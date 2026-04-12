@@ -14,7 +14,7 @@ public class TestTCP {
             while (connection==null) {
                 System.out.print("Podaj czy hustujesz(Y/N):");
                 ans = scanner.nextLine();
-                System.out.println(ans);
+                //System.out.println(ans);
                 if(ans.equals("Y")){
                     connection = new TCPServer();
                 }else if(ans.equals("N")){
@@ -25,7 +25,7 @@ public class TestTCP {
             }
             
         } catch (IOException e) {
-            // TODO: handle exception
+            System.out.println(e.getMessage());
         }
 
         
@@ -33,11 +33,13 @@ public class TestTCP {
         while(!ans.equals("end")){
             System.out.print("Podaj czy wysylasz(Y/N/end)(N=odbierasz):");
             ans = scanner.nextLine();
-            System.out.println(ans);
+            //System.out.println(ans);
             if(ans.equals("Y")){
-                connection.sendString("kek");
+                System.out.print("Podaj co wyslac:");
+                String send = scanner.nextLine();
+                connection.sendString(send);
             }else if(ans.equals("N")){
-                System.out.print(connection.awaitString());
+                System.out.println(connection.awaitString());
             }else if(!ans.equals("end")){
                 System.out.println("zly input");
             }
