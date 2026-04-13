@@ -11,10 +11,12 @@
             "mainClass": "SzachyOnline",
             "projectName": "JJ_Proj_743de0b1",
             "vmArgs": "--module-path \"${env:PATH_TO_FX}\" --add-modules javafx.controls"
+        }
+    ]
+}
             //na linux'sie wpisać komendy:
             //echo 'export PATH_TO_FX="/usr/share/openjfx/lib"' >> ~/.bashrc
             //source ~/.bashrc
             //potem wylaczyc i wlaczyc vsc
-        }
-    ]
-}
+            //Error: LinkageError occurred while loading main class SzachyOnline
+            //java.lang.UnsupportedClassVersionError: javafx/application/Application has been compiled by a more recent version of the Java Runtime (class file version 68.0), this version of the Java Runtime only recognizes class file versions up to 61.0
