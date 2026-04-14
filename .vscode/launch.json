@@ -9,7 +9,7 @@
             "name": "SzachyOnline",
             "request": "launch",
             "mainClass": "SzachyOnline",
-            "projectName": "JJ_Proj_743de0b1",
+            "projectName": "JJ_Proj_25abb386",
             "vmArgs": "--module-path \"${env:PATH_TO_FX}\" --add-modules javafx.controls"
         }
     ]
