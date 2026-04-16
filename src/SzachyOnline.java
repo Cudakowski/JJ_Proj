@@ -30,3 +30,5 @@ public class SzachyOnline extends Application {
 // napisac o tym sprawozdanie, zasieg funkcjonalny gry
 // co bedzie wysylane miedzy klientami a serwerem ,jak to bedzie wygladalo
 // jak to zorganizoac w plikach 
+
+// rankingi
