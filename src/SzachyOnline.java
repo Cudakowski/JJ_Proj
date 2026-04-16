@@ -18,3 +18,15 @@ public class SzachyOnline extends Application {
 
 
 
+// logowanie
+// przez serwer poprawnosc wynikow 
+
+// zapisywanie gry
+// u kogo gra sie zapisuje 
+
+// wgladzenie, zeby nie wpijac ip
+
+// podchodze do komputera i widze liste potencjalnych graczy
+// napisac o tym sprawozdanie, zasieg funkcjonalny gry
+// co bedzie wysylane miedzy klientami a serwerem ,jak to bedzie wygladalo
+// jak to zorganizoac w plikach 
