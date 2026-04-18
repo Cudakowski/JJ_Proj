@@ -96,7 +96,7 @@ public class GameView {
     }
 
 
-    // PLANSZA
+    // PLANSZA :)))))
 
     private GridPane createBoard() {
         GridPane board = new GridPane();
