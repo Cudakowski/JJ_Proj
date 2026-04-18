@@ -4,9 +4,9 @@ import java.util.Objects;
 
 public class Coordinates {
     public final File file; // columns
-    public final Integer rank; //rows
+    public final int rank; //rows
 
-    public Coordinates(File file, Integer rank){
+    public Coordinates(File file, int rank){
         this.file=file;
         this.rank=rank;
     }
@@ -23,7 +23,8 @@ public class Coordinates {
         if(file != anotherCoordinates.file){
             return false;
         }
-        return rank.equals(anotherCoordinates.rank);
+        //return rank.equals(anotherCoordinates.rank);
+        return file == anotherCoordinates.file && rank == anotherCoordinates.rank;
     }
 
     // @Override
