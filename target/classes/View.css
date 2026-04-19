@@ -13,7 +13,6 @@
 .root-gradient {
     -fx-background-color: linear-gradient(to bottom, #111, #222);
     -fx-padding: 40;
-
 }
 
 .panel-dark {
