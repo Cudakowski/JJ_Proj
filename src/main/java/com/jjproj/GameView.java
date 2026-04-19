@@ -357,4 +357,42 @@ public class GameView {
 
 
 
+
+        private void startTimer() {
+
+                gameTimer = new Timeline(
+                        new KeyFrame(Duration.seconds(1), e -> {
+
+                                if (whiteTurn)
+                                        whiteTime++;
+                                else
+                                        blackTime++;
+
+                                timer.setText(
+                                        "Czas: "
+                                        + formatTime(whiteTime)
+                                        + ", "
+                                        + formatTime(blackTime)
+                                );
+                        })
+                );
+
+                gameTimer.setCycleCount(Timeline.INDEFINITE);
+                gameTimer.play();
+        }
+
+        private String formatTime(int totalSeconds) {
+
+                int minutes = totalSeconds / 60;
+                int seconds = totalSeconds % 60;
+
+                return String.format("%02d:%02d", minutes, seconds);
+        }
+
+        public void changeTurn() {
+                whiteTurn = !whiteTurn;
+        }
+
+
+
 }
