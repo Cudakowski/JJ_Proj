@@ -205,8 +205,7 @@ public class GameView {
         board.getStyleClass().add("board");
         board.setAlignment(Pos.CENTER);
 
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
+                // Minimalna wielkość okna
 
                 StackPane square = new StackPane();
                 square.setPrefSize(80, 80);
@@ -273,8 +272,7 @@ public class GameView {
                 e.consume();
                 });
 
-                board.add(square, col, row);
-            }
+                return scene;
         }
 
         refreshBoard();
@@ -358,3 +356,188 @@ public class GameView {
 
 
 }
+// package com.jjproj;
+
+// import com.jjproj.Logic.Board;
+// import com.jjproj.Logic.Coordinates;
+// import com.jjproj.Logic.File;
+// import com.jjproj.Logic.Color;
+// import com.jjproj.Logic.piece.Piece;
+// import com.jjproj.Logic.piece.Pawn;
+// import javafx.geometry.Insets;
+// import javafx.geometry.Pos;
+// import javafx.scene.Scene;
+// import javafx.scene.control.*;
+// import javafx.scene.layout.*;
+// import javafx.stage.Stage;
+
+// public class GameView {
+
+//     private Board board; // Twoja plansza z logiką
+    
+//     // Konstruktor z Board
+//     public GameView(Board board) {
+//         this.board = board;
+//     }
+    
+//     public Scene createScene(Stage stage) {
+
+//         BorderPane root = new BorderPane();
+//         root.setStyle("-fx-background-color: #1e1e1e;");
+
+//         // TOP (status + czas + zapis)
+//         Label status = new Label("Tura: Białe");
+//         status.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
+
+//         Label timer = new Label("Czas: 00:00, 00:00");
+//         timer.setStyle("-fx-text-fill: white; -fx-font-size: 16px;");
+
+//         Button save = new Button("Zapisz");
+//         styleButton(save);
+
+//         HBox topBar = new HBox(20, status, timer, save);
+//         topBar.setPadding(new Insets(10));
+//         topBar.setAlignment(Pos.CENTER_LEFT);
+//         topBar.setStyle("-fx-background-color: #2b2b2b;");
+//         root.setTop(topBar);
+
+//         // CENTER (plansza)
+//         GridPane chessBoard = createBoard(); // ← zmieniłam nazwę na chessBoard
+//         StackPane centerWrapper = new StackPane(chessBoard);
+//         centerWrapper.setPadding(new Insets(20));
+//         root.setCenter(centerWrapper);
+
+//         // RIGHT (historia ruchów)
+//         ListView<String> moveHistory = new ListView<>();
+//         moveHistory.getItems().addAll(
+//                 "1. e4",
+//                 "1... e5",
+//                 "2. Nf3",
+//                 "2... Nc6",
+//                 "Dodac tu ruchy"
+//         );
+
+//         moveHistory.setStyle(
+//                 "-fx-control-inner-background: #2b2b2b;" +
+//                 "-fx-text-fill: white;"
+//         );
+
+//         VBox rightPanel = new VBox(10,
+//                 new Label("Historia ruchów"),
+//                 moveHistory
+//         );
+
+//         rightPanel.setPadding(new Insets(10));
+//         rightPanel.setPrefWidth(200);
+//         rightPanel.setStyle("-fx-background-color: #2b2b2b;");
+
+//         root.setRight(rightPanel);
+
+//         // BOTTOM (powrót)
+//         Button back = new Button("Powrót do menu");
+//         styleButton(back);
+
+//         back.setOnAction(e -> {
+//             MenuView menu = new MenuView();
+//             stage.setScene(menu.createScene(stage));
+//         });
+
+//         HBox bottom = new HBox(back);
+//         bottom.setAlignment(Pos.CENTER);
+//         bottom.setPadding(new Insets(10));
+//         bottom.setStyle("-fx-background-color: #2b2b2b;");
+
+//         root.setBottom(bottom);
+
+//         // SCENE
+//         Scene scene = new Scene(root, 900, 800);
+//         stage.setMinWidth(900);
+//         stage.setMinHeight(800);
+
+//         return scene;
+//     }
+
+//     // PLANSZA
+//     private GridPane createBoard() {
+//         GridPane boardGrid = new GridPane(); // ← zmieniłam nazwę
+//         boardGrid.setStyle("-fx-effect: dropshadow(gaussian, black, 20, 0.5, 0, 0);");
+//         boardGrid.setAlignment(Pos.CENTER);
+
+//         for (int row = 0; row < 8; row++) {
+//             for (int col = 0; col < 8; col++) {
+//                 int rank = 8 - row;
+//                 File file = File.values()[col];
+
+//                 StackPane square = new StackPane();
+//                 square.setPrefSize(70, 70);
+
+//                 String color = ((row + col) % 2 == 0) ? "#f0d9b5" : "#b58863";
+//                 square.setStyle("-fx-background-color: " + color + ";");
+
+//                 Coordinates coords = new Coordinates(file, rank);
+//                 //Piece piece = this.board.pieces.get(coords); // ← użyj this.board
+//                 Piece piece = this.board.getPieces().get(coords);
+
+//                 // Jeśli jest figura, dodaj jej symbol/obrazek
+//                 if (piece != null) {
+//                     Label pieceLabel = new Label(getPieceSymbol(piece));
+//                     pieceLabel.setStyle(getPieceStyle(piece));
+//                     pieceLabel.setFont(javafx.scene.text.Font.font(40));
+//                     square.getChildren().add(pieceLabel);
+//                 }
+
+//                 boardGrid.add(square, col, row); // ← boardGrid, nie board
+//             }
+//         }
+
+//         return boardGrid;
+//     }
+
+//     // Dodaj te metody!
+//     private String getPieceSymbol(Piece piece) {
+//         if (piece instanceof Pawn) {
+//             return piece.color == Color.WHITE ? "♙" : "♟";
+//         }
+//         // Tu dodasz inne figury później
+//         return "?";
+//     }
+
+//     private String getPieceStyle(Piece piece) {
+//         if (piece.color == Color.WHITE) {
+//             return "-fx-text-fill: white; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, black, 1, 0.5, 0, 0);";
+//         } else {
+//             return "-fx-text-fill: black; -fx-font-weight: bold;";
+//         }
+//     }
+
+//     // BUTTON STYLE
+//     private void styleButton(Button btn) {
+//         btn.setStyle(
+//                 "-fx-background-color: #444;" +
+//                 "-fx-text-fill: white;" +
+//                 "-fx-font-size: 14px;" +
+//                 "-fx-background-radius: 8;" +
+//                 "-fx-padding: 6 14 6 14;"
+//         );
+
+//         btn.setOnMouseEntered(e ->
+//                 btn.setStyle(
+//                         "-fx-background-color: #666;" +
+//                         "-fx-text-fill: white;" +
+//                         "-fx-font-size: 14px;" +
+//                         "-fx-background-radius: 8;" +
+//                         "-fx-padding: 6 14 6 14;"
+//                 )
+//         );
+
+//         btn.setOnMouseExited(e ->
+//                 btn.setStyle(
+//                         "-fx-background-color: #444;" +
+//                         "-fx-text-fill: white;" +
+//                         "-fx-font-size: 14px;" +
+//                         "-fx-background-radius: 8;" +
+//                         "-fx-padding: 6 14 6 14;"
+//                 )
+//         );
+//     }
+// }
