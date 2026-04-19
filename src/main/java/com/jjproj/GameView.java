@@ -17,6 +17,7 @@ public class GameView {
         private boolean whiteTurn = true;
         private Label timer;
         private Timeline gameTimer;
+        private Label status;
 
         public Scene createScene(Stage stage) {
 
@@ -27,16 +28,22 @@ public class GameView {
         //TOP (status + czas + zapis)
 
                 // Naglowek czyja tura jest
-                Label status = new Label("Tura: Białe");
+                status = new Label("Tura: Białe");
                 
                 // Naglowek czas rozgrywki graczy
                 timer = new Label("Czas: 00:00, 00:00");
                 
-                // Przycisk do zapisania gry
+                // Przycisk do zmiany tury gry
+                Button changeTurnButton = new Button("Zmien ture");
+
+                // Przycisk do zmiany tury gry
                 Button save = new Button("Zapisz");
+
+                // Klikajac zmienia sie tura 
+                changeTurnButton.setOnAction(e -> changeTurn());
                 
                 // Ustawiam te wszystkie elementy Kolo siebie
-                HBox topBar = new HBox(20, status, timer, save);
+                HBox topBar = new HBox(20, status, timer, changeTurnButton, save);
                 
                 // Dodaje miedzy nimi odstep 10 px
                 topBar.setPadding(new Insets(10));
@@ -128,11 +135,12 @@ public class GameView {
                 root.getStyleClass().add("root-dark");
                 status.getStyleClass().add("status-label");
                 timer.getStyleClass().add("timer-label");
-                save.getStyleClass().add("btn-game");
+                save.getStyleClass().add("btn-main");
+                changeTurnButton.getStyleClass().add("btn-main");
                 topBar.getStyleClass().add("panel-dark");
                 historyTitle.getStyleClass().add("side-title");
                 rightPanel.getStyleClass().add("panel-dark");
-                back.getStyleClass().add("btn-game");
+                back.getStyleClass().add("btn-main");
                 bottom.getStyleClass().add("panel-dark");
 
 
@@ -253,7 +261,12 @@ public class GameView {
         }
 
         public void changeTurn() {
+                if (whiteTurn)
+                        status.setText("Tura: czarne");
+                else 
+                        status.setText("Tura: białe");
                 whiteTurn = !whiteTurn;
+                
         }
 
 
