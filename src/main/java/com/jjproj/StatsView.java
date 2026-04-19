@@ -13,13 +13,23 @@ public class StatsView {
 
     public Scene createScene(Stage stage) {
 
+        // Ustawiam roota - bedzie borderpane zeby moc dawac po bokach rozne info, jeszce do konca nie mam pelnego pomyslu jak to bedzie ale cos sie wymysli
         BorderPane root = new BorderPane();
 
+    // TOP
+        
+        // Tytul okienka - statystyki!
         Label title = new Label("Statystyki");
-        title.setStyle("-fx-font-size: 24px;");
+        
+        // Dodaje na gore naszego roota ten tytul
         root.setTop(title);
 
+    // CENTER
+
+        // Tworze liste naszych gier
         ListView<String> gamesList = new ListView<>();
+
+        // Dodawanie gier do listy, na razie bez funkcjonalnosci, tak poglądowo
         gamesList.getItems().addAll(
                 "Gra 1 - wygrana",
                 "Gra 2 - przerwana",
@@ -27,17 +37,48 @@ public class StatsView {
                 "Dokonczyc"
         );
 
+
+        // dodaje na srodek listę gier
         root.setCenter(gamesList);
 
+    // BOTTOM
+
+        // Przycisk wyjscia do menu
         Button back = new Button("Powrót");
+        
+        // Jak klikniemy przenosi nas do menu
         back.setOnAction(e -> {
             MenuView menu = new MenuView();
             stage.setScene(menu.createScene(stage));
         });
 
+        // Przycisk powrotu do menu daje na sam dół (tworze HBox i do niego dala, - moze tam kilka opcji by jeszcze dodac)
         root.setBottom(new HBox(back));
 
-        return new Scene(root, 600, 600);
+    // SCENE
+
+        // Tworze nowa scene i dodaje nasz root - borderpane do niej
+        Scene scene = new Scene(root, 600, 600);
+
+        // Ustawiam scene
+        stage.setScene(scene);
+
+        // Stylizowanie elementów
+        
+        root.getStyleClass().add("root-dark");
+        title.getStyleClass().add("stats-title");
+        gamesList.getStyleClass().add("list-view");
+        back.getStyleClass().add("btn-main");
+        scene.getStylesheets().add(
+                getClass().getResource("/view.css").toExternalForm()
+        );
+
+        // Minnimalny rozmiar okna
+
+        stage.setMinWidth(400);
+        stage.setMinHeight(500);
+
+        return scene;
     }
 }
 
