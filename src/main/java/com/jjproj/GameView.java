@@ -1,13 +1,22 @@
 package com.jjproj;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class GameView {
+
+        private int whiteTime = 0;
+        private int blackTime = 0;
+        private boolean whiteTurn = true;
+        private Label timer;
+        private Timeline gameTimer;
 
         public Scene createScene(Stage stage) {
 
@@ -21,7 +30,7 @@ public class GameView {
                 Label status = new Label("Tura: Białe");
                 
                 // Naglowek czas rozgrywki graczy
-                Label timer = new Label("Czas: 00:00, 00:00");
+                timer = new Label("Czas: 00:00, 00:00");
                 
                 // Przycisk do zapisania gry
                 Button save = new Button("Zapisz");
@@ -137,6 +146,8 @@ public class GameView {
                 stage.setMinWidth(900);
                 stage.setMinHeight(800);
 
+                startTimer();
+
                 return scene;
         }
 
@@ -205,6 +216,44 @@ public class GameView {
                 }
 
                 return board;
+        }
+
+
+
+
+        private void startTimer() {
+
+                gameTimer = new Timeline(
+                        new KeyFrame(Duration.seconds(1), e -> {
+
+                                if (whiteTurn)
+                                        whiteTime++;
+                                else
+                                        blackTime++;
+
+                                timer.setText(
+                                        "Czas: "
+                                        + formatTime(whiteTime)
+                                        + ", "
+                                        + formatTime(blackTime)
+                                );
+                        })
+                );
+
+                gameTimer.setCycleCount(Timeline.INDEFINITE);
+                gameTimer.play();
+        }
+
+        private String formatTime(int totalSeconds) {
+
+                int minutes = totalSeconds / 60;
+                int seconds = totalSeconds % 60;
+
+                return String.format("%02d:%02d", minutes, seconds);
+        }
+
+        public void changeTurn() {
+                whiteTurn = !whiteTurn;
         }
 
 
