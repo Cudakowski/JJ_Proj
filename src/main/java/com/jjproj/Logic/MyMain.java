@@ -2,7 +2,7 @@ package com.jjproj.Logic;
 
 import com.jjproj.Logic.piece.Piece;
 
-public class Main {
+public class MyMain {
     public static void main(String[] args){
         Board board = new Board();
         board.setupDefaultPiecesPositions();
