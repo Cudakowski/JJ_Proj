@@ -1,8 +1,22 @@
-D:\moje rzeczy\Code\Java\JJ_Proj\src\main\java\com\jjproj\TCPConnection.java
-D:\moje rzeczy\Code\Java\JJ_Proj\src\main\java\com\jjproj\MenuView.java
-D:\moje rzeczy\Code\Java\JJ_Proj\src\main\java\com\jjproj\TCPClient.java
-D:\moje rzeczy\Code\Java\JJ_Proj\src\main\java\com\jjproj\StatsView.java
-D:\moje rzeczy\Code\Java\JJ_Proj\src\main\java\com\jjproj\TCPServer.java
-D:\moje rzeczy\Code\Java\JJ_Proj\src\main\java\com\jjproj\GameView.java
-D:\moje rzeczy\Code\Java\JJ_Proj\src\main\java\com\jjproj\SzachyOnline.java
-D:\moje rzeczy\Code\Java\JJ_Proj\src\main\java\com\jjproj\TestTCP.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/GameView.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/Logic/Board.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/TCPClient.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/Logic/piece/Pawn.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/Logic/Color.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/TCPConnection.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/Logic/piece/Bishop.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/StatsView.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/Logic/piece/Rook.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/TCPServer.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/Logic/piece/King.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/Logic/Main.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/Logic/piece/Piece.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/Logic/piece/Knight.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/Logic/Coordinates.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/Logic/File.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/Logic/piece/Queen.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/MenuView.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/Logic/BoardConsoleRenderer.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/SzachyOnline.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/TestTCP.java
+/Users/dararomanovskaa/uni_sem4/JJ_Proj/src/main/java/com/jjproj/Logic/Integer.java
