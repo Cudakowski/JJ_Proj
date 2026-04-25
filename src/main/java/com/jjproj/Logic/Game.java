@@ -13,6 +13,7 @@ public class Game {
         this.board=board;
     }
     //render -> input -> make move -> pass move 
+    
     public void gameLoop(){
         boolean isWhiteToMove = true;
         while(true){
