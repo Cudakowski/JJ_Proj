@@ -18,7 +18,7 @@ abstract public class Piece {
     }
     //для рассчета координат нужно пройтись по каждому сдвигу(((
     public Set<Coordinates> getAvailableMoveSquares(Board board){
-        Set<Coordinates> result = new HashSet<>()
+        Set<Coordinates> result = new HashSet<>();
         for( CoordinatesShift shift: getPieceMoves()){
             if(coordinates.shift(shift)!=null){
                 Coordinates newCoordinates = coordinates.shift(shift);
