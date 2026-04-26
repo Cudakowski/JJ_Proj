@@ -7,8 +7,8 @@ public class SzachyOnline extends Application {
 
     @Override
     public void start(Stage stage) {
-        MenuView menu = new MenuView();
-        stage.setScene(menu.createScene(stage));
+        LoginView login = new LoginView();
+        stage.setScene(login.createScene(stage));
         stage.setTitle("Szachy");
         stage.show();
     }
