@@ -10,76 +10,82 @@ import javafx.scene.control.Label;
 public class MenuView {
 
     public Scene createScene(Stage stage) {
+
+        // Tytul naszych szachów :3
         Label title = new Label("SZACHY");
-        title.setStyle(
-            "-fx-font-size: 72px;" +
-            "-fx-font-weight: bold;" +
-            "-fx-text-fill: beige;" +
-            "-fx-background-color: brown;" +
-            "-fx-padding: 10; "+
-            "-fx-background-radius: 10;"
-        );
 
-
+        // Przycisk rozpoczęcia gry
         Button newGame = new Button("Nowa gra");
-        Button stats = new Button("Statystyki");
-        Button exit = new Button("Wyjście");
 
-        String buttonStyle =
-        "-fx-font-size: 18px;" +
-        "-fx-font-weight: bold;" +
-        "-fx-text-fill: white;" +
-        "-fx-background-color: #333;" +
-        "-fx-background-radius: 10;" +
-        "-fx-padding: 10 30 10 30;";
-
-        newGame.setStyle(buttonStyle);
-
-        stats.setStyle(buttonStyle);
-
-        exit.setStyle(buttonStyle);
-
+        // Jak klikniemy to przenosi nas do gry
         newGame.setOnAction(e -> {
             GameView gameView = new GameView();
             stage.setScene(gameView.createScene(stage));
         });
 
+
+        // Przycisk przejscia do statystyk
+        Button stats = new Button("Statystyki");
+
+
+        // Przechodzimy do statystyk po kliknięciu
         stats.setOnAction(e -> {
             StatsView statsView = new StatsView();
             stage.setScene(statsView.createScene(stage));
         });
 
+
+        // Przycisk wylogowania
+        Button logOut = new Button("Wyloguj");
+
+        // Jak klikniemy to przenosi nas do strony logowania 
+        // !!! Trzeba tu porawic jak będą bazy danych ogarnięte
+        logOut.setOnAction(e-> {
+            LoginView loginView = new LoginView();
+            stage.setScene(loginView.createScene(stage));
+        });
+
+
+        // Przycisk wyjścia
+        Button exit = new Button("Wyjście");
+
+        // Jak klikniemy wywala nas z programu
         exit.setOnAction(e -> stage.close());
 
-        VBox layout = new VBox(20, title, newGame, stats, exit);
+
+        // Tutaj robie Uklad wspolny taki zeby bylo jeden po drugim na dół
+        VBox layout = new VBox(20, title, newGame, stats, logOut, exit);
+
+        // Ustawiam to pośrodku okna
         layout.setAlignment(Pos.CENTER); 
-        layout.setStyle(
-                "-fx-background-color: linear-gradient(to bottom, #111, #222);" +
-                "-fx-padding: 40;"
+
+        // Tworzenie nowego okna, jego poczatkowy rozmiar, dodajemy nasz layout
+        Scene scene = new Scene(layout, 600, 600);
+
+        // dodaje okno do roota
+        stage.setScene(scene);
+
+        // Stylizwoanie
+
+        title.getStyleClass().add("main-title");
+        newGame.getStyleClass().add("btn-main");
+        stats.getStyleClass().add("btn-main");
+        logOut.getStyleClass().add("btn-main");
+        exit.getStyleClass().add("btn-main");
+        layout.getStyleClass().add("root-gradient");
+
+        scene.getStylesheets().add(
+            getClass().getResource("/view.css").toExternalForm()
         );
+            
 
-        String hover =
-            "-fx-background-color: #555;";
+        // Ustawiam minimalny rozmiar okna
+        stage.setMinWidth(400);
+        stage.setMinHeight(500);
 
-            newGame.setOnMouseEntered(e -> newGame.setStyle(buttonStyle + hover));
-            newGame.setOnMouseExited(e -> newGame.setStyle(buttonStyle));
-
-            stats.setOnMouseEntered(e -> stats.setStyle(buttonStyle + hover));
-            stats.setOnMouseExited(e -> stats.setStyle(buttonStyle));
-
-            exit.setOnMouseEntered(e -> exit.setStyle(buttonStyle + hover));
-            exit.setOnMouseExited(e -> exit.setStyle(buttonStyle));
-
-
-
-            Scene scene = new Scene(layout, 600, 600);
-
-            stage.setScene(scene);
-
-            stage.setMinWidth(400);
-            stage.setMinHeight(500);
-
-            return scene;
+        
+        
+        return scene;
 
     }
 }
