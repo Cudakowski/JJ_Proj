@@ -6,7 +6,6 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.control.Label;
-import com.jjproj.Logic.Board;
 
 public class MenuView {
 
@@ -20,9 +19,6 @@ public class MenuView {
 
         // Jak klikniemy to przenosi nas do gry
         newGame.setOnAction(e -> {
-            // Board board = new Board(); // ← DODAŁEM
-            // board.setupDefaultPiecesPositions(); // ← DODAŁEM
-            // GameView gameView = new GameView(board); // ← ZMIENIŁEM (dodałem board)
             GameView gameView = new GameView();
             stage.setScene(gameView.createScene(stage));
         });
