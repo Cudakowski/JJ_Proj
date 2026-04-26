@@ -239,12 +239,7 @@ public class GameView {
                                 else
                                         blackTime++;
 
-                                timer.setText(
-                                        "Czas: "
-                                        + formatTime(whiteTime)
-                                        + ", "
-                                        + formatTime(blackTime)
-                                );
+                                timer.setText("Czas: "+ formatTime(whiteTime)+ ", "+ formatTime(blackTime));
                         })
                 );
 
