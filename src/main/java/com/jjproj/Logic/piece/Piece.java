@@ -47,7 +47,11 @@ abstract public class Piece {
     //фигуры не могут сбивать фигуры своего цвета.
     //фигуры не могут уходить за границу доски
     //мы можем рвссчитать сдвиги и проверить корректна ли клетка для данной фигуры
-    protected abstract Set<CoordinatesShift> getPieceMoves(){
+    // protected abstract Set<CoordinatesShift> getPieceMoves(){
 
+    // }
+
+    protected Set<CoordinatesShift> getPieceMoves(){
+        return null;
     }
 }
