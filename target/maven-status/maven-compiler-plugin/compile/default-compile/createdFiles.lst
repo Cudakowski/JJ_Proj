@@ -1,3 +1,12 @@
+com/jjproj/SzachyOnline.class
+com/jjproj/TCPClient.class
+com/jjproj/MenuView.class
+com/jjproj/TCPServer.class
+com/jjproj/TCPConnection.class
+com/jjproj/LoginView.class
+com/jjproj/StatsView.class
+com/jjproj/TestTCP.class
+com/jjproj/GameView.class
 com/jjproj/Logic/Main.class
 com/jjproj/SzachyOnline.class
 com/jjproj/Logic/piece/Pawn.class
@@ -18,12 +27,5 @@ com/jjproj/TCPConnection.class
 com/jjproj/Logic/Color.class
 com/jjproj/Logic/File.class
 com/jjproj/Logic/piece/Piece.class
-com/jjproj/SzachyOnline.class
-com/jjproj/TCPClient.class
-com/jjproj/MenuView.class
-com/jjproj/TCPServer.class
-com/jjproj/TCPConnection.class
-com/jjproj/LoginView.class
-com/jjproj/StatsView.class
 com/jjproj/TestTCP.class
 com/jjproj/GameView.class
