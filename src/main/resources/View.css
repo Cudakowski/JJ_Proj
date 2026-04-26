@@ -10,15 +10,18 @@
 
 .root-dark {
     -fx-background-color: #1e1e1e;
+
 }
 
 .root-gradient {
     -fx-background-color: linear-gradient(to bottom, #111, #222);
     -fx-padding: 40;
+
 }
 
 .panel-dark {
     -fx-background-color: #2b2b2b;
+
 }
 
 
@@ -56,11 +59,13 @@
     -fx-text-fill: white;
     -fx-font-size: 16px;
     -fx-font-weight: bold;
+    -fx-padding: 10;
 }
 
 .timer-label {
     -fx-text-fill: white;
     -fx-font-size: 16px;
+    -fx-padding: 10;
 }
 
 .side-title {
@@ -123,6 +128,9 @@
 .list-view {
     -fx-control-inner-background: #2b2b2b;
     -fx-background-color: #2b2b2b;
+    -fx-background-radius: 25;
+    -fx-border-radius: 25;
+    -fx-padding: 20;
 }
 
 .list-view .list-cell {

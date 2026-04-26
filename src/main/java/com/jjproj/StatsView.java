@@ -1,5 +1,6 @@
 package com.jjproj;
 
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -17,13 +18,25 @@ public class StatsView {
         // Ustawiam roota - bedzie borderpane zeby moc dawac po bokach rozne info, jeszce do konca nie mam pelnego pomyslu jak to bedzie ale cos sie wymysli
         BorderPane root = new BorderPane();
 
+        root.setPadding(new Insets(20));
+
     // TOP
+
+        
+    
         
         // Tytul okienka - statystyki!
         Label title = new Label("Statystyki");
+
+
+        HBox topBox = new HBox(title);
+
+        topBox.setAlignment(Pos.CENTER);
+
+        topBox.setPadding(new Insets(10));
         
         // Dodaje na gore naszego roota ten tytul
-        root.setTop(title);
+        root.setTop(topBox);
 
     // CENTER
 
@@ -72,7 +85,7 @@ public class StatsView {
         // Stylizowanie elementów
         
         root.getStyleClass().add("root-dark");
-        title.getStyleClass().add("stats-title");
+        title.getStyleClass().add("status-label");
         gamesList.getStyleClass().add("list-view");
         back.getStyleClass().add("btn-main");
         scene.getStylesheets().add(

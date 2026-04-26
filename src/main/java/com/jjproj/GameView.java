@@ -24,6 +24,7 @@ public class GameView {
                 // Tworzenie roota - borderPane - bedzie po wszystkich bokach cos :p
                 BorderPane root = new BorderPane();
 
+
                 
         //TOP (status + czas + zapis)
 
@@ -32,12 +33,16 @@ public class GameView {
                 
                 // Naglowek czas rozgrywki graczy
                 timer = new Label("Czas: 00:00, 00:00");
-                
+
+
+                        
                 // Przycisk do zmiany tury gry
                 Button changeTurnButton = new Button("Zmien ture");
 
                 // Przycisk do zmiany tury gry
                 Button save = new Button("Zapisz");
+
+
 
                 // Klikajac zmienia sie tura 
                 changeTurnButton.setOnAction(e -> changeTurn());
@@ -86,15 +91,20 @@ public class GameView {
 
                 // Etykieta ze to jest historia ruchow
                 Label historyTitle = new Label("Historia ruchów");
+
+                HBox titleBox = new HBox(historyTitle);
+                titleBox.setAlignment(Pos.CENTER);
                 
                 // Robie z tego VBox - bedzie jedno nad drugim
-                VBox rightPanel = new VBox(10, historyTitle, moveHistory);
+                VBox rightPanel = new VBox(10, titleBox, moveHistory);
 
                 // Ustawiam odstepy po 10 px z kazdej strony
                 rightPanel.setPadding(new Insets(10));
 
                 // Ustawiam szerokosc tej historii ruchow
                 rightPanel.setPrefWidth(200);
+
+
                 
                 // dodaje do naszego okna
                 root.setRight(rightPanel);
@@ -148,6 +158,17 @@ public class GameView {
                         getClass().getResource("/view.css").toExternalForm()
                 );
 
+                status.setMinWidth(150);
+                status.setPrefWidth(150);
+
+                timer.setMinWidth(180);
+                timer.setPrefWidth(180);
+
+                save.setMinWidth(150);
+                save.setPrefWidth(150);
+
+                changeTurnButton.setMinWidth(150);
+                changeTurnButton.setPrefWidth(150);
 
                 // Minimalna wielkość okna
 
