@@ -6,6 +6,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -18,6 +19,21 @@ public class GameView {
         private Label timer;
         private Timeline gameTimer;
         private Label status;
+        private StackPane[][] squares = new StackPane[8][8];
+
+        // Pionki są w tablicy, na razie po prostu symbole z unicode, potem zmienie na cos fajniejszego
+        String[][] pieces = {
+                {"♜","♞","♝","♛","♚","♝","♞","♜"},
+                {"♟","♟","♟","♟","♟","♟","♟","♟"},
+                {"","","","","","","",""},
+                {"","","","","","","",""},
+                {"","","","","","","",""},
+                {"","","","","","","",""},
+                {"♙","♙","♙","♙","♙","♙","♙","♙"},
+                {"♖","♘","♗","♕","♔","♗","♘","♖"}
+        };
+
+
 
         public Scene createScene(Stage stage) {
 
@@ -183,70 +199,124 @@ public class GameView {
 
         // PLANSZA
 
-        private GridPane createBoard() {
+ private GridPane createBoard() {
 
-                // Tworze grid pane - nasza plansza bedzie taka siatka
-                GridPane board = new GridPane();
+        GridPane board = new GridPane();
+        board.getStyleClass().add("board");
+        board.setAlignment(Pos.CENTER);
 
-                // Ustawiam wyglad naszej planszy
-                board.getStyleClass().add("board");
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
 
-                // Plansza będzoe na srodku
-                board.setAlignment(Pos.CENTER);
+                StackPane square = new StackPane();
+                square.setPrefSize(80, 80);
 
-        // PIONKI
+                if ((row + col) % 2 == 0)
+                    square.getStyleClass().add("square-light");
+                else
+                    square.getStyleClass().add("square-dark");
 
-                // Pionki są w tablicy, na razie po prostu symbole z unicode, potem zmienie na cos fajniejszego
-                String[][] pieces = {
-                        {"♜","♞","♝","♛","♚","♝","♞","♜"},
-                        {"♟","♟","♟","♟","♟","♟","♟","♟"},
-                        {"","","","","","","",""},
-                        {"","","","","","","",""},
-                        {"","","","","","","",""},
-                        {"","","","","","","",""},
-                        {"♙","♙","♙","♙","♙","♙","♙","♙"},
-                        {"♖","♘","♗","♕","♔","♗","♘","♖"}
-                };
+                final int r = row;
+                final int c = col;
 
+                squares[row][col] = square;
 
-                for (int row = 0; row < 8; row++) 
-                {
-                        for (int col = 0; col < 8; col++)
-                        {
-                                // Dla kazdego pola robie osobne okienko
-                                StackPane square = new StackPane();
+                // DROP
+                square.setOnDragOver(e -> {
+                    if (e.getGestureSource() != square && e.getDragboard().hasString()) {
+                        e.acceptTransferModes(TransferMode.MOVE);
+                    }
+                    e.consume();
+                });
 
-                                // Ustawiam jego wielkość
-                                square.setPrefSize(70, 70);
+                square.setOnDragEntered(e -> square.getStyleClass().add("square-hover"));
 
-                                // Tutaj stylizuje - odpowiednio jasne albo ciemne pole w zaleznosci od parzystosci
-                                if ((row + col) % 2 == 0)
-                                        square.getStyleClass().add("square-light");
-                                else
-                                        square.getStyleClass().add("square-dark");
+                square.setOnDragExited(e -> square.getStyleClass().remove("square-hover"));
 
+                square.setOnDragDropped(e -> {
 
-                                // Wiec tak, jesli jest pionek w danym miejscu, to tam tworze nowy label z nim, na pewno trzeba zmienic bo ruchy tych pionkow beda, ale teraz tak pogladowo
-                                if (!pieces[row][col].equals("")) 
-                                {
-                                        // Kazdy pionek to label
-                                        Label piece = new Label(pieces[row][col]);
+                Dragboard db = e.getDragboard();
+                boolean success = false;
 
-                                        // Ustawiamy jego styl
-                                        piece.getStyleClass().add("chess-piece");
+                if (db.hasString()) {
 
-                                        // Dodajemy pionka do pola w gridzie
-                                        square.getChildren().add(piece);
-                                }
+                        String[] data = db.getString().split(",");
 
-                                // Do calego grida dodajemy pole w odpowiednie miejsce (col, row)
-                                board.add(square, col, row);
+                        int oldRow = Integer.parseInt(data[0]);
+                        int oldCol = Integer.parseInt(data[1]);
+
+                        // 1. ten sam square
+                        if (oldRow == r && oldCol == c) {
+                        e.setDropCompleted(false);
+                        e.consume();
+                        return;
                         }
+
+                        // 2. pole zajęte
+                        if (!pieces[r][c].equals("")) {
+                        e.setDropCompleted(false);
+                        e.consume();
+                        return;
+                        }
+
+                        String piece = pieces[oldRow][oldCol];
+
+                        pieces[r][c] = piece;
+                        pieces[oldRow][oldCol] = "";
+
+                        refreshBoard();
+
+                        success = true;
                 }
 
-                return board;
+                e.setDropCompleted(success);
+                e.consume();
+                });
+
+                board.add(square, col, row);
+            }
         }
 
+        refreshBoard();
+
+        return board;
+    }
+
+    // odświeżanie pionków
+    private void refreshBoard() {
+
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+
+                StackPane square = squares[row][col];
+                square.getChildren().clear();
+
+                if (!pieces[row][col].equals("")) {
+
+                    Label piece = new Label(pieces[row][col]);
+                    piece.getStyleClass().add("chess-piece");
+
+                    final int r = row;
+                    final int c = col;
+
+                    // START DRAG
+                    piece.setOnDragDetected(e -> {
+
+                        Dragboard db = piece.startDragAndDrop(TransferMode.MOVE);
+
+                        ClipboardContent content = new ClipboardContent();
+                        content.putString(r + "," + c);
+
+                        db.setContent(content);
+
+                        e.consume();
+                    });
+
+                    square.getChildren().add(piece);
+                }
+            }
+        }
+    }
 
 
 

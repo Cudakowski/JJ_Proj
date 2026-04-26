@@ -2,7 +2,7 @@
 
 
 
- //  ROOT / TŁA
+ /*  ROOT / TŁA */
 
 
 .root-dark {
@@ -73,7 +73,7 @@
 
 
 
- //  BUTTONY
+ /*  BUTTONY */
 
 
 .btn-main {
@@ -118,7 +118,7 @@
 }
 
 
-//   LISTVIEW
+/* LISTVIEW */
 
 
 .list-view {
@@ -140,11 +140,12 @@
 
 
 
-  // SZACHOWNICA
-
+  /* SZACHOWNICA*/
 
 .board {
     -fx-effect: dropshadow(gaussian, black, 20, 0.5, 0, 0);
+    -fx-border-color: #111;
+    -fx-border-width: 6;
 }
 
 .square-light {
@@ -155,7 +156,14 @@
     -fx-background-color: #b58863;
 }
 
+.square-hover {
+    -fx-border-color: gold;
+    -fx-border-width: 4;
+}
+
 .chess-piece {
-    -fx-font-size: 38px;
-    -fx-text-fill: black;
+    -fx-font-size: 46px;
+    -fx-font-family: "Segoe UI Symbol";
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.55), 5, 0.3, 0, 2);
 }
