@@ -1,5 +1,6 @@
 package com.jjproj;
 
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -44,7 +45,7 @@ public class StatsView {
     // BOTTOM
 
         // Przycisk wyjscia do menu
-        Button back = new Button("Powrót");
+        Button back = new Button("Powrót do menu");
         
         // Jak klikniemy przenosi nas do menu
         back.setOnAction(e -> {
@@ -52,8 +53,13 @@ public class StatsView {
             stage.setScene(menu.createScene(stage));
         });
 
+
+
         // Przycisk powrotu do menu daje na sam dół (tworze HBox i do niego dala, - moze tam kilka opcji by jeszcze dodac)
-        root.setBottom(new HBox(back));
+
+        HBox bottom = new HBox(back);
+        bottom.setAlignment(Pos.CENTER);
+        root.setBottom(bottom);
 
     // SCENE
 
