@@ -11,89 +11,79 @@ import javafx.scene.control.PasswordField;
 
 
 public class LoginView {
-
+    
     public Scene createScene(Stage stage) {
+        // Tytuł
         Label title = new Label("SZACHY");
+
+        // Nagłowek
         Label subtitle = new Label("logowanie");
 
-        title.setStyle(
-            "-fx-font-size: 72px;" +
-            "-fx-font-weight: bold;" +
-            "-fx-text-fill: beige;" +
-            "-fx-background-color: brown;" +
-            "-fx-padding: 10; "+
-            "-fx-background-radius: 10;"
-        );
-
-        subtitle.setStyle(
-            "-fx-font-size: 26px;" +
-            "-fx-font-weight: bold;" +
-            "-fx-text-fill: #d9c7a3;" +
-            "-fx-letter-spacing: 2px;" +
-            "-fx-padding: 5 0 15 0;"
-        );
-
+        // Pole do wpisania loginu
         TextField usernameField = new TextField();
+
+        // Jest taki poczatkowy tekst, zeby uzytkownik wiedzial ze tutaj jest do wpisania loginu
         usernameField.setPromptText("Nazwa uzytkownika");
 
+        // Pole do wpisania hasła
         PasswordField passwordField = new PasswordField();
+
+        // Jest taki poczatkowy tekst, zeby uzytkownik wiedzial ze tutaj jest haslo
         passwordField.setPromptText("Hasło");
 
+        // Przycisk logowania
         Button loginButton = new Button("Zaloguj");
-        Button exit = new Button("Wyjście");
 
-
-        String buttonStyle =
-        "-fx-font-size: 18px;" +
-        "-fx-font-weight: bold;" +
-        "-fx-text-fill: white;" +
-        "-fx-background-color: #333;" +
-        "-fx-background-radius: 10;" +
-        "-fx-padding: 10 30 10 30;";
-
-        loginButton.setStyle(buttonStyle);
-
-
-
+        // Klikniecie z logowania - jak narazie do menu - dodac bazy danych
         loginButton.setOnAction(e -> {
             MenuView menuView = new MenuView();
             stage.setScene(menuView.createScene(stage));
         });
 
 
+        // Przycisk wyjścia
+        Button exit = new Button("Wyjście");
+
+        // Jak klikniemy to wywala nas z szachow
         exit.setOnAction(e -> stage.close());
 
+
+        // Wszystkie te elementy bedą tak jeden pod drugim, dlatego wybralam VBox
+
         VBox layout = new VBox(20, title, subtitle, usernameField, passwordField, loginButton, exit);
+
+        // Bedzie to wszystko pośrodku okna
         layout.setAlignment(Pos.CENTER); 
-        layout.setStyle(
-                "-fx-background-color: linear-gradient(to bottom, #111, #222);" +
-                "-fx-padding: 40;"
+
+        // Dodaje te elementy do okna
+        Scene scene = new Scene(layout, 600, 600);
+
+        // Dodaje okno do roota
+        stage.setScene(scene);
+
+        // Ustawianie wygladu - dodalam plik css zeby byl jeden uniwersalny (to wszystko bedzie eleganko pasowac i mozemy uzywac wielokrotnie)
+
+        title.getStyleClass().add("main-title");
+        subtitle.getStyleClass().add("subtitle");
+        layout.getStyleClass().add("root-gradient");
+
+        loginButton.getStyleClass().add("btn-main");
+        exit.getStyleClass().add("btn-main");
+
+        usernameField.getStyleClass().add("text-field");
+        passwordField.getStyleClass().add("password-field");
+
+        scene.getStylesheets().add(
+                getClass().getResource("/view.css").toExternalForm()
         );
 
-        String hover =
-            "-fx-background-color: #555;";
+        
+        // ustawianie minimalnego rozmiaru okna
+        stage.setMinWidth(400);
+        stage.setMinHeight(500);
 
-            loginButton.setOnMouseEntered(e -> loginButton.setStyle(buttonStyle + hover));
-            loginButton.setOnMouseExited(e -> loginButton.setStyle(buttonStyle));
-
-            exit.setOnMouseEntered(e -> exit.setStyle(buttonStyle + hover));
-            exit.setOnMouseExited(e -> exit.setStyle(buttonStyle));
-
-            usernameField.setStyle(buttonStyle);
-            passwordField.setStyle(buttonStyle);
-            exit.setStyle(buttonStyle);
-
-
-
-
-            Scene scene = new Scene(layout, 600, 600);
-
-            stage.setScene(scene);
-
-            stage.setMinWidth(400);
-            stage.setMinHeight(500);
-
-            return scene;
+        
+        return scene;
 
     }
 }
