@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.jjproj</groupId>
+        <artifactId>szachyonline-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>szachy-server</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.jjproj</groupId>
+            <artifactId>szachy-shared</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>com.jjproj.BackendMain</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
