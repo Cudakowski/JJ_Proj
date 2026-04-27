@@ -17,7 +17,7 @@ public class Coordinates {
     //     return new Coordinates(File.values()[this.file.ordinal()+shift.fileShift],  this.rank+shift.rankShift);
     // }
 
-
+    
     public Coordinates shift(CoordinatesShift shift) {
         int newFileIndex = this.file.ordinal() + shift.fileShift;
         int newRank = this.rank + shift.rankShift;
@@ -35,15 +35,15 @@ public class Coordinates {
         if(this==obj){
             return true;
         }
-        if(obj==null || getClass() != obj.getClass()){
+        if(!(obj instanceof Coordinates)){
             return false;
         }
-        Coordinates anotherCoordinates = (Coordinates) obj;
-        if(file != anotherCoordinates.file){
+        Coordinates other = (Coordinates) obj;
+        if(file != other.file){
             return false;
         }
-        //return rank.equals(anotherCoordinates.rank);
-        return file == anotherCoordinates.file && rank == anotherCoordinates.rank;
+        //return rank.equals(other.rank);
+        return file == other.file && rank == other.rank;
     }
 
 
@@ -52,6 +52,9 @@ public class Coordinates {
         return Objects.hash(file, rank); 
     }
 
-
+    @Override
+    public String toString() {
+        return file.name() + rank;
+    }
 
 }

@@ -6,7 +6,8 @@ import java.util.Set;
 public class Game {
 
     private final Board board;
-    private BoardConsoleRenderer render = new BoardConsoleRenderer();
+    //private BoardConsoleRenderer render = new BoardConsoleRenderer();
+    private final BoardConsoleRenderer renderer = new BoardConsoleRenderer(); 
     private InputCoordinates inputCoordinates = new InputCoordinates();
 
     public Game(Board board){
@@ -19,16 +20,19 @@ public class Game {
         while(true){
             
 
-            //renderer.render(board);
+            renderer.render(board);
+            Color currentColor = isWhiteToMove ? Color.WHITE : Color.BLACK;
+            System.out.println("\n" + (currentColor == Color.WHITE ? "BIAŁE" : "CZARNE") + " to move!");
+            Coordinates from = InputCoordinates.inputPieceCoordinatesForColor(currentColor, board);
 
             //input
-            Coordinates sourseCoordinates=InputCoordinates.inputPieceCoordinatesForColor(isWhiteToMove ? Color.WHITE : Color.BLACK, board);
+            //Coordinates sourseCoordinates=InputCoordinates.inputPieceCoordinatesForColor(isWhiteToMove ? Color.WHITE : Color.BLACK, board);
             
-            Piece piece= board.getPiece(sourseCoordinates);
+            Piece piece= board.getPiece(from);
             Set<Coordinates> availableMoveSquares =piece.getAvailableMoveSquares(board);
-            Coordinates targetCoordinates =InputCoordinates.inputAvailableSquare(availableMoveSquares);
+            Coordinates to =InputCoordinates.inputAvailableSquare(availableMoveSquares);
             //move
-            board.movePiece(sourseCoordinates, targetCoordinates);
+            board.movePiece(from, to);
 
             //change color
             isWhiteToMove= !isWhiteToMove;

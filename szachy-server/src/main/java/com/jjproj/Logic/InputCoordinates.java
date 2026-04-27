@@ -5,6 +5,8 @@ import com.jjproj.Logic.piece.CoordinatesShift;
 import com.jjproj.Logic.piece.Piece;
 import java.util.Set;
 
+
+
 public class InputCoordinates {
 
     private static final Scanner scanner = new Scanner(System.in);
@@ -12,7 +14,7 @@ public class InputCoordinates {
     public static Coordinates input(){
         while(true){
             System.out.println("enter coordinates (A1)");
-            String line = scanner.nextLine();
+            String line = scanner.nextLine().trim().toUpperCase();
 
             if(line.length()!=2){
                 System.out.println("invalid format");
@@ -20,79 +22,76 @@ public class InputCoordinates {
 
             }
 
-            char fileChar = Character.toUpperCase(line.charAt(0));
+            char fileChar = line.charAt(0);
             char rankChar = line.charAt(1);
 
-            if(!Character.isLetter(fileChar)){
-                System.out.println("invalid format");
-                continue;
-            }
-            if(!Character.isDigit(rankChar)){
-                System.out.println("invalid format");
+            if(fileChar < 'A' || fileChar > 'H' || rankChar < '1' || rankChar > '8') {
+                System.out.println("Invalid coordinates! File must be A-H and rank must be 1-8.");
                 continue;
             }
 
-            File file;
-            try {
-                file = File.valueOf(String.valueOf(fileChar));
-            } catch (IllegalArgumentException e) {
-                System.out.println("Invalid file! Please use letters A through H");
-                continue;
-            }
-           
-             int rank = Character.getNumericValue(rankChar);
-            if (rank < 1 || rank > 8) {
-                System.out.println("Invalid rank! Please use numbers 1 through 8");
-                continue;
-            }
+            int fileIndex = fileChar - 'A';
+            File file = File.values()[fileIndex];
+            int rank = Character.getNumericValue(rankChar);
+
             return new Coordinates(file, rank);
 
         }
     }
 
-    //
-    public static Coordinates inputPieceCoordinatesForColor(Color color, Board board){
-        while(true){
-            System.out.println("enter your move");
-            Coordinates coordinates = input();
-            if(board.isSquareEmpty(coordinates)){
-                System.out.println("is empty Square");
-                continue;
-            }
-            Piece piece = board.getPiece(coordinates);
-            //zeby color of piece byl takii samy jak nasz 
-            if(piece.color!=color){
-                System.out.println("You can't move someone else's piece! Wrong color!!!!");
-                continue;
-            }
-            ///czy piece moze isc
-           Set<Coordinates> availableMoveSquares=piece.getAvailableMoveSquares(board);
-           if(availableMoveSquares.size()==0){
-            System.out.println("Blocked piece");
-            continue;
-           }
 
-           return coordinates;
-
-        }
-    }
-
-    public static Coordinates inputAvailableSquare(Set<Coordinates> coordinates){
-        while(true){
-            System.out.println("enter your move for selected piece");
-            Coordinates input=input();
-            if(!coordinates.contains(input)){
-                System.out.println("not available square");
-                continue;
-            }
-            return input;
-        }
-            
-    }
-
-    public static void main(String[] args){
+    public static Coordinates inputPieceCoordinatesForColor(Color color, Board board) {
+    while(true){
+        System.out.println((color == Color.WHITE ? "BIAŁE" : "CZARNE") + " - wybierz figurę (np. e2):");
         Coordinates coordinates = input();
-        System.out.println("coordinates"+coordinates);
+        
+        if(board.isSquareEmpty(coordinates)){
+            System.out.println("To pole jest puste!");
+            continue;
+        }
+        
+        Piece piece = board.getPiece(coordinates);
+        if(piece.color != color){
+            System.out.println("To nie Twoja figura!");
+            continue;
+        }
+        Set<Coordinates> availableMoveSquares = piece.getAvailableMoveSquares(board);
+        if(availableMoveSquares.isEmpty()){
+            System.out.println("Ta figura nie ma dostępnych ruchów!");
+            System.out.print("Dostępne ruchy: ");
+            for (Coordinates c : availableMoveSquares) {
+                System.out.print(c.file + "" + c.rank + " ");
+            }
+            System.out.println();
+            continue;
+        }
+        
+        return coordinates;
     }
+}
+
+    public static Coordinates inputAvailableSquare(Set<Coordinates> availableSquares) {
+    while(true) {
+        System.out.println("Wybierz docelowe pole (np. e4):");
+        System.out.print("Dostępne ruchy: ");
+        for (Coordinates c : availableSquares) {
+            System.out.print(c.file + "" + c.rank + " ");
+        }
+        System.out.println();
+        
+        Coordinates input = input();
+        
+        if (!availableSquares.contains(input)) {
+            System.out.println("Nieprawidłowy ruch!");
+            continue;
+        }
+        return input;
+        }
+    }
+
+    // public static void main(String[] args){
+    //     Coordinates coordinates = input();
+    //     System.out.println("coordinates"+coordinates);
+    // }
 
 }

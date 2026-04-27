@@ -1,11 +1,13 @@
 package com.jjproj.Logic.piece;
 
-import com.jjproj.Logic.Board;
 import com.jjproj.Logic.Color;
 import com.jjproj.Logic.Coordinates;
+
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
+import com.jjproj.Logic.Board;
 
 abstract public class Piece {
 
@@ -23,8 +25,10 @@ abstract public class Piece {
             if(coordinates.shift(shift)!=null){
                 Coordinates newCoordinates = coordinates.shift(shift);
 
-                if(isSquareAvailableForMove(newCoordinates, board)){
-                    result.add(newCoordinates);
+                if(newCoordinates != null) { // czy nie wychodzi poza planszę
+                    if(isSquareAvailableForMove(newCoordinates, board)){
+                        result.add(newCoordinates);
+                    }
                 }
             }
 
