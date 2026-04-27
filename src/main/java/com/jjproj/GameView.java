@@ -234,38 +234,44 @@ public class GameView {
 
                 // square.setOnDragExited(e -> square.getStyleClass().remove("square-hover"));
 
+                // zakomentowalam bo z jakiegos powodu sie zmienia rozmiar calego wiersza przy przeciaganiu
+
                 square.setOnDragDropped(e -> {
 
-
+                // pobieranie danych
                 Dragboard db = e.getDragboard();
                 boolean success = false;
 
                 if (db.hasString()) {
 
+                        // dane figurki
                         String[] data = db.getString().split(",");
 
                         int oldRow = Integer.parseInt(data[0]);
                         int oldCol = Integer.parseInt(data[1]);
 
-                        // 1. ten sam square
+                        // 1. ten sam square - blokada
                         if (oldRow == r && oldCol == c) {
                         e.setDropCompleted(false);
                         e.consume();
                         return;
                         }
 
-                        // 2. pole zajęte
+                        // 2. pole zajęte ----------(to do zmiany przy zbijaniu)
                         if (!pieces[r][c].equals("")) {
                         e.setDropCompleted(false);
                         e.consume();
                         return;
                         }
 
+                        // przesuniacie figuty
                         String piece = pieces[oldRow][oldCol];
 
+                        // nowe pole dodaje figure a stare zostanie piste
                         pieces[r][c] = piece;
                         pieces[oldRow][oldCol] = "";
 
+                        // funkcja odswiezania planszy
                         refreshBoard();
 
                         success = true;
@@ -275,55 +281,62 @@ public class GameView {
                 e.consume();
                 });
 
+                // dodaje pole do planszy
                 board.add(square, col, row);
             }
         }
 
+        // potem cala plansze odswiezam
         refreshBoard();
 
         return board;
     }
 
-    // odświeżanie pionków
+    // czyszcze plansze i dodaje pionki od nowa - dzieki temu plansza sie aktualizuje
     private void refreshBoard() {
 
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
 
+                // pobieram pole
                 StackPane square = squares[row][col];
-                square.getChildren().clear();
+                square.getChildren().clear(); // czyszce pole
 
-                if (!pieces[row][col].equals("")) {
+                if (!pieces[row][col].equals("")) { // jesli jest figura to ponizej towrze label ze znaczkeim figury
 
                     Label piece = new Label(pieces[row][col]);
                     piece.getStyleClass().add("chess-piece");
 
-                    final int r = row;
+                    final int r = row; // zapisuje pozycje pierwotne
                     final int c = col;
 
-                    // START DRAG
+                    // start przeciagania
                     piece.setOnDragDetected(e -> {
 
+                        // dworze dragboard
                         Dragboard db = piece.startDragAndDrop(TransferMode.MOVE);
 
+                        // zapisuje dane
                         ClipboardContent content = new ClipboardContent();
                         content.putString(r + "," + c);
 
+                        // podczas przeciagania dane leca dlaej z figurka
                         db.setContent(content);
 
                         e.consume();
                     });
 
+                    // dodaje podaja figurke do pola
                     square.getChildren().add(piece);
                 }
             }
         }
     }
 
-
-
+        // Uruchamianie liczbika czasu
         private void startTimer() {
 
+                // Tworze timeline (animacja dzialajaca coo 1 s)
                 gameTimer = new Timeline(
                         new KeyFrame(Duration.seconds(1), e -> {
 
@@ -332,22 +345,26 @@ public class GameView {
                                 else
                                         blackTime++;
 
-                                timer.setText("Czas: "+ formatTime(whiteTime)+ ", "+ formatTime(blackTime));
+                                timer.setText("Czas: "+ formatTime(whiteTime)+ ", "+ formatTime(blackTime)); // wypisuje czas odliczany dla bualych i czarnych
                         })
                 );
-
+                // tutaj zeby sie do dzialo w nieskonczaonosc
                 gameTimer.setCycleCount(Timeline.INDEFINITE);
+
+                // start timera
                 gameTimer.play();
         }
 
+        // tutaj zamieniam sekundy na minuty i sekundy
         private String formatTime(int totalSeconds) {
 
-                int minutes = totalSeconds / 60;
-                int seconds = totalSeconds % 60;
+                int minutes = totalSeconds/60;
+                int seconds = totalSeconds%60;
 
                 return String.format("%02d:%02d", minutes, seconds);
         }
 
+        // to potrzebne do zmiany tury, raczej nie bedzie potem takiego przycisku ale dodalam ja na razie bo chcialam zobaczyc jak to bedzoe wygladalo z timerem i wgl :DDD
         public void changeTurn() {
                 if (whiteTurn)
                         status.setText("Tura: czarne");
