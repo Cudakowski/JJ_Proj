@@ -216,24 +216,26 @@ public class GameView {
                 else
                     square.getStyleClass().add("square-dark");
 
-                final int r = row;
+                final int r = row; // final zeby moglo byc w eventach
                 final int c = col;
 
+                // tutaj zapisuje pole zebym potem latwiej mogla sie odwolac od niefo
                 squares[row][col] = square;
 
-                // DROP
+                // DROP (obzluga przeciagania)
                 square.setOnDragOver(e -> {
-                    if (e.getGestureSource() != square && e.getDragboard().hasString()) {
-                        e.acceptTransferModes(TransferMode.MOVE);
+                    if (e.getGestureSource() != square && e.getDragboard().hasString()) { // zeby nie przeciagnac na to samo pole i jesli cos juz jest (to potem zmienie bo wiadomo pionk sie zbija xd)
+                        e.acceptTransferModes(TransferMode.MOVE); // jesli powzysze spelnion to mozna figurke dac na dane pole
                     }
-                    e.consume();
+                    e.consume();// nie rpzekazywac dalej zdarzenia
                 });
 
-                square.setOnDragEntered(e -> square.getStyleClass().add("square-hover"));
+                // square.setOnDragEntered(e -> square.getStyleClass().add("square-hover"));
 
-                square.setOnDragExited(e -> square.getStyleClass().remove("square-hover"));
+                // square.setOnDragExited(e -> square.getStyleClass().remove("square-hover"));
 
                 square.setOnDragDropped(e -> {
+
 
                 Dragboard db = e.getDragboard();
                 boolean success = false;
