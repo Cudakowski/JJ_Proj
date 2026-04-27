@@ -2,7 +2,7 @@
 Projekt na jave
 
 
-./mvnw clean javafx:run
+
 
 
 
