@@ -36,17 +36,12 @@ abstract public class Piece {
         return result;
     }
 
-    // private boolean isSquereAvailableForMove(Coordinates coordinates, Board board){
-    //     return board.isSquareEmpty(coordinates)|| board.getPiece(coordinates) != color;
-
-    // }
-
     // SprawdZenie czy pole puste LUB czy na polu jest figura przeciwnika
     private boolean isSquareAvailableForMove(Coordinates coordinates, Board board) {
     return board.isSquareEmpty(coordinates) || 
            (board.getPiece(coordinates) != null && 
             board.getPiece(coordinates).color != this.color); 
-}
+    }
     //сдвиг координат
     //фигуры не могут сбивать фигуры своего цвета.
     //фигуры не могут уходить за границу доски

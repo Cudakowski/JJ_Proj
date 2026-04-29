@@ -88,10 +88,4 @@ public class InputCoordinates {
         return input;
         }
     }
-
-    // public static void main(String[] args){
-    //     Coordinates coordinates = input();
-    //     System.out.println("coordinates"+coordinates);
-    // }
-
 }

@@ -15,7 +15,7 @@ public class Game {
     }
     //render -> input -> make move -> pass move 
     
-    public void gameLoop(){
+    public void startGame(){
         boolean isWhiteToMove = true;
         while(true){
             

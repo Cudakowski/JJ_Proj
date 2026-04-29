@@ -14,8 +14,8 @@ public class BackendMain {
         board.setupDefaultPiecesPositions();
         
         Game game = new Game(board);
-        game.gameLoop();
+        game.startGame();
         //TestLogic.test();
-        //Game.gameLoop();
+        
     }
 }
