@@ -19,3 +19,4 @@ public class CoordinatesShift {
     }
     
 }
+// java records: public record CoorditatesShift(int fileShift, int rankShift){}
