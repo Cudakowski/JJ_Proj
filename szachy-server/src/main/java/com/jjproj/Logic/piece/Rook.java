@@ -17,7 +17,7 @@ public class Rook extends Piece{
     protected Set<CoordinatesShift> getPieceMoves() {
     Set<CoordinatesShift> moves = new HashSet<>();
 
-    for (int i = 1; i <= 7; i++) {
+    for(int i = 1; i <= 7; i++) {
         moves.add(new CoordinatesShift(i, 0));   // prawo
         moves.add(new CoordinatesShift(-i, 0));  // lewo
         moves.add(new CoordinatesShift(0, i));   // góra
@@ -25,4 +25,11 @@ public class Rook extends Piece{
     }
     return moves;
     }
+    //  @Override
+    // protected boolean isSquareAvailableForMove(Coordinates coordinates, Board board) {
+    //     if (!super.isSquareAvailableForMove(coordinates, board)) {
+    //         return false;
+    //     }
+    //     return isPathClear(coordinates, board);
+    // }
 }

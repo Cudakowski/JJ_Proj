@@ -9,6 +9,7 @@ public class Game {
     //private BoardConsoleRenderer render = new BoardConsoleRenderer();
     private final BoardConsoleRenderer renderer = new BoardConsoleRenderer(); 
     private InputCoordinates inputCoordinates = new InputCoordinates();
+  
 
     public Game(Board board){
         this.board=board;
@@ -17,9 +18,10 @@ public class Game {
     
     public void startGame(){
         boolean isWhiteToMove = true;
+        Coordinates selectedPiece = null;
         while(true){
             
-
+        
             renderer.render(board);
             Color currentColor = isWhiteToMove ? Color.WHITE : Color.BLACK;
             System.out.println("\n" + (currentColor == Color.WHITE ? "BIAŁE" : "CZARNE") + " to move!");

@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import com.jjproj.Logic.Board;
+import java.util.Collections;
+import com.jjproj.Logic.File;
 
 abstract public class Piece {
 
@@ -36,21 +38,57 @@ abstract public class Piece {
         return result;
     }
 
-    // SprawdZenie czy pole puste LUB czy na polu jest figura przeciwnika
-    private boolean isSquareAvailableForMove(Coordinates coordinates, Board board) {
-    return board.isSquareEmpty(coordinates) || 
-           (board.getPiece(coordinates) != null && 
-            board.getPiece(coordinates).color != this.color); 
+    protected boolean isSquareAvailableForMove(Coordinates coordinates, Board board) {
+       
+        if(!board.isSquareEmpty(coordinates) && 
+            board.getPiece(coordinates) != null && 
+            board.getPiece(coordinates).color == this.color){
+                return false;  // własna figura – nie można
+        }
+        
+        if(canJumpOverPieces()) {
+            return true;
+        }
+        //dla innych figur sprawdzany czy sciezka jest pusta
+        return isPathClear(coordinates, board);
     }
-    //сдвиг координат
-    //фигуры не могут сбивать фигуры своего цвета.
-    //фигуры не могут уходить за границу доски
-    //мы можем рвссчитать сдвиги и проверить корректна ли клетка для данной фигуры
-    // protected abstract Set<CoordinatesShift> getPieceMoves(){
+    
 
-    // }
+    protected boolean isPathClear(Coordinates target, Board board) {
+
+        int fileStep = Integer.compare(target.file.ordinal(),this.coordinates.file.ordinal());
+        int rankStep = Integer.compare(target.rank,this.coordinates.rank);
+
+        // move to target coordinate
+        int currentFileIndex = this.coordinates.file.ordinal();
+        int currentRank = this.coordinates.rank;
+
+        while(true) {
+
+            currentFileIndex += fileStep;
+            currentRank += rankStep;
+
+            // sprawdzenie czy nie wyszliśmy poza zakres
+            if(currentFileIndex < 0 || currentFileIndex >= 8 || currentRank < 1 || currentRank > 8) {
+                return false;
+            }
+
+            Coordinates current = new Coordinates(File.values()[currentFileIndex],currentRank);
+
+            if(current.equals(target)) {
+                return true;
+            }
+            if(!board.isSquareEmpty(current)) {
+                return false;
+            }
+        }
+    }
+    protected boolean canJumpOverPieces() {
+        return false;
+    }   
 
     protected Set<CoordinatesShift> getPieceMoves(){
-        return null;
+        //return null;
+        return Collections.emptySet(); 
     }
 }
