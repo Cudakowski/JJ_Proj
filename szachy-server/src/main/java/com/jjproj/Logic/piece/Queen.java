@@ -34,4 +34,11 @@ public class Queen extends Piece {
         
         return moves;
     }
+    // @Override
+    // protected boolean isSquareAvailableForMove(Coordinates coordinates, Board board) {
+    //     if (!super.isSquareAvailableForMove(coordinates, board)) {
+    //         return false;
+    //     }
+    //     return isPathClear(coordinates, board);
+    // }
 }
