@@ -74,7 +74,7 @@ public class LoginView {
         passwordField.getStyleClass().add("password-field");
 
         scene.getStylesheets().add(
-                getClass().getResource("/view.css").toExternalForm()
+                getClass().getResource("/View.css").toExternalForm()
         );
 
         

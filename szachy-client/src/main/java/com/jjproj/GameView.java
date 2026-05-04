@@ -171,7 +171,7 @@ public class GameView {
 
 
                 scene.getStylesheets().add(
-                        getClass().getResource("/view.css").toExternalForm()
+                        getClass().getResource("/View.css").toExternalForm()
                 );
 
                 status.setMinWidth(150);

@@ -75,7 +75,7 @@ public class MenuView {
         layout.getStyleClass().add("root-gradient");
 
         scene.getStylesheets().add(
-            getClass().getResource("/view.css").toExternalForm()
+            getClass().getResource("/View.css").toExternalForm()
         );
             
 

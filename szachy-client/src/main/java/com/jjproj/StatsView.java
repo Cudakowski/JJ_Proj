@@ -89,7 +89,7 @@ public class StatsView {
         gamesList.getStyleClass().add("list-view");
         back.getStyleClass().add("btn-main");
         scene.getStylesheets().add(
-                getClass().getResource("/view.css").toExternalForm()
+                getClass().getResource("/View.css").toExternalForm()
         );
 
         // Minnimalny rozmiar okna
