@@ -3,12 +3,12 @@ package com.jjproj;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
 import javafx.stage.Stage;
-import javafx.scene.control.Label;
 
 
 public class StatsView {
@@ -89,7 +89,7 @@ public class StatsView {
         gamesList.getStyleClass().add("list-view");
         back.getStyleClass().add("btn-main");
         scene.getStylesheets().add(
-                getClass().getResource("/view.css").toExternalForm()
+                getClass().getResource("/View.css").toExternalForm()
         );
 
         // Minnimalny rozmiar okna

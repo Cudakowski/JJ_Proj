@@ -5,9 +5,17 @@ import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.input.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -34,6 +42,9 @@ public class GameView {
         };
 
 
+        // Do klikania na figure zeby widziec gdzie moozna ja poruszyc
+        private int selectedRow = -1;
+        private int selectedCol = -1;
 
         public Scene createScene(Stage stage) {
 
@@ -171,7 +182,7 @@ public class GameView {
 
 
                 scene.getStylesheets().add(
-                        getClass().getResource("/view.css").toExternalForm()
+                        getClass().getResource("/View.css").toExternalForm()
                 );
 
                 status.setMinWidth(150);
@@ -310,6 +321,12 @@ public class GameView {
                     final int r = row; // zapisuje pozycje pierwotne
                     final int c = col;
 
+                        piece.setOnMouseClicked(e -> {
+                        selectedRow = r;
+                        selectedCol = c;
+                        showPossibleMoves(r, c);
+                        });
+
                     // start przeciagania
                     piece.setOnDragDetected(e -> {
 
@@ -374,13 +391,43 @@ public class GameView {
                 
         }
 
+        // Funkcja do czyszczenia kropek
+        private void clearHighlights() {
+        for (int row = 0; row < 8; row++) {
+                for (int col = 0; col < 8; col++) {
+                StackPane square = squares[row][col];
+
+                square.getChildren().removeIf(node -> node.getStyleClass().contains("move-dot"));
+                }
+        }
+        }
+
+        //Funkcja pokazujaca mozliwe ruchy (na razie do okola) !!!!!!!!!!!!!!!!!!!!!!!!!! Połączyc z backendem
+        private void showPossibleMoves(int row, int col) {
+        clearHighlights();
 
 
+        int[][] moves = {
+                {row+1, col},
+                {row-1, col},
+                {row, col+1},
+                {row, col-1}
+        };
 
+        for (int[] move : moves) {
+                int r = move[0];
+                int c = move[1];
 
+                if (r >= 0 && r < 8 && c >= 0 && c < 8 && pieces[r][c].equals("")) {
+                StackPane square = squares[r][c];
 
+                Label dot = new Label("●");
+                dot.getStyleClass().add("move-dot");
 
-
+                square.getChildren().add(dot);
+}
+        }
+        }
 
 
 }

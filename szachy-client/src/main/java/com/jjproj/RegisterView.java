@@ -10,14 +10,14 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 
-public class LoginView {
+public class RegisterView {
     
     public Scene createScene(Stage stage) {
         // Tytuł
         Label title = new Label("SZACHY");
 
         // Nagłowek
-        Label subtitle = new Label("logowanie");
+        Label subtitle = new Label("rejestracja");
 
         // Pole do wpisania loginu
         TextField usernameField = new TextField();
@@ -31,21 +31,24 @@ public class LoginView {
         // Jest taki poczatkowy tekst, zeby uzytkownik wiedzial ze tutaj jest haslo
         passwordField.setPromptText("Hasło");
 
+        PasswordField confirmPasswordField = new PasswordField();
+        confirmPasswordField.setPromptText("Powtórz hasło");
+
         // Przycisk logowania
         Button loginButton = new Button("Zaloguj się");
 
         Button registerButton = new Button("Zarejestruj się");
 
         registerButton.setOnAction(e -> {
-            RegisterView registerView = new RegisterView();
-            stage.setScene(registerView.createScene(stage));
+            MenuView menuView = new MenuView();
+            stage.setScene(menuView.createScene(stage));
         });
 
 
         // Klikniecie z logowania - jak narazie do menu - dodac bazy danych
         loginButton.setOnAction(e -> {
-            MenuView menuView = new MenuView();
-            stage.setScene(menuView.createScene(stage));
+            LoginView loginView = new LoginView();
+            stage.setScene(loginView.createScene(stage));
         });
 
 
@@ -58,7 +61,7 @@ public class LoginView {
 
         // Wszystkie te elementy bedą tak jeden pod drugim, dlatego wybralam VBox
 
-        VBox layout = new VBox(20, title, subtitle, usernameField, passwordField, loginButton, registerButton,exit);
+        VBox layout = new VBox(20, title, subtitle, usernameField, passwordField, confirmPasswordField, registerButton, loginButton, exit);
 
         // Bedzie to wszystko pośrodku okna
         layout.setAlignment(Pos.CENTER); 
@@ -81,6 +84,7 @@ public class LoginView {
 
         usernameField.getStyleClass().add("text-field");
         passwordField.getStyleClass().add("password-field");
+        confirmPasswordField.getStyleClass().add("password-field");
 
         scene.getStylesheets().add(
                 getClass().getResource("/View.css").toExternalForm()
