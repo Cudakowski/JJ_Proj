@@ -18,6 +18,11 @@ public class MenuView {
         // Powiadomienia
 
         Button notifications = new Button("⬛");
+
+        notifications.setOnAction(e -> {
+            NotificationsView notificationsView = new NotificationsView();
+            stage.setScene(notificationsView.createScene(stage));
+        });
         
 
         Label badge = new Label();

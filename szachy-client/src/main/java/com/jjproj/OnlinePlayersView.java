@@ -26,7 +26,7 @@ public class OnlinePlayersView {
         Button refreshBtn = new Button("Odśwież");
 
 
-        // Kontener na nagłówek (Tytuł + Odśwież obok siebie)
+        // Kontener na nagłówek 
         HBox header = new HBox(20, title, refreshBtn);
         header.setAlignment(Pos.CENTER);
 
@@ -61,6 +61,8 @@ public class OnlinePlayersView {
                     //Zaproszenie
                     inviteBtn.setOnAction(e -> {
                         System.out.println("Zaproszono gracza: " + name);
+                        WaitingForPlayerView waitingForPlayerView = new WaitingForPlayerView();
+                        stage.setScene(waitingForPlayerView.createScene(stage, name));
 
                         // Tutaj bede dodawac logikę wysyłania zaproszenia do serwera !!!!!!!!!!!!!!!!!!!!!!!!!!
                     });
