@@ -89,6 +89,38 @@ public class Board {
     private void setupKings() {
         setPiece(new Coordinates(File.E, 1), new King(Color.WHITE, new Coordinates(File.E, 1)));
         setPiece(new Coordinates(File.E, 8), new King(Color.BLACK, new Coordinates(File.E, 8)));
-    }  
+    }
+    public Board copy() {
+
+        Board newBoard = new Board();
+        for(HashMap.Entry<Coordinates, Piece> entry : pieces.entrySet()) {
+            Coordinates coords = entry.getKey();
+            Piece original = entry.getValue();
+            Piece copy;
+
+            if(original instanceof Pawn){
+                copy = new Pawn(original.color, coords);
+            }        
+            else if (original instanceof Rook){
+                copy = new Rook(original.color, coords);
+            }   
+            else if (original instanceof Knight){
+                copy = new Knight(original.color, coords);
+            } 
+            else if (original instanceof Bishop){
+                copy = new Bishop(original.color, coords);
+            } 
+            else if (original instanceof Queen){
+                copy = new Queen(original.color, coords);
+            }  
+            else if (original instanceof King){
+                copy = new King(original.color, coords);
+            }  
+            else continue;
+
+            newBoard.pieces.put(coords, copy);
+        }
+        return newBoard;
+    }
     
 }
