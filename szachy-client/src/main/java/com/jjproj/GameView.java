@@ -5,9 +5,17 @@ import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.input.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -18,7 +26,7 @@ public class GameView {
         private boolean whiteTurn = true;
         private Label timer;
         private Timeline gameTimer;
-        private Label status;
+        private Label statusGry;
         private StackPane[][] squares = new StackPane[8][8];
 
         // Pionki są w tablicy, na razie po prostu symbole z unicode, potem zmienie na cos fajniejszego
@@ -34,6 +42,9 @@ public class GameView {
         };
 
 
+        // Do klikania na figure zeby widziec gdzie moozna ja poruszyc
+        private int selectedRow = -1;
+        private int selectedCol = -1;
 
         public Scene createScene(Stage stage) {
 
@@ -42,10 +53,10 @@ public class GameView {
 
 
                 
-        //TOP (status + czas + zapis)
+        //TOP (statusGry + czas + zapis)
 
                 // Naglowek czyja tura jest
-                status = new Label("Tura: Białe");
+                statusGry = new Label("Tura: Białe");
                 
                 // Naglowek czas rozgrywki graczy
                 timer = new Label("Czas: 00:00, 00:00");
@@ -64,7 +75,7 @@ public class GameView {
                 changeTurnButton.setOnAction(e -> changeTurn());
                 
                 // Ustawiam te wszystkie elementy Kolo siebie
-                HBox topBar = new HBox(20, status, timer, changeTurnButton, save);
+                HBox topBar = new HBox(20, statusGry, timer, changeTurnButton, save);
                 
                 // Dodaje miedzy nimi odstep 10 px
                 topBar.setPadding(new Insets(10));
@@ -126,11 +137,10 @@ public class GameView {
                 root.setRight(rightPanel);
 
 
-        // BOTTOM (powrót)
+                // BOTTOM (powrót do menu)
 
                 // Przycisk powrotu do menu
                 Button back = new Button("Powrót do menu");
-                
 
                 // Jak sie klinknie to wraca do menu :D
                 back.setOnAction(e -> {
@@ -139,17 +149,21 @@ public class GameView {
                 });
 
 
-                // Dodaje to do Hboxa , moze cos jeszcze tu wymysle
-                HBox bottom = new HBox(back);
+                Label status = new Label("Status");
+                status.getStyleClass().add("error-label");
+                status.setMaxWidth(Double.MAX_VALUE);
+                status.setAlignment(Pos.CENTER);
+
+                HBox backBox = new HBox(back);
+                backBox.setAlignment(Pos.CENTER);
+
+                VBox bottomContainer = new VBox(10, backBox, status);
+                bottomContainer.setAlignment(Pos.CENTER);
+                bottomContainer.setPadding(new Insets(10));
                 
-                // Ustawiam eleganco na srodek
-                bottom.setAlignment(Pos.CENTER);
 
-                // Dodaje odstepy po 10 px z kazdej stony
-                bottom.setPadding(new Insets(10));
 
-                // dodaje hbox do naszego okna
-                root.setBottom(bottom);
+                root.setBottom(bottomContainer);
 
         // SCENE
 
@@ -159,7 +173,7 @@ public class GameView {
                 // Stylizowanie elementow
 
                 root.getStyleClass().add("root-dark");
-                status.getStyleClass().add("status-label");
+                statusGry.getStyleClass().add("statusGry-label");
                 timer.getStyleClass().add("timer-label");
                 save.getStyleClass().add("btn-main");
                 changeTurnButton.getStyleClass().add("btn-main");
@@ -167,15 +181,15 @@ public class GameView {
                 historyTitle.getStyleClass().add("side-title");
                 rightPanel.getStyleClass().add("panel-dark");
                 back.getStyleClass().add("btn-main");
-                bottom.getStyleClass().add("panel-dark");
+                bottomContainer.getStyleClass().add("panel-dark"); 
 
 
                 scene.getStylesheets().add(
                         getClass().getResource("/View.css").toExternalForm()
                 );
 
-                status.setMinWidth(150);
-                status.setPrefWidth(150);
+                statusGry.setMinWidth(150);
+                statusGry.setPrefWidth(150);
 
                 timer.setMinWidth(180);
                 timer.setPrefWidth(180);
@@ -310,6 +324,12 @@ public class GameView {
                     final int r = row; // zapisuje pozycje pierwotne
                     final int c = col;
 
+                        piece.setOnMouseClicked(e -> {
+                        selectedRow = r;
+                        selectedCol = c;
+                        showPossibleMoves(r, c);
+                        });
+
                     // start przeciagania
                     piece.setOnDragDetected(e -> {
 
@@ -367,20 +387,50 @@ public class GameView {
         // to potrzebne do zmiany tury, raczej nie bedzie potem takiego przycisku ale dodalam ja na razie bo chcialam zobaczyc jak to bedzoe wygladalo z timerem i wgl :DDD
         public void changeTurn() {
                 if (whiteTurn)
-                        status.setText("Tura: czarne");
+                        statusGry.setText("Tura: czarne");
                 else 
-                        status.setText("Tura: białe");
+                        statusGry.setText("Tura: białe");
                 whiteTurn = !whiteTurn;
                 
         }
 
+        // Funkcja do czyszczenia kropek
+        private void clearHighlights() {
+        for (int row = 0; row < 8; row++) {
+                for (int col = 0; col < 8; col++) {
+                StackPane square = squares[row][col];
+
+                square.getChildren().removeIf(node -> node.getStyleClass().contains("move-dot"));
+                }
+        }
+        }
+
+        //Funkcja pokazujaca mozliwe ruchy (na razie do okola) !!!!!!!!!!!!!!!!!!!!!!!!!! Połączyc z backendem
+        private void showPossibleMoves(int row, int col) {
+        clearHighlights();
 
 
+        int[][] moves = {
+                {row+1, col},
+                {row-1, col},
+                {row, col+1},
+                {row, col-1}
+        };
 
+        for (int[] move : moves) {
+                int r = move[0];
+                int c = move[1];
 
+                if (r >= 0 && r < 8 && c >= 0 && c < 8 && pieces[r][c].equals("")) {
+                StackPane square = squares[r][c];
 
+                Label dot = new Label("●");
+                dot.getStyleClass().add("move-dot");
 
-
+                square.getChildren().add(dot);
+}
+        }
+        }
 
 
 }

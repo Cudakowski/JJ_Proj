@@ -11,28 +11,32 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 
-public class LoginView {
+public class RegisterView {
     
     public Scene createScene(Stage stage) {
         // Tytuł
         Label title = new Label("SZACHY");
 
         Label status = new Label("Status");
+    
 
-        // Nagłowek
-        Label subtitle = new Label("logowanie");
 
-        // Pole do wpisania loginu
+        Label subtitle = new Label("rejestracja");
+
+
         TextField usernameField = new TextField();
 
-        // Jest taki poczatkowy tekst, zeby uzytkownik wiedzial ze tutaj jest do wpisania loginu
+
         usernameField.setPromptText("Nazwa użytkownika");
 
-        // Pole do wpisania hasła
+
         PasswordField passwordField = new PasswordField();
 
-        // Jest taki poczatkowy tekst, zeby uzytkownik wiedzial ze tutaj jest haslo
+
         passwordField.setPromptText("Hasło");
+
+        PasswordField confirmPasswordField = new PasswordField();
+        confirmPasswordField.setPromptText("Powtórz hasło");
 
         // Przycisk logowania
         Button loginButton = new Button("Zaloguj się");
@@ -40,15 +44,15 @@ public class LoginView {
         Button registerButton = new Button("Zarejestruj się");
 
         registerButton.setOnAction(e -> {
-            RegisterView registerView = new RegisterView();
-            stage.setScene(registerView.createScene(stage));
+            MenuView menuView = new MenuView();
+            stage.setScene(menuView.createScene(stage));
         });
 
 
         // Klikniecie z logowania - jak narazie do menu - dodac bazy danych
         loginButton.setOnAction(e -> {
-            MenuView menuView = new MenuView();
-            stage.setScene(menuView.createScene(stage));
+            LoginView loginView = new LoginView();
+            stage.setScene(loginView.createScene(stage));
         });
 
 
@@ -58,18 +62,17 @@ public class LoginView {
         // Jak klikniemy to wywala nas z szachow
         exit.setOnAction(e -> stage.close());
 
-
         Region spacer = new Region();
         VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
 
         // Wszystkie te elementy bedą tak jeden pod drugim, dlatego wybralam VBox
 
-        VBox layout = new VBox(20, title, subtitle, usernameField, passwordField, loginButton, registerButton, exit,spacer , status);
+        VBox layout = new VBox(20, title, subtitle, usernameField, passwordField, confirmPasswordField, registerButton, loginButton, exit, spacer, status);
+
 
         // Bedzie to wszystko pośrodku okna
         layout.setAlignment(Pos.CENTER); 
-
 
         // Dodaje te elementy do okna
         Scene scene = new Scene(layout, 600, 800);
@@ -86,10 +89,11 @@ public class LoginView {
         loginButton.getStyleClass().add("btn-main");
         registerButton.getStyleClass().add("btn-main");
         exit.getStyleClass().add("btn-main");
-        status.getStyleClass().add("error-label");
 
         usernameField.getStyleClass().add("text-field");
         passwordField.getStyleClass().add("password-field");
+        confirmPasswordField.getStyleClass().add("password-field");
+        status.getStyleClass().add("error-label");
 
         scene.getStylesheets().add(
                 getClass().getResource("/View.css").toExternalForm()
