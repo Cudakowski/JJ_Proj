@@ -16,11 +16,9 @@ public class MenuView {
     public Scene createScene(Stage stage) {
 
         // Powiadomienia
+        
 
         Button notifications = new Button("⬛");
-
-        Label status = new Label("Status");
-        status.getStyleClass().add("error-label");
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
@@ -74,7 +72,7 @@ public class MenuView {
 
         exit.setOnAction(e -> stage.close());
 
-        VBox menu = new VBox(20, title, newGame, stats, logOut, exit, spacer,status);
+        VBox menu = new VBox(20, title, newGame, stats, logOut, exit, spacer,SzachyOnline.status);
         menu.setAlignment(Pos.CENTER);
 
 

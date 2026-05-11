@@ -8,6 +8,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javafx.application.Platform;
+
 public class NetworkManager {
     
     private static TCPConnection connection;
@@ -42,13 +44,13 @@ public class NetworkManager {
             
             if (isConnected) {
                 NetworkManager.sendCommand("LOGIN|" + wpisanyLogin + "|" + wpisaneHaslo);
-                // Platform.runLater(() -> {
-                    // TODO: status "Weryfikacja danych"
-                // });
+                Platform.runLater(() -> {
+                    SzachyOnline.status.setText("Weryfikacja danych");
+                });
             } else {
-                // Platform.runLater(() -> {
-                    // TODO: status "Błąd: Brak połączenia z serwerem"
-                // });
+                Platform.runLater(() -> {
+                    SzachyOnline.status.setText("Brak połączenia z serwerem");
+                });
                 isLoggingOrLogged.set(false);
             }
             
@@ -93,9 +95,9 @@ public class NetworkManager {
                 System.out.println("Rozlaczono z serwerem.");
                 disconnect();
 
-                // Platform.runLater(() -> {
-                //     // TODO: Status "Utracono połączenie"
-                // });
+                Platform.runLater(() -> {
+                    SzachyOnline.status.setText("Utracono połączenie");
+                });
             }
         });
         
@@ -126,9 +128,10 @@ public class NetworkManager {
                 System.out.println("Zalogowano");
                 startPinging();
                 isLoggingOrLogged.set(true);
-                // Platform.runLater(() -> {
-                //     // TODO: zmień na menu
-                // });
+                Platform.runLater(() -> {
+                    MenuView menuView = new MenuView();
+                    stage.setScene(menuView.createScene(stage));
+                });
                 
                 break;
 

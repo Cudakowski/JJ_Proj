@@ -24,9 +24,6 @@ public class StatsView {
 
     // TOP
 
-        Label status = new Label("Status");
-        status.getStyleClass().add("error-label");
-
         Region spacer = new Region();
         VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);       
     
@@ -76,7 +73,7 @@ public class StatsView {
 
         // Przycisk powrotu do menu daje na sam dół (tworze HBox i do niego dala, - moze tam kilka opcji by jeszcze dodac)
 
-        VBox bottom = new VBox(back, spacer, status);
+        VBox bottom = new VBox(back, spacer, SzachyOnline.status);
         bottom.setAlignment(Pos.CENTER);
         root.setBottom(bottom);
 

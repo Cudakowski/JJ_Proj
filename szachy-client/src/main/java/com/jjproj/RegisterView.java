@@ -17,9 +17,6 @@ public class RegisterView {
         // Tytuł
         Label title = new Label("SZACHY");
 
-        Label status = new Label("Status");
-    
-
 
         Label subtitle = new Label("rejestracja");
 
@@ -68,7 +65,7 @@ public class RegisterView {
 
         // Wszystkie te elementy bedą tak jeden pod drugim, dlatego wybralam VBox
 
-        VBox layout = new VBox(20, title, subtitle, usernameField, passwordField, confirmPasswordField, registerButton, loginButton, exit, spacer, status);
+        VBox layout = new VBox(20, title, subtitle, usernameField, passwordField, confirmPasswordField, registerButton, loginButton, exit, spacer, SzachyOnline.status);
 
 
         // Bedzie to wszystko pośrodku okna
@@ -93,7 +90,7 @@ public class RegisterView {
         usernameField.getStyleClass().add("text-field");
         passwordField.getStyleClass().add("password-field");
         confirmPasswordField.getStyleClass().add("password-field");
-        status.getStyleClass().add("error-label");
+
 
         scene.getStylesheets().add(
                 getClass().getResource("/View.css").toExternalForm()

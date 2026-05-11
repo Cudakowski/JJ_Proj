@@ -38,10 +38,6 @@ public Scene createScene(Stage stage) {
 
 
 
-        Label status = new Label("Status");
-        status.getStyleClass().add("error-label");
-        status.setMaxWidth(Double.MAX_VALUE); 
-        status.setAlignment(Pos.CENTER);   
 
         HBox topBar = new HBox(title);
         topBar.setPadding(new Insets(20, 20, 10, 20));
@@ -158,7 +154,7 @@ public Scene createScene(Stage stage) {
         backBtnContainer.setAlignment(Pos.CENTER_LEFT);
 
 
-        VBox bottomContainer = new VBox(10, backBtnContainer, status);
+        VBox bottomContainer = new VBox(10, backBtnContainer, SzachyOnline.status);
         bottomContainer.setPadding(new Insets(10, 20, 20, 20));
         bottomContainer.setAlignment(Pos.CENTER); 
 

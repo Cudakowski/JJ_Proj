@@ -19,9 +19,6 @@ public class WaitingForPlayerView {
         Label title = new Label("OCZEKIWANIE NA GRACZA");
         title.getStyleClass().add("subtitle");
 
-        Label status = new Label("Status");
-        status.getStyleClass().add("error-label");
-
         Region spacer = new Region();
         VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
@@ -49,7 +46,7 @@ public class WaitingForPlayerView {
         });
 
 
-        VBox layout = new VBox(30, title, statusLog, infoLabel, cancelBtn, spacer, status);
+        VBox layout = new VBox(30, title, statusLog, infoLabel, cancelBtn, spacer, SzachyOnline.status);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(40));
         layout.getStyleClass().add("root-gradient");

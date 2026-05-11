@@ -24,9 +24,7 @@ public class OnlinePlayersView {
         Region spacer = new Region();
         VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
-        Label status = new Label("Status");
 
-        status.getStyleClass().add("error-label");
 
 
 
@@ -103,7 +101,7 @@ public class OnlinePlayersView {
         });
 
 
-        VBox layout = new VBox(25, header, playersList, backBtn, spacer, status);
+        VBox layout = new VBox(25, header, playersList, backBtn, spacer, SzachyOnline.status);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(40));
 

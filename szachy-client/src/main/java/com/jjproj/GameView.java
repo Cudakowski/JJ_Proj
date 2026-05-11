@@ -149,15 +149,13 @@ public class GameView {
                 });
 
 
-                Label status = new Label("Status");
-                status.getStyleClass().add("error-label");
-                status.setMaxWidth(Double.MAX_VALUE);
-                status.setAlignment(Pos.CENTER);
+
+                
 
                 HBox backBox = new HBox(back);
                 backBox.setAlignment(Pos.CENTER);
 
-                VBox bottomContainer = new VBox(10, backBox, status);
+                VBox bottomContainer = new VBox(10, backBox, SzachyOnline.status);
                 bottomContainer.setAlignment(Pos.CENTER);
                 bottomContainer.setPadding(new Insets(10));
                 

@@ -1,13 +1,24 @@
 package com.jjproj;
 
 import javafx.application.Application;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
 public class SzachyOnline extends Application {
 
+    public static Label status;
+
     @Override
     public void start(Stage stage) {
+        status = new Label("Status");
+        status.getStyleClass().add("error-label");
+        status.setMaxWidth(Double.MAX_VALUE);
+        status.setAlignment(Pos.CENTER);
+
+        
         LoginView login = new LoginView();
+
         stage.setScene(login.createScene(stage));
         stage.setTitle("Szachy");
         stage.show();
