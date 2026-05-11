@@ -106,7 +106,7 @@ public class MenuView {
         root.getStyleClass().add("root-gradient");
 
         scene.getStylesheets().add(
-                getClass().getResource("/View.css").toExternalForm()
+            getClass().getResource("/View.css").toExternalForm()
         );
 
         stage.setMinWidth(400);
