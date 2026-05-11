@@ -8,5 +8,6 @@ public class BackendMain {
         System.out.println("To jest backend!");
 
         //TestLogic.test();
+        Server.startServer();
     }
 }
