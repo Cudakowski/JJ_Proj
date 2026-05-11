@@ -1,14 +1,12 @@
 package com.jjproj;
 
 
-// import javafx.application.Platform;
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javafx.application.Platform;
 
 public class NetworkManager {
     
@@ -44,13 +42,13 @@ public class NetworkManager {
             
             if (isConnected) {
                 NetworkManager.sendCommand("LOGIN|" + wpisanyLogin + "|" + wpisaneHaslo);
-                Platform.runLater(() -> {
-                    SzachyOnline.status.setText("Weryfikacja danych");
-                });
+
+                SceneManager.setStatus("Weryfikacja danych");
+                
             } else {
-                Platform.runLater(() -> {
-                    SzachyOnline.status.setText("Brak połączenia z serwerem");
-                });
+
+                SceneManager.setStatus("Brak połączenia z serwerem");
+
                 isLoggingOrLogged.set(false);
             }
             
@@ -95,9 +93,9 @@ public class NetworkManager {
                 System.out.println("Rozlaczono z serwerem.");
                 disconnect();
 
-                Platform.runLater(() -> {
-                    SzachyOnline.status.setText("Utracono połączenie");
-                });
+                
+                //SceneManager.setStatus("Utracono połączenie");
+                
             }
         });
         
@@ -128,10 +126,7 @@ public class NetworkManager {
                 System.out.println("Zalogowano");
                 startPinging();
                 isLoggingOrLogged.set(true);
-                Platform.runLater(() -> {
-                    MenuView menuView = new MenuView();
-                    stage.setScene(menuView.createScene(stage));
-                });
+                SceneManager.switchToMenu();
                 
                 break;
 
@@ -139,9 +134,9 @@ public class NetworkManager {
                 String cause = data.length > 1 ? data[1] : "Nieznany blad";
                 
                 System.out.println("Odmowa dostepu: " + cause);
-                // Platform.runLater(() -> {
-                     // TODO: status: "Błąd logowania: " + powod ;
-                // });
+                
+                SceneManager.setStatus("Blad logowania: " + cause );
+                
                 disconnect(); 
                 break;
                 

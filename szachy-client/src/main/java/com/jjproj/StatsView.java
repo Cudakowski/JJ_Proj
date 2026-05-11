@@ -22,6 +22,11 @@ public class StatsView {
 
         root.setPadding(new Insets(20));
 
+        Label status = new Label("Status");
+        status.getStyleClass().add("error-label");
+        status.setMaxWidth(Double.MAX_VALUE);
+        status.setAlignment(Pos.CENTER);
+
     // TOP
 
         Region spacer = new Region();
@@ -73,7 +78,7 @@ public class StatsView {
 
         // Przycisk powrotu do menu daje na sam dół (tworze HBox i do niego dala, - moze tam kilka opcji by jeszcze dodac)
 
-        VBox bottom = new VBox(back, spacer, SzachyOnline.status);
+        VBox bottom = new VBox(back, spacer, status);
         bottom.setAlignment(Pos.CENTER);
         root.setBottom(bottom);
 
@@ -100,6 +105,8 @@ public class StatsView {
         stage.setMinWidth(400);
         stage.setMinHeight(500);
 
+        SceneManager.registerStatusLabel(status);
+        
         return scene;
     }
 }

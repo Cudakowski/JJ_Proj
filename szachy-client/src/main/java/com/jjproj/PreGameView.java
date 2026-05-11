@@ -36,7 +36,10 @@ public Scene createScene(Stage stage) {
         // top
         Label title = new Label("Przed rozpoczęciem gry...");
 
-
+        Label status = new Label("Status");
+        status.getStyleClass().add("error-label");
+        status.setMaxWidth(Double.MAX_VALUE);
+        status.setAlignment(Pos.CENTER);
 
 
         HBox topBar = new HBox(title);
@@ -154,7 +157,7 @@ public Scene createScene(Stage stage) {
         backBtnContainer.setAlignment(Pos.CENTER_LEFT);
 
 
-        VBox bottomContainer = new VBox(10, backBtnContainer, SzachyOnline.status);
+        VBox bottomContainer = new VBox(10, backBtnContainer, status);
         bottomContainer.setPadding(new Insets(10, 20, 20, 20));
         bottomContainer.setAlignment(Pos.CENTER); 
 
@@ -201,6 +204,8 @@ public Scene createScene(Stage stage) {
         scene.getStylesheets().add(
                 getClass().getResource("/View.css").toExternalForm()
         );
+
+        SceneManager.registerStatusLabel(status);
 
         return scene;
     }

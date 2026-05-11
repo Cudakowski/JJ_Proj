@@ -22,6 +22,11 @@ public class WaitingForPlayerView {
         Region spacer = new Region();
         VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
+        Label status = new Label("Status");
+        status.getStyleClass().add("error-label");
+        status.setMaxWidth(Double.MAX_VALUE);
+        status.setAlignment(Pos.CENTER);
+
         // logi
         statusLog = new ListView<>();
         statusLog.getStyleClass().add("list-view");
@@ -46,7 +51,7 @@ public class WaitingForPlayerView {
         });
 
 
-        VBox layout = new VBox(30, title, statusLog, infoLabel, cancelBtn, spacer, SzachyOnline.status);
+        VBox layout = new VBox(30, title, statusLog, infoLabel, cancelBtn, spacer, status);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(40));
         layout.getStyleClass().add("root-gradient");
@@ -54,6 +59,8 @@ public class WaitingForPlayerView {
         Scene scene = new Scene(layout, 600, 800);
         scene.getStylesheets().add(getClass().getResource("/View.css").toExternalForm());
 
+
+        SceneManager.registerStatusLabel(status);
 
         return scene;
     }

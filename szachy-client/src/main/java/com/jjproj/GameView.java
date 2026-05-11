@@ -51,7 +51,10 @@ public class GameView {
                 // Tworzenie roota - borderPane - bedzie po wszystkich bokach cos :p
                 BorderPane root = new BorderPane();
 
-
+                Label status = new Label("Status");
+                status.getStyleClass().add("error-label");
+                status.setMaxWidth(Double.MAX_VALUE);
+                status.setAlignment(Pos.CENTER);
                 
         //TOP (statusGry + czas + zapis)
 
@@ -155,10 +158,9 @@ public class GameView {
                 HBox backBox = new HBox(back);
                 backBox.setAlignment(Pos.CENTER);
 
-                VBox bottomContainer = new VBox(10, backBox, SzachyOnline.status);
+                VBox bottomContainer = new VBox(10, backBox, status);
                 bottomContainer.setAlignment(Pos.CENTER);
                 bottomContainer.setPadding(new Insets(10));
-                
 
 
                 root.setBottom(bottomContainer);
@@ -204,6 +206,8 @@ public class GameView {
                 stage.setMinHeight(800);
 
                 startTimer();
+
+                SceneManager.registerStatusLabel(status);
 
                 return scene;
         }

@@ -28,6 +28,11 @@ public class MenuView {
             NotificationsView notificationsView = new NotificationsView();
             stage.setScene(notificationsView.createScene(stage));
         });
+
+        Label status = new Label("Status");
+        status.getStyleClass().add("error-label");
+        status.setMaxWidth(Double.MAX_VALUE);
+        status.setAlignment(Pos.CENTER);
         
 
         Label badge = new Label();
@@ -72,7 +77,7 @@ public class MenuView {
 
         exit.setOnAction(e -> stage.close());
 
-        VBox menu = new VBox(20, title, newGame, stats, logOut, exit, spacer,SzachyOnline.status);
+        VBox menu = new VBox(20, title, newGame, stats, logOut, exit, spacer,status);
         menu.setAlignment(Pos.CENTER);
 
 
@@ -109,6 +114,8 @@ public class MenuView {
 
         stage.setMinWidth(400);
         stage.setMinHeight(500);
+
+        SceneManager.registerStatusLabel(status);
 
         return scene;
     }

@@ -17,7 +17,10 @@ public class LoginView {
         // Tytuł
         Label title = new Label("SZACHY");
 
-         
+        Label status = new Label("Status");
+        status.getStyleClass().add("error-label");
+        status.setMaxWidth(Double.MAX_VALUE);
+        status.setAlignment(Pos.CENTER);
 
         // Nagłowek
         Label subtitle = new Label("logowanie");
@@ -66,7 +69,7 @@ public class LoginView {
 
         // Wszystkie te elementy bedą tak jeden pod drugim, dlatego wybralam VBox
 
-        VBox layout = new VBox(20, title, subtitle, usernameField, passwordField, loginButton, registerButton, exit,spacer , SzachyOnline.status);
+        VBox layout = new VBox(20, title, subtitle, usernameField, passwordField, loginButton, registerButton, exit,spacer , status);
 
         // Bedzie to wszystko pośrodku okna
         layout.setAlignment(Pos.CENTER); 
@@ -87,7 +90,7 @@ public class LoginView {
         loginButton.getStyleClass().add("btn-main");
         registerButton.getStyleClass().add("btn-main");
         exit.getStyleClass().add("btn-main");
-        SzachyOnline.status.getStyleClass().add("error-label");
+        status.getStyleClass().add("error-label");
 
         usernameField.getStyleClass().add("text-field");
         passwordField.getStyleClass().add("password-field");
@@ -101,6 +104,7 @@ public class LoginView {
         stage.setMinWidth(400);
         stage.setMinHeight(500);
 
+        SceneManager.registerStatusLabel(status);
         
         return scene;
 

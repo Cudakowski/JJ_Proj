@@ -31,7 +31,10 @@ public class NotificationsView {
         Label title = new Label("LISTA POWIADOMIEŃ");
         title.getStyleClass().add("subtitle");
 
-
+        Label status = new Label("Status");
+        status.getStyleClass().add("error-label");
+        status.setMaxWidth(Double.MAX_VALUE);
+        status.setAlignment(Pos.CENTER);
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
@@ -104,13 +107,15 @@ public class NotificationsView {
             stage.setScene(menu.createScene(stage));
         });
 
-        VBox layout = new VBox(20, title, listView, backBtn, spacer, SzachyOnline.status);
+        VBox layout = new VBox(20, title, listView, backBtn, spacer, status);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(30));
         layout.getStyleClass().add("root-gradient");
 
         Scene scene = new Scene(layout, 600, 800);
         scene.getStylesheets().add(getClass().getResource("/View.css").toExternalForm());
+
+        SceneManager.registerStatusLabel(status);
 
         return scene;
     }
