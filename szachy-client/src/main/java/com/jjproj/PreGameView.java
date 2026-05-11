@@ -4,6 +4,7 @@ package com.jjproj;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -35,6 +36,12 @@ public Scene createScene(Stage stage) {
         // top
         Label title = new Label("Przed rozpoczęciem gry...");
 
+
+
+        Label status = new Label("Status");
+        status.getStyleClass().add("error-label");
+        status.setMaxWidth(Double.MAX_VALUE); 
+        status.setAlignment(Pos.CENTER);   
 
         HBox topBar = new HBox(title);
         topBar.setPadding(new Insets(20, 20, 10, 20));
@@ -140,17 +147,23 @@ public Scene createScene(Stage stage) {
 
         // dol
         Button backBtn = new Button("Wstecz");
-
         backBtn.setOnAction(e -> {
-                MenuView menuView = new MenuView();
-                stage.setScene(menuView.createScene(stage));
+        MenuView menuView = new MenuView();
+        stage.setScene(menuView.createScene(stage));
         });
 
 
-        HBox bottom = new HBox(backBtn);
-        bottom.setPadding(new Insets(20));
 
-        root.setBottom(bottom);
+        HBox backBtnContainer = new HBox(backBtn);
+        backBtnContainer.setAlignment(Pos.CENTER_LEFT);
+
+
+        VBox bottomContainer = new VBox(10, backBtnContainer, status);
+        bottomContainer.setPadding(new Insets(10, 20, 20, 20));
+        bottomContainer.setAlignment(Pos.CENTER); 
+
+        root.setBottom(bottomContainer);
+
 
         // Stylizowanie
         root.getStyleClass().add("root-dark");

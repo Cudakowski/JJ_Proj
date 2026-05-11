@@ -6,6 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -16,19 +17,22 @@ public class RegisterView {
         // Tytuł
         Label title = new Label("SZACHY");
 
-        // Nagłowek
+        Label status = new Label("Status");
+    
+
+
         Label subtitle = new Label("rejestracja");
 
-        // Pole do wpisania loginu
+
         TextField usernameField = new TextField();
 
-        // Jest taki poczatkowy tekst, zeby uzytkownik wiedzial ze tutaj jest do wpisania loginu
+
         usernameField.setPromptText("Nazwa użytkownika");
 
-        // Pole do wpisania hasła
+
         PasswordField passwordField = new PasswordField();
 
-        // Jest taki poczatkowy tekst, zeby uzytkownik wiedzial ze tutaj jest haslo
+
         passwordField.setPromptText("Hasło");
 
         PasswordField confirmPasswordField = new PasswordField();
@@ -58,10 +62,14 @@ public class RegisterView {
         // Jak klikniemy to wywala nas z szachow
         exit.setOnAction(e -> stage.close());
 
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+
 
         // Wszystkie te elementy bedą tak jeden pod drugim, dlatego wybralam VBox
 
-        VBox layout = new VBox(20, title, subtitle, usernameField, passwordField, confirmPasswordField, registerButton, loginButton, exit);
+        VBox layout = new VBox(20, title, subtitle, usernameField, passwordField, confirmPasswordField, registerButton, loginButton, exit, spacer, status);
+
 
         // Bedzie to wszystko pośrodku okna
         layout.setAlignment(Pos.CENTER); 
@@ -85,6 +93,7 @@ public class RegisterView {
         usernameField.getStyleClass().add("text-field");
         passwordField.getStyleClass().add("password-field");
         confirmPasswordField.getStyleClass().add("password-field");
+        status.getStyleClass().add("error-label");
 
         scene.getStylesheets().add(
                 getClass().getResource("/View.css").toExternalForm()

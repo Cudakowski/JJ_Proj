@@ -21,12 +21,20 @@ public class OnlinePlayersView {
         // Tytuł strony
         Label title = new Label("LISTA GRACZY ONLINE");
 
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
-        // Przycisk odświeżania
+        Label status = new Label("Status");
+
+        status.getStyleClass().add("error-label");
+
+
+
+
         Button refreshBtn = new Button("Odśwież");
 
 
-        // Kontener na nagłówek 
+
         HBox header = new HBox(20, title, refreshBtn);
         header.setAlignment(Pos.CENTER);
 
@@ -50,28 +58,27 @@ public class OnlinePlayersView {
                     setGraphic(null);
                 } else {
 
-                    // Nazwa gracza
+
                     Label playerName = new Label(name);
                     playerName.setStyle("-fx-text-fill: white; -fx-font-size: 16px;");
 
-                    // Przycisk zaproś
                     Button inviteBtn = new Button("zaproś");
                     inviteBtn.getStyleClass().add("btn-game");
                     
-                    //Zaproszenie
+
                     inviteBtn.setOnAction(e -> {
                         System.out.println("Zaproszono gracza: " + name);
                         WaitingForPlayerView waitingForPlayerView = new WaitingForPlayerView();
                         stage.setScene(waitingForPlayerView.createScene(stage, name));
 
-                        // Tutaj bede dodawac logikę wysyłania zaproszenia do serwera !!!!!!!!!!!!!!!!!!!!!!!!!!
+                        // Tu bede dodawac logikę wysyłania zaproszenia do serwera !!!!!!!!!!!!!!!!!!!!!!!!!!
                     });
 
-                    // Spacer - wypycha przycisk do prawej strony
+
                     Region spacer = new Region();
                     HBox.setHgrow(spacer, Priority.ALWAYS);
 
-                    // Układ wiersza
+
                     HBox row = new HBox(10, playerName, spacer, inviteBtn);
                     row.setAlignment(Pos.CENTER_LEFT);
                     row.setPadding(new Insets(5, 10, 5, 10));
@@ -81,13 +88,13 @@ public class OnlinePlayersView {
             }
         });
 
-        // Przycisk odświeżania
+
         refreshBtn.setOnAction(e -> {
-            // Tutaj dodanm ponowne wczytanie listy z  serwera
+
             System.out.println("Odświeżam listę graczy...");
         });
 
-        // Przycisk wstecz
+
         Button backBtn = new Button("Wstecz");
 
         backBtn.setOnAction(e -> {
@@ -95,8 +102,8 @@ public class OnlinePlayersView {
             stage.setScene(preGame.createScene(stage));
         });
 
-        // Główny układ
-        VBox layout = new VBox(25, header, playersList, backBtn);
+
+        VBox layout = new VBox(25, header, playersList, backBtn, spacer, status);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(40));
 

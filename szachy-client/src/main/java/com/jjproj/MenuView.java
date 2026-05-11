@@ -19,6 +19,13 @@ public class MenuView {
 
         Button notifications = new Button("⬛");
 
+        Label status = new Label("Status");
+        status.getStyleClass().add("error-label");
+
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+
+
         notifications.setOnAction(e -> {
             NotificationsView notificationsView = new NotificationsView();
             stage.setScene(notificationsView.createScene(stage));
@@ -67,7 +74,7 @@ public class MenuView {
 
         exit.setOnAction(e -> stage.close());
 
-        VBox menu = new VBox(20, title, newGame, stats, logOut, exit);
+        VBox menu = new VBox(20, title, newGame, stats, logOut, exit, spacer,status);
         menu.setAlignment(Pos.CENTER);
 
 

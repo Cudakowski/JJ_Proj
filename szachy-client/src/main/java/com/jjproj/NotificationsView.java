@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -29,6 +30,13 @@ public class NotificationsView {
     public Scene createScene(Stage stage) {
         Label title = new Label("LISTA POWIADOMIEŃ");
         title.getStyleClass().add("subtitle");
+
+        Label status = new Label("Status");
+        status.getStyleClass().add("error-label");
+
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+
 
         ListView<Invitation> listView = new ListView<>(notificationsData);
         listView.setPrefHeight(400);
@@ -97,7 +105,7 @@ public class NotificationsView {
             stage.setScene(menu.createScene(stage));
         });
 
-        VBox layout = new VBox(20, title, listView, backBtn);
+        VBox layout = new VBox(20, title, listView, backBtn, spacer, status);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(30));
         layout.getStyleClass().add("root-gradient");

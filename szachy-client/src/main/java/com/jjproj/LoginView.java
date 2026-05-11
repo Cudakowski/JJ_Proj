@@ -6,6 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -15,6 +16,8 @@ public class LoginView {
     public Scene createScene(Stage stage) {
         // Tytuł
         Label title = new Label("SZACHY");
+
+        Label status = new Label("Status");
 
         // Nagłowek
         Label subtitle = new Label("logowanie");
@@ -56,12 +59,17 @@ public class LoginView {
         exit.setOnAction(e -> stage.close());
 
 
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+
+
         // Wszystkie te elementy bedą tak jeden pod drugim, dlatego wybralam VBox
 
-        VBox layout = new VBox(20, title, subtitle, usernameField, passwordField, loginButton, registerButton,exit);
+        VBox layout = new VBox(20, title, subtitle, usernameField, passwordField, loginButton, registerButton, exit,spacer , status);
 
         // Bedzie to wszystko pośrodku okna
         layout.setAlignment(Pos.CENTER); 
+
 
         // Dodaje te elementy do okna
         Scene scene = new Scene(layout, 600, 800);
@@ -78,6 +86,7 @@ public class LoginView {
         loginButton.getStyleClass().add("btn-main");
         registerButton.getStyleClass().add("btn-main");
         exit.getStyleClass().add("btn-main");
+        status.getStyleClass().add("error-label");
 
         usernameField.getStyleClass().add("text-field");
         passwordField.getStyleClass().add("password-field");

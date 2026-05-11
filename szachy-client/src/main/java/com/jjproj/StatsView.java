@@ -8,6 +8,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 
@@ -22,7 +24,11 @@ public class StatsView {
 
     // TOP
 
-        
+        Label status = new Label("Status");
+        status.getStyleClass().add("error-label");
+
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);       
     
         
         // Tytul okienka - statystyki!
@@ -70,7 +76,7 @@ public class StatsView {
 
         // Przycisk powrotu do menu daje na sam dół (tworze HBox i do niego dala, - moze tam kilka opcji by jeszcze dodac)
 
-        HBox bottom = new HBox(back);
+        VBox bottom = new VBox(back, spacer, status);
         bottom.setAlignment(Pos.CENTER);
         root.setBottom(bottom);
 

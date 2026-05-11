@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -18,6 +19,12 @@ public class WaitingForPlayerView {
         Label title = new Label("OCZEKIWANIE NA GRACZA");
         title.getStyleClass().add("subtitle");
 
+        Label status = new Label("Status");
+        status.getStyleClass().add("error-label");
+
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+
         // logi
         statusLog = new ListView<>();
         statusLog.getStyleClass().add("list-view");
@@ -27,11 +34,11 @@ public class WaitingForPlayerView {
         // Przykładowe wpisy na start - potem to wywoływać metodą addStatus
         addStatus("Zaproszenie wysłano do gracza " + opponentName);
         
-        // Pomocniczy label z informacją
         Label infoLabel = new Label("Kiedy gracz przyjmie zaproszenie,\ngra rozpocznie się automatycznie.");
         infoLabel.setStyle("-fx-text-fill: #d9c7a3; -fx-text-alignment: center; -fx-font-size: 14px;");
 
-        // Przycisk Anuluj
+
+
         Button cancelBtn = new Button("Anuluj");
         cancelBtn.getStyleClass().add("btn-main");
 
@@ -41,8 +48,8 @@ public class WaitingForPlayerView {
             stage.setScene(preGame.createScene(stage));
         });
 
-        // Układ
-        VBox layout = new VBox(30, title, statusLog, infoLabel, cancelBtn);
+
+        VBox layout = new VBox(30, title, statusLog, infoLabel, cancelBtn, spacer, status);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(40));
         layout.getStyleClass().add("root-gradient");
