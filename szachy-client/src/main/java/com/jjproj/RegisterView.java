@@ -46,8 +46,9 @@ public class RegisterView {
         Button registerButton = new Button("Zarejestruj się");
 
         registerButton.setOnAction(e -> {
-            MenuView menuView = new MenuView();
-            stage.setScene(menuView.createScene(stage));
+            // MenuView menuView = new MenuView();
+            // stage.setScene(menuView.createScene(stage));
+            NetworkManager.onRegister(usernameField.getText(), passwordField.getText(),confirmPasswordField.getText());
         });
 
 

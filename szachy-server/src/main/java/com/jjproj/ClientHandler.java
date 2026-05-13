@@ -66,7 +66,7 @@ public class ClientHandler implements Runnable {
                 break;
                 
             case "REGISTER":
-                // obsluzRejestracje(data);
+                commandRegister(data);
                 break;
                 
             case "INVITE":
@@ -86,6 +86,34 @@ public class ClientHandler implements Runnable {
             default:
                 System.out.println("[Ostrzeżenie] Otrzymano nieznaną komendę: " + command);
                 break;
+        }
+    }
+
+    private void commandRegister(String[] data) {
+        if (data.length >= 3) {
+            String enteredLogin = data[1];
+            String enteredPassword = data[2];
+            
+            // TODO: Zapytanie do bazy danych MySQL
+            boolean isCorrect = UsersTable.registerUser(enteredLogin, enteredPassword);
+
+            if(isCorrect){
+                if (Server.onlineUsers.containsKey(enteredLogin)) {
+                    sendMessage("REGISTER_FAILED|Gracz jest juz zalogowany");
+                    return;
+                }
+
+                this.playerLogin = enteredLogin;
+                Server.onlineUsers.put(this.playerLogin, this);
+                
+                sendMessage("REGISTER_SUCCESS|" + this.playerLogin);
+                System.out.println("Gracz " + this.playerLogin + " zarejestrowal sie poprawnie");
+
+            } else {
+                sendMessage("REGISTER_FAILED|Gracz o takiej nazwie juz istnieje");
+            }
+        } else {
+            sendMessage("REGISTER_FAILED|Brak loginu lub hasla");
         }
     }
 

@@ -29,7 +29,42 @@ public class NetworkManager {
         }
     }
 
-    public static void login(String wpisanyLogin,String wpisaneHaslo) {
+    public static void onRegister(String wpisanyLogin, String wpisaneHaslo, String wpisanePonownieHaslo) {
+
+        if(!isLoggingOrLogged.compareAndSet(false,true)){
+            System.out.println("Blokada podwojnej rejestracji");
+            return;
+        }
+
+        Thread bridgeThread = new Thread(() -> {
+            boolean isConnected = NetworkManager.connect("localhost", 5000);
+            
+            
+            if (isConnected) {
+                if (wpisaneHaslo == wpisanePonownieHaslo) {
+                    NetworkManager.sendCommand("REGISTER|" + wpisanyLogin + "|" + wpisaneHaslo);
+                    SceneManager.setStatus("Weryfikacja danych");
+                    
+                } else {
+                    SceneManager.setStatus("Hasła nie są zgodne");
+                    isLoggingOrLogged.set(false);
+                    
+                }// TODO: wymagania haseł czyli min 3 znaki, cyfra, znak specjalny itd.
+
+                
+            } else {
+                SceneManager.setStatus("Brak połączenia z serwerem");
+                isLoggingOrLogged.set(false);
+
+            }
+            
+        });
+        
+        bridgeThread.setDaemon(true);
+        bridgeThread.start();
+    }
+
+    public static void onLogin(String wpisanyLogin,String wpisaneHaslo) {
 
         if(!isLoggingOrLogged.compareAndSet(false,true)){
             System.out.println("Blokada podwojnego logowania");
@@ -116,6 +151,7 @@ public class NetworkManager {
     private static void processMessage(String message) {
         String[] data = message.split("\\|");
         String command = data[0];
+        String cause="?";
 
         switch (command) {
             case "PONG":
@@ -131,11 +167,28 @@ public class NetworkManager {
                 break;
 
             case "LOGIN_FAILED":
-                String cause = data.length > 1 ? data[1] : "Nieznany blad";
+                cause = data.length > 1 ? data[1] : "Nieznany blad";
                 
                 System.out.println("Odmowa dostepu: " + cause);
                 
                 SceneManager.setStatus("Blad logowania: " + cause );
+                
+                disconnect(); 
+                break;
+
+            case "REGISTER_SUCCESS":
+                System.out.println("Zarejestrowano");
+                startPinging();
+                isLoggingOrLogged.set(true);
+                SceneManager.switchToMenu();
+                break;
+
+            case "REGISTER_FAILED":
+                cause = data.length > 1 ? data[1] : "Nieznany blad";
+                
+                System.out.println("Odmowa rejestracji: " + cause);
+                
+                SceneManager.setStatus("Blad rejestracji: " + cause );
                 
                 disconnect(); 
                 break;
