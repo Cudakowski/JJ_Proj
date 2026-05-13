@@ -8,7 +8,7 @@ public class SceneManager {
 
     public static Label status;
 
-    private static Stage glowneOkno;
+    private static Stage mainStage;
 
     public static void registerStatusLabel(Label label) {
         status = label;
@@ -26,28 +26,17 @@ public class SceneManager {
 
     // tylko przy starcie
     public static void setWindow(Stage stage) {
-        glowneOkno = stage;
+        mainStage = stage;
     }
 
     
 
     public static void switchToMenu() {
         Platform.runLater(() -> {
-            if (glowneOkno != null) {
-                // Zakładam, że Emilia stworzy klasę MenuView na wzór LoginView
+            if (mainStage != null) {
                 MenuView menu = new MenuView(); 
-                glowneOkno.setScene(menu.createScene(glowneOkno));
-                // Opcjonalnie zmiana rozmiaru lub tytułu okna:
-                // glowneOkno.setTitle("Szachy - Menu Główne");
+                mainStage.setScene(menu.createScene(mainStage));
             }
-        });
-    }
-
-    // Możesz tu dodawać kolejne metody w przyszłości
-    public static void switchToGame() {
-        Platform.runLater(() -> {
-            // GameView gra = new GameView();
-            // glowneOkno.setScene(gra.createScene(glowneOkno));
         });
     }
 }

@@ -1,5 +1,6 @@
 package com.jjproj;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -56,8 +57,8 @@ public class MenuView {
         //przyciski
 
         Button newGame = new Button("Graj");
-        Button stats = new Button("Statystyki");
-        Button logOut = new Button("Wyloguj");
+        Button stats = new Button("Statystyki"); // TODO: pobierz statystyki
+        Button logOut = new Button("Wyloguj"); 
         Button exit = new Button("Wyjście");
 
         newGame.setOnAction(e -> {
@@ -71,8 +72,17 @@ public class MenuView {
         });
 
         logOut.setOnAction(e -> {
-            LoginView loginView = new LoginView();
-            stage.setScene(loginView.createScene(stage));
+            SceneManager.setStatus("Wylogowywanie");
+            Thread logOuThread = new Thread(()->{
+                NetworkManager.disconnect();
+                Platform.runLater(() -> {
+                    LoginView loginView = new LoginView();
+                    stage.setScene(loginView.createScene(stage));
+                });
+            });
+
+            logOuThread.setDaemon(true);
+            logOuThread.start();
         });
 
         exit.setOnAction(e -> stage.close());
