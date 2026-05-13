@@ -36,21 +36,20 @@ public class NetworkManager {
             return;
         }
 
+        if (!wpisaneHaslo.equals(wpisanePonownieHaslo)) {
+            SceneManager.setStatus("Hasła nie są zgodne");
+            isLoggingOrLogged.set(false);
+            return;
+        }// TODO: wymagania haseł czyli min 3 znaki, cyfra, znak specjalny itd.
+
         Thread bridgeThread = new Thread(() -> {
+        
             boolean isConnected = NetworkManager.connect("localhost", 5000);
             
             
             if (isConnected) {
-                if (wpisaneHaslo == wpisanePonownieHaslo) {
-                    NetworkManager.sendCommand("REGISTER|" + wpisanyLogin + "|" + wpisaneHaslo);
-                    SceneManager.setStatus("Weryfikacja danych");
-                    
-                } else {
-                    SceneManager.setStatus("Hasła nie są zgodne");
-                    isLoggingOrLogged.set(false);
-                    
-                }// TODO: wymagania haseł czyli min 3 znaki, cyfra, znak specjalny itd.
-
+                NetworkManager.sendCommand("REGISTER|" + wpisanyLogin + "|" + wpisaneHaslo);
+                SceneManager.setStatus("Weryfikacja danych");
                 
             } else {
                 SceneManager.setStatus("Brak połączenia z serwerem");
