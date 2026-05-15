@@ -81,7 +81,7 @@ public class Game {
     }
     private void handlePromotion(Coordinates coords, Color color) {
         System.out.println("Promocja! Wybierz: Q (hetman), R (wieża), B (goniec), N (skoczek):");
-        Scanner scanner = new Scanner(System.in);
+        //Scanner scanner = new Scanner(System.in);
         while (true) {
             String choice = scanner.nextLine().trim().toUpperCase();
             Piece newPiece = null;
