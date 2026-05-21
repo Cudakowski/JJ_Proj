@@ -3,12 +3,14 @@ package com.jjproj;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.scene.control.Label;
 
 
 public class StatsView {
@@ -20,9 +22,15 @@ public class StatsView {
 
         root.setPadding(new Insets(20));
 
+        Label status = new Label("Status");
+        status.getStyleClass().add("error-label");
+        status.setMaxWidth(Double.MAX_VALUE);
+        status.setAlignment(Pos.CENTER);
+
     // TOP
 
-        
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);       
     
         
         // Tytul okienka - statystyki!
@@ -70,7 +78,7 @@ public class StatsView {
 
         // Przycisk powrotu do menu daje na sam dół (tworze HBox i do niego dala, - moze tam kilka opcji by jeszcze dodac)
 
-        HBox bottom = new HBox(back);
+        VBox bottom = new VBox(back, spacer, status);
         bottom.setAlignment(Pos.CENTER);
         root.setBottom(bottom);
 
@@ -89,7 +97,7 @@ public class StatsView {
         gamesList.getStyleClass().add("list-view");
         back.getStyleClass().add("btn-main");
         scene.getStylesheets().add(
-                getClass().getResource("/view.css").toExternalForm()
+                getClass().getResource("/View.css").toExternalForm()
         );
 
         // Minnimalny rozmiar okna
@@ -97,6 +105,8 @@ public class StatsView {
         stage.setMinWidth(400);
         stage.setMinHeight(500);
 
+        SceneManager.registerStatusLabel(status);
+        
         return scene;
     }
 }

@@ -7,6 +7,8 @@ public class SzachyOnline extends Application {
 
     @Override
     public void start(Stage stage) {
+        SceneManager.setWindow(stage);
+        
         LoginView login = new LoginView();
         stage.setScene(login.createScene(stage));
         stage.setTitle("Szachy");
@@ -15,6 +17,12 @@ public class SzachyOnline extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    @Override
+    public void stop() throws Exception {
+        NetworkManager.disconnect();
+        super.stop();
     }
 }
 

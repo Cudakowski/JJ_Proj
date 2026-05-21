@@ -16,6 +16,6 @@ public class BackendMain {
         Game game = new Game(board);
         game.startGame();
         //TestLogic.test();
-        
+        Server.startServer();
     }
 }

@@ -166,3 +166,81 @@
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.55), 5, 0.3, 0, 2);
 }
+
+.move-dot {
+    -fx-text-fill: rgba(0,0,0,0.4);
+    -fx-font-size: 20px;
+}
+
+.btn-notification {
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+
+    -fx-background-color: #333;
+
+
+    -fx-background-radius: 10;
+
+}
+
+.notification-badge {
+    -fx-min-width: 12px;
+    -fx-min-height: 12px;
+    -fx-max-width: 12px;
+    -fx-max-height: 12px;
+
+    -fx-background-color: red;
+    -fx-background-radius: 999;
+
+}
+
+.border-pane {
+    -fx-background-color: linear-gradient(to bottom, #111, #222);
+}
+.top-bar {
+   -fx-background-color:  transparent;
+
+}
+
+
+
+.radio-button {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+}
+
+.radio-button .radio {
+    -fx-background-color: #333;
+    -fx-border-color: #666;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+.radio-button:selected .radio {
+    -fx-background-color: #555;
+}
+
+
+
+.section-label {
+    -fx-text-fill: #d9c7a3;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 0 5 0;
+    -fx-letter-spacing: 1px;
+}
+
+
+
+.list-view .list-cell:hover {
+    -fx-background-color: #3a3a3a;
+}
+
+.error-label {
+    -fx-text-fill: #ff4d4d;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 5 0 0 5;
+}
