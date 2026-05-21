@@ -3,6 +3,7 @@ package com.jjproj.Logic;
 import com.jjproj.Logic.piece.*;
 import java.util.Set;
 import com.jjproj.Logic.Coordinates;
+import com.jjproj.ClientHandler;
 import com.jjproj.Logic.Board;
 import com.jjproj.Logic.GameStateChecker;
 
@@ -12,18 +13,24 @@ public class GameSession {
     private Color currentTurn;
     private boolean gameOver;
 
-    private final String whitePlayer;
-    private final String blackPlayer;
+    private final ClientHandler whitePlayer;
+    private final ClientHandler blackPlayer;
 
-
-    public GameSession(String whitePlayer,String blackPlayer ){
+    public GameSession(ClientHandler whitePlayer, ClientHandler blackPlayer) {
         this.board = new Board();
         this.board.setupDefaultPiecesPositions();
         this.currentTurn = Color.WHITE;
         this.gameOver = false;
+        
         this.whitePlayer = whitePlayer;
         this.blackPlayer = blackPlayer;
+    }
 
+    public void startGame() {
+        String startingFEN = boardToFEN();
+        
+        whitePlayer.sendMessage("BOARD_UPDATE|" + startingFEN);
+        blackPlayer.sendMessage("BOARD_UPDATE|" + startingFEN);
     }
 
     // for drawing the board rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
@@ -53,6 +60,14 @@ public class GameSession {
                 fen.append("/");
             }
         }
+
+        // trzeba wprowadzić pełną notację 
+        fen.append(" ");
+        fen.append(this.currentTurn == Color.WHITE ? "w" : "b");
+        // TODO: tutaj możliwości roszady, ruch enpassant, półruchy, ruchy
+        fen.append(" KQkq - 0 0");
+
+
         return fen.toString();
     }
 

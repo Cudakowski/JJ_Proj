@@ -14,6 +14,7 @@ public class SceneManager {
     private static Label activeBadge;
     private static boolean areThereNewNotifications = false;
     private static boolean isNotificationsViewActive = false;
+    private static GameView activeGameView;
 
     // w każdym wiev
     public static void registerStatusLabel(Label label) {
@@ -137,5 +138,17 @@ public class SceneManager {
         if (isActive) {
             setBadgeVisibility(false);
         }
+    }
+
+    public static void registerGameView(GameView gameView) {
+        activeGameView = gameView;
+    }
+
+    public static void updateBoard(String fen) {
+        Platform.runLater(() -> {
+            if (activeGameView != null) {
+                activeGameView.updateBoardFromFEN(fen);
+            }
+        });
     }
 }

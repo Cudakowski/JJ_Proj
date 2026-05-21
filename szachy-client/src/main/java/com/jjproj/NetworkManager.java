@@ -283,11 +283,10 @@ public class NetworkManager {
             
             // w grze
             case "BOARD_UPDATE":
-                // String nowyFEN = dane[1];
-                // TODO: 
-                // Platform.runLater(() -> {
-                    
-                // });
+                if (data.length > 1) {
+                    String fen = data[1];
+                    SceneManager.updateBoard(fen);
+                }
                 break;
                 
             default:

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 import com.jjproj.DatabaseIntegration.UsersTable;
+import com.jjproj.Logic.GameSession;
 
 public class ClientHandler implements Runnable {
     
@@ -13,6 +14,7 @@ public class ClientHandler implements Runnable {
     private boolean isInGame=false;
     private boolean isWaitingForPlayer = false;
     private String waitingForPlayerName = null;
+    private GameSession currentSession = null;
 
     public ClientHandler(Socket socket) {
         try {
@@ -148,16 +150,17 @@ public class ClientHandler implements Runnable {
             inviterClient.isWaitingForPlayer = false;
             this.waitingForPlayerName = null;
             
-            // TODO w przyszłości: 
-            // tworzenie obiektu GameSession, który powiąże wasze dwa ClientHandlery
-            // GameSession session = new GameSession(inviterClient, this);
+            GameSession session = new GameSession(inviterClient, this);
+            
+            this.currentSession = session;
+            inviterClient.currentSession = session;
             
             inviterClient.sendMessage("GAME_START|Bialy|" + this.playerLogin);
             this.sendMessage("GAME_START|Czarny|" + inviterName);
             
             System.out.println("Rozpoczęto partię: " + inviterName + " (B) vs " + this.playerLogin + " (C)");
 
-            
+            session.startGame();
             
         }
     }
