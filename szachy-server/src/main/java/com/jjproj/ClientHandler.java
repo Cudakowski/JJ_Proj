@@ -10,6 +10,9 @@ public class ClientHandler implements Runnable {
     private long lastPingTime = System.currentTimeMillis();
     private TCPConnection connection = null;
     private String playerLogin = null;
+    private boolean isInGame=false;
+    private boolean isWaitingForPlayer = false;
+    private String waitingForPlayerName = null;
 
     public ClientHandler(Socket socket) {
         try {
@@ -32,7 +35,6 @@ public class ClientHandler implements Runnable {
             String message;
             
             while ((message = connection.awaitString()) != null) {
-                System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
                 
                 processMessage(message);
             }
@@ -61,24 +63,53 @@ public class ClientHandler implements Runnable {
 
         switch (command) {
             
+            // login
             case "LOGIN":
+                System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
                 commandLogin(data);
                 break;
                 
             case "REGISTER":
+                System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
                 commandRegister(data);
+                break;
+
+            // usage
+            case "GET_USER_LIST":
+                System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
+                commandGetUserList(data);
                 break;
                 
             case "INVITE":
-                // obsluzZaproszenie(data);
+                System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
+                commandInvite(data);
+                break;
+
+            case "CANCEL_INVITE":
+                System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
+                commandCancelInvite(data);
+                break;
+            
+            case "ACCEPT":
+                System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
+                commandAccept(data);
                 break;
                 
+            case "DECLINE":
+                System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
+                commandDecline(data);
+                break;
+
+            
+            // ping
             case "PING":
                 lastPingTime = System.currentTimeMillis();
                 sendMessage("PONG");
                 break;
-                
+            
+            // game
             case "MOVE":
+                System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
                 //lastPingTime = System.currentTimeMillis();
                 // obsluzRuch(data);
                 break;
@@ -89,12 +120,124 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    private void commandAccept(String[] data) {
+        if (data.length > 1) {
+            String inviterName = data[1];
+            
+            ClientHandler inviterClient = Server.onlineUsers.get(inviterName);
+            
+            if (inviterClient == null) {
+                this.sendMessage("INVITE_ERROR|Gracz " + inviterName + " nie jest zalogowany");
+                return;
+            }
+
+            if (inviterClient.isInGame) {
+                this.sendMessage("INVITE_ERROR|Gracz " + inviterName + " jest już w grze");
+                return;
+            }
+
+            if (!inviterClient.isWaitingForPlayer) {
+                this.sendMessage("INVITE_ERROR|Gracz opuscil poczekalnie");
+                return;
+            }
+
+                
+            this.isInGame = true;
+            inviterClient.isInGame = true;
+
+            inviterClient.isWaitingForPlayer = false;
+            this.waitingForPlayerName = null;
+            
+            // TODO w przyszłości: 
+            // tworzenie obiektu GameSession, który powiąże wasze dwa ClientHandlery
+            // GameSession session = new GameSession(inviterClient, this);
+            
+            inviterClient.sendMessage("GAME_START|Bialy|" + this.playerLogin);
+            this.sendMessage("GAME_START|Czarny|" + inviterName);
+            
+            System.out.println("Rozpoczęto partię: " + inviterName + " (B) vs " + this.playerLogin + " (C)");
+
+            
+            
+        }
+    }
+
+    private void commandCancelInvite(String[] data) {
+        this.isWaitingForPlayer = false;
+        this.waitingForPlayerName = null;
+
+        if (data.length > 1) {
+            String invitedUser = data[1];
+            ClientHandler invitedClient = Server.onlineUsers.get(invitedUser);
+            
+            if (invitedClient != null) {
+                
+                invitedClient.sendMessage("INVITE_CANCELLED|" + this.playerLogin);
+            }
+        }
+    }
+
+    private void commandDecline(String[] data) {
+        if (data.length > 1) {
+            String inviterName = data[1];
+            
+            ClientHandler inviterClient = Server.onlineUsers.get(inviterName);
+            
+            if (inviterClient != null) {
+                inviterClient.sendMessage("INVITE_REJECTED|" + this.playerLogin);
+            }
+        }
+    }
+
+    private void commandGetUserList(String[] data) {
+        java.util.StringJoiner playerList = new java.util.StringJoiner(",");
+
+        for (String playerName : Server.onlineUsers.keySet()) {
+            
+            if (this.playerLogin != null && !playerName.equals(this.playerLogin)) {
+                playerList.add(playerName);
+            }
+        }
+
+
+        sendMessage("USER_LIST|" + playerList.toString());
+    }
+
+
+    private void commandInvite(String[] data) {
+        if (data.length >= 4) {
+            String invitedUser = data[1];
+            String color = data[2];
+            String time = data[3];
+            
+            ClientHandler invitedClient = Server.onlineUsers.get(invitedUser);
+            
+            if (invitedClient == null) {
+                this.sendMessage("INVITE_ERROR|Gracz jest juz offline");
+                return;
+            }
+
+            if(invitedClient.isInGame){
+                this.sendMessage("INVITE_ERROR|Gracz jest juz w grze");
+                return;
+            }
+
+            this.isWaitingForPlayer = true;
+            this.waitingForPlayerName = invitedUser;
+
+            invitedClient.sendMessage("INVITE_RECEIVED|" + this.playerLogin + "|" + color + "|" + time);
+        
+            
+        }
+    }
+
+
+
     private void commandRegister(String[] data) {
         if (data.length >= 3) {
             String enteredLogin = data[1];
             String enteredPassword = data[2];
             
-            // TODO: Zapytanie do bazy danych MySQL
             boolean isCorrect = UsersTable.registerUser(enteredLogin, enteredPassword);
 
             if(isCorrect){
@@ -122,7 +265,6 @@ public class ClientHandler implements Runnable {
             String enteredLogin = data[1];
             String enteredPassword = data[2];
             
-            // TODO: Zapytanie do bazy danych MySQL
             boolean isCorrect = UsersTable.checkLogin(enteredLogin, enteredPassword);
 
             if(isCorrect){
@@ -147,6 +289,17 @@ public class ClientHandler implements Runnable {
 
     private void clearAfterDisconnect() {
         if (playerLogin != null) {
+            
+            for (ClientHandler client : Server.onlineUsers.values()) {
+                if (client.isWaitingForPlayer && playerLogin.equals(client.waitingForPlayerName)) {
+                    
+                    client.isWaitingForPlayer = false;
+                    client.waitingForPlayerName = null;
+                    
+                    client.sendMessage("INVITE_EXPIRED|Gracz " + playerLogin + " offline");
+                }
+            }
+
             Server.onlineUsers.remove(playerLogin);
             System.out.println("Usunieto " + playerLogin + " z listy online.");
         }
@@ -172,6 +325,8 @@ public class ClientHandler implements Runnable {
 // Serwer,PONG,(brak),PONG,Odpowiedź serwera na PING.
 // Serwer,LOGIN_SUCCESS,Nick,`LOGIN_SUCCESS,Tomek`
 // Serwer,LOGIN_FAILED,Powód,`LOGIN_FAILED,Złe hasło`
+// Serwer,REGISTER_SUCCESS,Nick,`REGISTER_SUCCESS,Tomek`
+// Serwer,REGISTER_FAILED,Powód,`REGISTER_FAILED,`
 
 // Kto wysyła?,Komenda,Argumenty,Przykładowe użycie,Opis
 // Klient,GET_USER_LIST,(brak),GET_USER_LIST,Klient prosi o listę zalogowanych graczy do wyświetlenia w Menu.
@@ -191,3 +346,20 @@ public class ClientHandler implements Runnable {
 // Serwer,GAME_OVER,KtoWygrał Powód,`GAME_OVER,Bialy
 // Klient,PAUSE_REQUEST,(brak),PAUSE_REQUEST,Gracz chce wstrzymać grę (wyjść do menu). Serwer musi zapisać aktualny stan (FEN) do bazy.
 // Serwer,GAME_PAUSED,(brak),GAME_PAUSED,"Potwierdzenie z serwera, że można bezpiecznie opuścić ekran gry."
+
+
+/*
+
+create database szachy;
+
+use szachy;
+
+create table users (
+	user_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_login VARCHAR(50),
+    user_password VARCHAR(50)
+);
+
+select * from users;
+
+*/

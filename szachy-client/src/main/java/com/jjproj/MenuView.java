@@ -19,13 +19,15 @@ public class MenuView {
         // Powiadomienia
         
 
-        Button notifications = new Button("⬛");
+        Button notifications = new Button("🔔");
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
 
         notifications.setOnAction(e -> {
+            SceneManager.setBadgeVisibility(false);
+
             NotificationsView notificationsView = new NotificationsView();
             stage.setScene(notificationsView.createScene(stage));
         });
@@ -38,7 +40,7 @@ public class MenuView {
 
         Label badge = new Label();
         
-        badge.setVisible(true); // jako test widoczne
+        //badge.setVisible(true); // jako test widoczne
 
         StackPane notificationWrapper = new StackPane(notifications, badge);
         StackPane.setAlignment(badge, Pos.BOTTOM_LEFT);
@@ -126,6 +128,7 @@ public class MenuView {
         stage.setMinHeight(500);
 
         SceneManager.registerStatusLabel(status);
+        SceneManager.registerNotificationBadge(badge);
 
         return scene;
     }

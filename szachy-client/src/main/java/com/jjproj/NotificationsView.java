@@ -16,10 +16,15 @@ import javafx.stage.Stage;
 
 //klasa pomocnicza dla powiadomienia
 class Invitation {
+    String sender; 
     String text;
     boolean rejected = false;
+    boolean cancelled = false;
 
-    Invitation(String text) { this.text = text; }
+    Invitation(String sender, String text) { 
+        this.sender = sender;
+        this.text = text; 
+    }
 }
 
 public class NotificationsView {
@@ -28,6 +33,7 @@ public class NotificationsView {
     private static final ObservableList<Invitation> notificationsData = FXCollections.observableArrayList();
 
     public Scene createScene(Stage stage) {
+        SceneManager.setNotificationsViewActive(true);
         Label title = new Label("LISTA POWIADOMIEŃ");
         title.getStyleClass().add("subtitle");
 
@@ -45,10 +51,10 @@ public class NotificationsView {
         listView.setMaxWidth(500);
 
         // Tutaj dalam testowe dane
-        if (notificationsData.isEmpty()) {
-            notificationsData.add(new Invitation("Mietek zaprasza do gry; 10min; ty białe"));
-            notificationsData.add(new Invitation("Mietek zaprasza do gry; bezczasowa; losowo"));
-        }
+        // if (notificationsData.isEmpty()) {
+        //     notificationsData.add(new Invitation("Mietek zaprasza do gry; 10min; ty białe"));
+        //     notificationsData.add(new Invitation("Mietek zaprasza do gry; bezczasowa; losowo"));
+        // }
 
         listView.setCellFactory(param -> new ListCell<>() {
             @Override
@@ -70,6 +76,12 @@ public class NotificationsView {
                         Label rejectedLabel = new Label("odrzucono");
                         rejectedLabel.setStyle("-fx-text-fill: #ff4444; -fx-font-style: italic;");
                         actions.getChildren().add(rejectedLabel);
+
+                    } else if (item.cancelled) {
+                        Label cancelledLabel = new Label("anulowano");
+                        cancelledLabel.setStyle("-fx-text-fill: #888888; -fx-font-style: italic;");
+                        actions.getChildren().add(cancelledLabel);
+                    
                     } else {
                         // otheriwse przyciski
                         Button rejectBtn = new Button("odrzuć");
@@ -80,14 +92,19 @@ public class NotificationsView {
 
                         rejectBtn.setOnAction(e -> {
                             item.rejected = true;
-
                             updateItem(item, false); 
+                            
+                            new Thread(() -> {
+                                NetworkManager.sendCommand("DECLINE|" + item.sender);
+                            }).start();
                         });
 
                         joinBtn.setOnAction(e -> {
-                            // Przejście do gry
-                            GameView game = new GameView();
-                            stage.setScene(game.createScene(stage));
+                            SceneManager.setNotificationsViewActive(true);
+                            SceneManager.setStatus("Łączenie z graczem...");
+                            new Thread(() -> {
+                                NetworkManager.sendCommand("ACCEPT|" + item.sender);
+                            }).start();
                         });
 
                         actions.getChildren().addAll(rejectBtn, joinBtn);
@@ -103,6 +120,8 @@ public class NotificationsView {
         Button backBtn = new Button("Wstecz");
         backBtn.getStyleClass().add("btn-main");
         backBtn.setOnAction(e -> {
+            SceneManager.setNotificationsViewActive(true);
+
             MenuView menu = new MenuView();
             stage.setScene(menu.createScene(stage));
         });
@@ -120,7 +139,17 @@ public class NotificationsView {
         return scene;
     }
 
-    public static void addNotification(String message) {
-        notificationsData.add(new Invitation(message));
+    public static void addNotification(String sender, String message) {
+        notificationsData.add(new Invitation(sender, message));
+    }
+
+    public static void markAsCancelled(String sender) {
+        for (int i = 0; i < notificationsData.size(); i++) {
+            Invitation inv = notificationsData.get(i);
+            if (inv.sender.equals(sender) && !inv.cancelled && !inv.rejected) {
+                inv.cancelled = true;
+                notificationsData.set(i, inv); 
+            }
+        }
     }
 }        

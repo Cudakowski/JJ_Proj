@@ -67,7 +67,7 @@ public Scene createScene(Stage stage) {
 
         resumeBtn.setOnAction(e -> {
             OnlinePlayersView onlinePlayersView = new OnlinePlayersView();
-            stage.setScene(onlinePlayersView.createScene(stage));                
+            stage.setScene(onlinePlayersView.createScene(stage,"","")); //TODO                
         });
 
 
@@ -85,13 +85,16 @@ public Scene createScene(Stage stage) {
 
         RadioButton c1 = new RadioButton("BIAŁY (ty), CZARNY (oponent)");
         c1.setToggleGroup(colorGroup);
+        c1.setUserData("Bialy");
         c1.setSelected(true);
 
         RadioButton c2 = new RadioButton("CZARNY (ty), BIAŁY (oponent)");
         c2.setToggleGroup(colorGroup);
+        c2.setUserData("Czarny");
 
-        RadioButton c3 = new RadioButton("losowo");
+        RadioButton c3 = new RadioButton("LOSOWO");
         c3.setToggleGroup(colorGroup);
+        c2.setUserData("Losowo");
 
         Label wybierzKolor = new Label("Wybierz kolor: ");
 
@@ -101,29 +104,42 @@ public Scene createScene(Stage stage) {
 
         ToggleGroup timeGroup = new ToggleGroup();
 
-        RadioButton t1 = new RadioButton("w sumie z czasem");
+        RadioButton t1 = new RadioButton("bez ograniczeń");
         t1.setToggleGroup(timeGroup);
+        t1.setUserData("Bez ograniczen");
         t1.setSelected(true);
 
-        RadioButton t2 = new RadioButton("bez ograniczenia");
+        RadioButton t2 = new RadioButton("10min (po 5min)");
         t2.setToggleGroup(timeGroup);
+        t2.setUserData("10min");
+
+        RadioButton t3 = new RadioButton("20min (po 10min)");
+        t3.setToggleGroup(timeGroup);
+        t3.setUserData("20min");
+
+        RadioButton t4 = new RadioButton("40min (po 20min)");
+        t4.setToggleGroup(timeGroup);
+        t4.setUserData("40min");
+
+        RadioButton t5 = new RadioButton("60min (po 30min)");
+        t5.setToggleGroup(timeGroup);
+        t5.setUserData("60min");
 
         Label czasGry  = new Label("Czas gry: ");
-
-        VBox timeBox = new VBox(10,
-                czasGry, t1, t2
-        );
+        VBox timeBox = new VBox(10, czasGry, t1, t2, t3, t4, t5);
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
         Button nextBtn = new Button("Dalej");
-
         nextBtn.setMaxWidth(Double.MAX_VALUE);
 
         nextBtn.setOnAction(e -> {
+            String gameColor = (String) colorGroup.getSelectedToggle().getUserData();
+            String gameTime = (String) timeGroup.getSelectedToggle().getUserData();
+
             OnlinePlayersView onlinePlayersView = new OnlinePlayersView();
-            stage.setScene(onlinePlayersView.createScene(stage));                
+            stage.setScene(onlinePlayersView.createScene(stage,gameColor,gameTime));                
         });
 
         VBox rightPanel = new VBox(20,
