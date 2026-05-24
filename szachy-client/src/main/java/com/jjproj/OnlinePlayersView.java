@@ -17,7 +17,7 @@ import javafx.stage.Stage;
 
 public class OnlinePlayersView {
 
-    public Scene createScene(Stage stage) {
+    public Scene createScene(Stage stage,String gameColor,String gameTime) {
         // Tytuł strony
         Label title = new Label("LISTA GRACZY ONLINE");
 
@@ -43,11 +43,9 @@ public class OnlinePlayersView {
         ListView<String> playersList = new ListView<>();
         
         // Przykładowe dane (potem tutaj da sie dane z serwera)
-        ObservableList<String> players = FXCollections.observableArrayList(
-                "Mietek", "Zbyszek", "Janusz", "Gamer123", "Szachista99", "Mietek_kopia"
-        );
-
+        ObservableList<String> players = FXCollections.observableArrayList();
         playersList.setItems(players);
+        SceneManager.registerPlayersList(players);
 
         // Tutaj robie customowy wyglad wiersza w liscie
         playersList.setCellFactory(param -> new ListCell<>() {
@@ -68,11 +66,13 @@ public class OnlinePlayersView {
                     
 
                     inviteBtn.setOnAction(e -> {
-                        System.out.println("Zaproszono gracza: " + name);
+                        System.out.println("Zaproszono gracza: " + name + " (" + gameColor + ", " + gameTime + ")");
                         WaitingForPlayerView waitingForPlayerView = new WaitingForPlayerView();
                         stage.setScene(waitingForPlayerView.createScene(stage, name));
 
-                        // Tu bede dodawac logikę wysyłania zaproszenia do serwera !!!!!!!!!!!!!!!!!!!!!!!!!!
+                        new Thread(() -> {
+                            NetworkManager.sendCommand("INVITE|" + name + "|" + gameColor + "|" + gameTime);
+                        }).start();
                     });
 
 
@@ -89,10 +89,12 @@ public class OnlinePlayersView {
             }
         });
 
+        
 
         refreshBtn.setOnAction(e -> {
-
-            System.out.println("Odświeżam listę graczy...");
+            SceneManager.setStatus("Pobieranie listy graczy...");
+            
+            startGetUsersThread();
         });
 
 
@@ -109,7 +111,7 @@ public class OnlinePlayersView {
         layout.setPadding(new Insets(40));
 
 
-        // stylizowanier
+        // stylizowanie
         title.getStyleClass().add("subtitle");
         refreshBtn.getStyleClass().add("btn-game"); 
         backBtn.getStyleClass().add("btn-main");
@@ -124,6 +126,13 @@ public class OnlinePlayersView {
 
         SceneManager.registerStatusLabel(status);
 
+        startGetUsersThread();
         return scene;
     }
+
+    private void startGetUsersThread(){
+        new Thread(() -> {
+            NetworkManager.sendCommand("GET_USER_LIST"); 
+        }).start();
+    } 
 }

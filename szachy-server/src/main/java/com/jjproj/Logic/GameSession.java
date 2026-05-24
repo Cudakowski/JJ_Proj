@@ -3,6 +3,7 @@ package com.jjproj.Logic;
 import com.jjproj.Logic.piece.*;
 import java.util.Set;
 import com.jjproj.Logic.Coordinates;
+import com.jjproj.ClientHandler;
 import com.jjproj.Logic.Board;
 import com.jjproj.Logic.GameStateChecker;
 
@@ -12,8 +13,8 @@ public class GameSession {
     private Color currentTurn;
     private boolean gameOver;
 
-    private final String whitePlayer;
-    private final String blackPlayer;
+    private final ClientHandler whitePlayer;
+    private final ClientHandler blackPlayer;
 
     private int halfMoveClock = 0;// liczba półruchów bez bicia
     private int fullMoveNumber = 1;//numer pełnego ruchu
@@ -27,15 +28,24 @@ public class GameSession {
     //dla en passant
     private Coordinates enPassantTarget = null;//Pole bicia w przelocie
 
-    public GameSession(String whitePlayer,String blackPlayer ){
+    public GameSession(ClientHandler whitePlayer, ClientHandler blackPlayer) {
         this.board = new Board();
         this.board.setupDefaultPiecesPositions();
         this.currentTurn = Color.WHITE;
         this.gameOver = false;
+        
         this.whitePlayer = whitePlayer;
         this.blackPlayer = blackPlayer;
-
     }
+
+    public void startGame() {
+        String startingFEN = boardToFEN();
+        
+        whitePlayer.sendMessage("BOARD_UPDATE|" + startingFEN);
+        blackPlayer.sendMessage("BOARD_UPDATE|" + startingFEN);
+    }
+
+  
     private void updateCastlingRights(Coordinates from, Piece piece) {
         if (piece instanceof King) {
             board.revokeCastlingRight(piece.color, true);
