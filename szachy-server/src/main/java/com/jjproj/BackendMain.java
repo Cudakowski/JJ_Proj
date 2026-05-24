@@ -10,12 +10,13 @@ public class BackendMain {
     public static void main(String[] args) {
     System.out.println("Start to play!\n");
         
-        Board board = new Board();
-        board.setupDefaultPiecesPositions();
+        // Board board = new Board();
+        // board.setupDefaultPiecesPositions();
         
-        Game game = new Game(board);
-        game.startGame();
+        // Game game = new Game(board);
+        // game.startGame();
         //TestLogic.test();
-        Server.startServer();
+        TestLogic.testGameSession();
+        
     }
 }

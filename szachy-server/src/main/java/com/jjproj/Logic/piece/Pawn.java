@@ -54,7 +54,15 @@ public class Pawn extends Piece {
         // Взятие по диагонали
         if (fileDiff == 1 && rankDiff == direction) {
             Piece targetPiece = board.getPiece(target);
-            return targetPiece != null && targetPiece.color != this.color;
+            if(targetPiece != null && targetPiece.color != this.color){
+                return true;
+            }
+            //en passant
+            Coordinates enPass = board.getEnPassantTarget();
+            if(enPass !=null && enPass.equals(target)){
+                return true;
+            }
+            
         }
 
         return false;

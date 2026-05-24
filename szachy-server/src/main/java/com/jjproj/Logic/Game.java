@@ -1,9 +1,6 @@
 package com.jjproj.Logic;
 
-import com.jjproj.Logic.piece.Piece;
 import com.jjproj.Logic.piece.*;
-import com.jjproj.Logic.piece.Queen;
-
 
 import java.util.Scanner;
 import java.util.Set;
@@ -66,8 +63,40 @@ public class Game {
 
     
             Coordinates to =InputCoordinates.inputAvailableSquare(legalMoves);
+
+             //sprawdzamy en passant przed ruchem 
+            Piece piece = board.getPiece(from);
+            int fileDiff = Math.abs(to.file.ordinal() - from.file.ordinal());
+            boolean isEnPassant = piece instanceof Pawn && fileDiff == 1 && board.isSquareEmpty(to);
+
+
             //move
             board.movePiece(from, to);
+
+            //en passant: usuwamy zbitą pieszkę
+            if (isEnPassant) {
+                Coordinates capturedPawn = new Coordinates(to.file, from.rank);
+                board.removePiece(capturedPawn);
+                System.out.println("Bicie w przelocie!");
+            }
+
+            //roszada: przesuwamy wieżę
+            if (piece instanceof King) {
+                int kingFileDiff = to.file.ordinal() - from.file.ordinal();
+                if(Math.abs(kingFileDiff) == 2) {
+                    handleCastling(from, to);
+                    System.out.println("Roszada!");
+                }
+            }
+            //aktualizujemy en passant target
+            board.setEnPassantTarget(null);
+            if (piece instanceof Pawn && Math.abs(to.rank - from.rank) == 2) {
+                int epRank = (from.rank + to.rank) / 2;
+                board.setEnPassantTarget(new Coordinates(from.file, epRank));
+            }
+            //aktualizujemy prawa do roszady
+            updateCastlingRights(from, piece);
+
 
             //check if pice can change
             Piece movePiece = board.getPiece(to);
@@ -79,6 +108,35 @@ public class Game {
             isWhiteToMove= !isWhiteToMove;
         }
     }
+    //roszada: przesuń wieżę 
+    private void handleCastling(Coordinates kingFrom, Coordinates kingTo) {
+        boolean kingSide = kingTo.file.ordinal() > kingFrom.file.ordinal();
+        int rank = kingFrom.rank;
+
+        Coordinates rookFrom = new Coordinates(kingSide ? File.H : File.A, rank);
+        Coordinates rookTo = new Coordinates(File.values()[kingFrom.file.ordinal() + (kingSide ? 1 : -1)],rank);
+
+        board.movePiece(rookFrom, rookTo);
+    }
+
+    // aktualizacja praw do roszady 
+    private void updateCastlingRights(Coordinates from, Piece piece) {
+        if (piece instanceof King) {
+            board.revokeCastlingRight(piece.color, true);
+            board.revokeCastlingRight(piece.color, false);
+        }
+        if(piece instanceof Rook) {
+            if (from.equals(new Coordinates(File.H, 1)))
+                board.revokeCastlingRight(Color.WHITE, true);
+            if (from.equals(new Coordinates(File.A, 1)))
+                board.revokeCastlingRight(Color.WHITE, false);
+            if (from.equals(new Coordinates(File.H, 8)))
+                board.revokeCastlingRight(Color.BLACK, true);
+            if (from.equals(new Coordinates(File.A, 8)))
+                board.revokeCastlingRight(Color.BLACK, false);
+        }
+    }
+    //promocja pionka
     private void handlePromotion(Coordinates coords, Color color) {
         System.out.println("Promocja! Wybierz: Q (hetman), R (wieża), B (goniec), N (skoczek):");
         //Scanner scanner = new Scanner(System.in);
