@@ -1,10 +1,5 @@
 package com.jjproj;
 
-import com.jjproj.Logic.TestLogic;
-import com.jjproj.Logic.InputCoordinates;
-import com.jjproj.Logic.Coordinates;
-import com.jjproj.Logic.Board;
-import com.jjproj.Logic.Game;
 public class BackendMain {
 
     public static void main(String[] args) {
@@ -16,7 +11,7 @@ public class BackendMain {
         // Game game = new Game(board);
         // game.startGame();
         //TestLogic.test();
-        TestLogic.testGameSession();
-        
+        //TestLogic.testGameSession();
+        Server.startServer();
     }
 }
