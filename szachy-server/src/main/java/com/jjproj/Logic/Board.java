@@ -14,6 +14,12 @@ import com.jjproj.Logic.piece.Rook;
 public class Board {
     private HashMap<Coordinates, Piece> pieces = new HashMap<>();
 
+    private Coordinates enPassantTarget = null;
+
+    private boolean whiteKingsideCastle  = true;
+    private boolean whiteQueensideCastle = true;
+    private boolean blackKingsideCastle  = true;
+    private boolean blackQueensideCastle = true;
     // public HashMap<Coordinates, Piece> getPieces() {
     //     return pieces;
     // }
@@ -46,6 +52,42 @@ public class Board {
     public boolean isSquareEmpty(Coordinates coordinates){
             return !pieces.containsKey(coordinates); // jerzeli key jest- piece jest
     }
+
+    public Coordinates getEnPassantTarget() {
+        return enPassantTarget;
+    }
+
+    public void setEnPassantTarget(Coordinates target) {
+
+        this.enPassantTarget = target;
+    }
+
+    public boolean hasCastlingRight(Color color, boolean kingSide) {
+        if(color == Color.WHITE) {
+            return kingSide ? whiteKingsideCastle : whiteQueensideCastle;
+        } else {
+            return kingSide ? blackKingsideCastle : blackQueensideCastle;
+        }
+    }
+
+    public void revokeCastlingRight(Color color, boolean kingSide) {
+        if (color == Color.WHITE) {
+            if(kingSide){
+                whiteKingsideCastle  = false;
+            } 
+            else { 
+                whiteQueensideCastle = false;
+            }        
+        } else {
+            if (kingSide){
+                blackKingsideCastle  = false;
+            } 
+            else {
+                blackQueensideCastle = false;
+            }        
+        }
+    }
+
     public void setupDefaultPiecesPositions() {
         setupPawns();
         setupRooks();
@@ -120,6 +162,12 @@ public class Board {
 
             newBoard.pieces.put(coords, copy);
         }
+        newBoard.enPassantTarget    = this.enPassantTarget;
+        newBoard.whiteKingsideCastle  = this.whiteKingsideCastle;
+        newBoard.whiteQueensideCastle = this.whiteQueensideCastle;
+        newBoard.blackKingsideCastle  = this.blackKingsideCastle;
+        newBoard.blackQueensideCastle = this.blackQueensideCastle;
+        
         return newBoard;
     }
     
