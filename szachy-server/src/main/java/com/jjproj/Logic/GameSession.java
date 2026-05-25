@@ -80,16 +80,25 @@ public class GameSession {
         board.movePiece(rookFrom, rookTo);
     }
     private Color getColorByLogin(String login) {
-        if(whitePlayer.equals(login)){
+        if(whitePlayer.getPlayerLogin().equals(login)){
             return Color.WHITE;
         }
-        if(blackPlayer.equals(login)){
+        if(blackPlayer.getPlayerLogin().equals(login)){
             return Color.BLACK;
         }
         return null;
     }
     private String colorToString(Color color) {
         return color == Color.WHITE ? "WHITE" : "BLACK";
+    }
+
+    public void broadcast(String msg){
+        whitePlayer.sendMessage(msg); 
+        blackPlayer.sendMessage(msg);
+    }
+
+    public void gameOver(){
+        whitePlayer.
     }
 
 
@@ -212,6 +221,8 @@ public class GameSession {
             return "ERROR|ILLEGAL_MOVE";
         }
 
+        boolean isCapture = !board.isSquareEmpty(toCoords);
+
         // en passant sprawdzamy do rucha
         int fileDiff = Math.abs(toCoords.file.ordinal() - fromCoords.file.ordinal());
         boolean isEnPassant = piece instanceof Pawn && fileDiff == 1 && board.isSquareEmpty(toCoords);
@@ -251,11 +262,9 @@ public class GameSession {
         }
 
         //for FEN
-        boolean isCapture = !board.isSquareEmpty(toCoords);
         if(piece instanceof Pawn || isCapture){
             halfMoveClock = 0;
-        }
-        else{
+        } else {
              halfMoveClock++;
         }                                   
         if(currentTurn == Color.BLACK){
@@ -289,12 +298,12 @@ public class GameSession {
     public Color getCurrentTurn() { 
         return currentTurn; 
     }
-    public String getWhitePlayer(){ 
-        return whitePlayer; 
-    }
-    public String getBlackPlayer(){ 
-        return blackPlayer; 
-    }
+    // public String getWhitePlayer(){ 
+    //     return whitePlayer; 
+    // }
+    // public String getBlackPlayer(){ 
+    //     return blackPlayer; 
+    // }
     public String getInitialFEN() { 
         return boardToFEN(); 
     }

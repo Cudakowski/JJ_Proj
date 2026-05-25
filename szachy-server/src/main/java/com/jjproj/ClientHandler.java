@@ -55,6 +55,10 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    public String getPlayerLogin() {
+        return playerLogin;
+    }
+
     private void processMessage(String message) {
         if (message == null || message.trim().isEmpty()) {
             return; 
@@ -112,13 +116,43 @@ public class ClientHandler implements Runnable {
             // game
             case "MOVE":
                 System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
-                //lastPingTime = System.currentTimeMillis();
-                // obsluzRuch(data);
+                
+                commandMove(data);
                 break;
 
             default:
                 System.out.println("[Ostrzeżenie] Otrzymano nieznaną komendę: " + command);
                 break;
+        }
+    }
+
+    private void commandMove(String[] data){
+        if (currentSession != null && data.length >= 3) {
+            String zPola = data[1];
+            String naPole = data[2];
+            
+            String wynikRuchu = currentSession.applyMove(zPola, naPole, this.playerLogin);
+            
+            String[] wynikData = wynikRuchu.split("\\|");
+            
+            if (wynikData[0].equals("ERROR")) {
+                this.sendMessage("MOVE_ERROR|" + wynikData[1]);
+            } 
+            else if (wynikData[0].equals("MOVE_OK")) {
+                String nowyFen = wynikData[wynikData.length - 1]; 
+                
+                currentSession.broadcast("BOARD_UPDATE|" + nowyFen);
+                
+                if (wynikData.length > 2 && wynikData[1].equals("CHECK")) {
+                    currentSession.broadcast("GAME_STATUS|SZACH!");
+                }
+            }
+            else if (wynikData[0].equals("GAME_OVER")) {
+                currentSession.broadcast("GAME_OVER|" + wynikData[1] + "|" + wynikData[2]);
+                
+                this.isInGame = false;
+                // Tutaj warto byłoby też wywołać koniec u przeciwnika
+            }
         }
     }
 
