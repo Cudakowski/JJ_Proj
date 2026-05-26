@@ -2,22 +2,20 @@ package com.jjproj.Logic;
 
 import com.jjproj.Logic.piece.*;
 import java.util.Set;
-import com.jjproj.Logic.Coordinates;
 import com.jjproj.ClientHandler;
-import com.jjproj.Logic.Board;
-import com.jjproj.Logic.GameStateChecker;
 
 public class GameSession {
     
     private final Board board;
     private Color currentTurn;
     private boolean gameOver;
+    private final String gameTime;
 
     private final ClientHandler whitePlayer;
     private final ClientHandler blackPlayer;
 
-    private int halfMoveClock = 0;// liczba półruchów bez bicia
-    private int fullMoveNumber = 0;//numer pełnego ruchu
+    private int halfMoveClock = 0; // liczba półruchów bez bicia
+    private int fullMoveNumber = 1; //numer pełnego ruchu
 
     //dla roszady
     private boolean whiteKingsideCastle  = true;// biała krótka (K)
@@ -28,17 +26,24 @@ public class GameSession {
     //dla en passant
     private Coordinates enPassantTarget = null;//Pole bicia w przelocie
 
-    public GameSession(ClientHandler whitePlayer, ClientHandler blackPlayer) {
+    public GameSession(ClientHandler whitePlayer, ClientHandler blackPlayer, String gameTime) {
         this.board = new Board();
         this.board.setupDefaultPiecesPositions();
         this.currentTurn = Color.WHITE;
         this.gameOver = false;
+        this.gameTime=gameTime;
         
         this.whitePlayer = whitePlayer;
         this.blackPlayer = blackPlayer;
     }
 
     public void startGame() {
+        this.whitePlayer.sendMessage("GAME_START|Bialy|" + this.blackPlayer + "|" + gameTime);
+        this.blackPlayer.sendMessage("GAME_START|Czarny|" + this.whitePlayer+ "|" + gameTime);
+            
+        System.out.println("Rozpoczęto partię: " + this.whitePlayer + " (B) vs " + this.blackPlayer + " (C)");
+
+
         String startingFEN = boardToFEN();
         
         whitePlayer.sendMessage("BOARD_UPDATE|" + startingFEN);
@@ -293,15 +298,16 @@ public class GameSession {
              halfMoveClock++;
         }
 
-        if(currentTurn == Color.BLACK){
-            fullMoveNumber++;
-        }
         
         String moveNotation;
         if (currentTurn == Color.WHITE) {
-            moveNotation = fullMoveNumber + " ⚪ " + from.toLowerCase() + "-" + to.toLowerCase();
-        } else {
             moveNotation = fullMoveNumber + " ⚫ " + from.toLowerCase() + "-" + to.toLowerCase();
+        } else {
+            moveNotation = fullMoveNumber + " ⚪ " + from.toLowerCase() + "-" + to.toLowerCase();
+        }
+
+        if(currentTurn == Color.BLACK){
+            fullMoveNumber++;
         }
         
         

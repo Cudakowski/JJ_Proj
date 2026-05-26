@@ -94,7 +94,7 @@ public Scene createScene(Stage stage) {
 
         RadioButton c3 = new RadioButton("LOSOWO");
         c3.setToggleGroup(colorGroup);
-        c2.setUserData("Losowo");
+        c3.setUserData("Losowo");
 
         Label wybierzKolor = new Label("Wybierz kolor: ");
 

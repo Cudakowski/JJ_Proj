@@ -73,11 +73,11 @@ public class SceneManager {
         });
     }
 
-    public static void switchToGame() {
+    public static void switchToGame(String mojKolor, String przeciwnik, String czasGry) {
         Platform.runLater(() -> {
             if (mainStage != null) {
                 GameView view = new GameView(); 
-                mainStage.setScene(view.createScene(mainStage));
+                mainStage.setScene(view.createScene(mainStage, mojKolor, przeciwnik, czasGry));
             }
         });
     }

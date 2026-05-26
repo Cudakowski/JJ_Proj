@@ -34,6 +34,10 @@ public class GameView {
     private Label statusGry;
     private StackPane[][] squares = new StackPane[8][8];
 
+    private String mojKolor = "Bialy";
+    private String wybranyCzas = "Bez ograniczen";
+    private Button save; 
+
     // Pionki są w tablicy, na razie po prostu symbole z unicode, potem zmienie na cos fajniejszego
     // String[][] pieces = {
     //     {"♜","♞","♝","♛","♚","♝","♞","♜"},
@@ -64,7 +68,12 @@ public class GameView {
         }
     }
 
-    public Scene createScene(Stage stage) {
+    public Scene createScene(Stage stage, String mojKolor, String przeciwnik, String czasGry) {
+        this.mojKolor = mojKolor;
+        this.wybranyCzas = czasGry;
+        
+        ustawPoczatkowyCzas(czasGry);
+
 
         // Tworzenie roota - borderPane - bedzie po wszystkich bokach cos :p
         BorderPane root = new BorderPane();
@@ -88,12 +97,20 @@ public class GameView {
         Button changeTurnButton = new Button("Zmien ture");
 
         // Przycisk do zmiany tury gry
-        Button save = new Button("Zapisz");
+        save = new Button("Zapisz");
 
 
 
         // Klikajac zmienia sie tura 
         changeTurnButton.setOnAction(e -> changeTurn());
+
+        if (wybranyCzas.equals("Bez ograniczen")) {
+            timer.setVisible(false);       // Ukrywamy licznik
+            save.setVisible(true);   // Pokazujemy przycisk zapisu
+        } else {
+            timer.setVisible(true);        // Pokazujemy licznik
+            save.setVisible(false);  // Ukrywamy przycisk zapisu (blokada zapisu na czas)
+        }
         
         // Ustawiam te wszystkie elementy Kolo siebie
         HBox topBar = new HBox(20, statusGry, timer, changeTurnButton, save);
@@ -223,12 +240,15 @@ public class GameView {
         stage.setMinWidth(900);
         stage.setMinHeight(800);
 
-        startTimer();
+        if (!wybranyCzas.equals("Bez ograniczen")) {
+            startTimer(); // Odpalamy zegar tylko, gdy gra jest na czas
+        }
 
         SceneManager.registerStatusLabel(status);
         SceneManager.registerGameView(this);
 
         return scene;
+        // TODO: jakiś napis u góry kto z kim gra
     }
 
 
@@ -345,6 +365,10 @@ public class GameView {
             }
         }
 
+        if (mojKolor.equals("Czarny")) {
+            board.setRotate(180);
+        }
+
         // potem cala plansze odswiezam
         refreshBoard();
 
@@ -365,6 +389,10 @@ public class GameView {
 
                     Label piece = new Label(pieces[row][col]);
                     piece.getStyleClass().add("chess-piece");
+
+                    if (mojKolor.equals("Czarny")) {
+                        piece.setRotate(180);
+                    }
 
                     final int r = row; // zapisuje pozycje pierwotne
                     final int c = col;
@@ -399,26 +427,26 @@ public class GameView {
     }
 
         // Uruchamianie liczbika czasu
-    private void startTimer() {
+    // private void startTimer() {
 
-        // Tworze timeline (animacja dzialajaca coo 1 s)
-        gameTimer = new Timeline(
-            new KeyFrame(Duration.seconds(1), e -> {
+    //     // Tworze timeline (animacja dzialajaca coo 1 s)
+    //     gameTimer = new Timeline(
+    //         new KeyFrame(Duration.seconds(1), e -> {
 
-                if (whiteTurn)
-                        whiteTime++;
-                else
-                        blackTime++;
+    //             if (whiteTurn)
+    //                     whiteTime++;
+    //             else
+    //                     blackTime++;
 
-                timer.setText("Czas: "+ formatTime(whiteTime)+ ", "+ formatTime(blackTime)); // wypisuje czas odliczany dla bualych i czarnych
-            })
-        );
-        // tutaj zeby sie do dzialo w nieskonczaonosc
-        gameTimer.setCycleCount(Timeline.INDEFINITE);
+    //             timer.setText("Czas: "+ formatTime(whiteTime)+ ", "+ formatTime(blackTime)); // wypisuje czas odliczany dla bualych i czarnych
+    //         })
+    //     );
+    //     // tutaj zeby sie do dzialo w nieskonczaonosc
+    //     gameTimer.setCycleCount(Timeline.INDEFINITE);
 
-        // start timera
-        gameTimer.play();
-    }
+    //     // start timera
+    //     gameTimer.play();
+    // }
 
     // tutaj zamieniam sekundy na minuty i sekundy
     private String formatTime(int totalSeconds) {
@@ -600,5 +628,64 @@ public class GameView {
     public void addMoveToHistory(String moveNotation) {
         moveHistory.getItems().add(moveNotation);
         moveHistory.scrollTo(moveHistory.getItems().size() - 1); //przewijanie na sam dół
+    }
+
+    private void ustawPoczatkowyCzas(String czasGry) {
+        // Pamiętaj: 10min to sumaryczny czas gry, czyli po 5 minut (300 sekund) na gracza!
+        switch (czasGry) {
+            case "10min":
+                whiteTime = 300;
+                blackTime = 300;
+                break;
+            case "20min":
+                whiteTime = 600;
+                blackTime = 600;
+                break;
+            case "40min":
+                whiteTime = 1200;
+                blackTime = 1200;
+                break;
+            case "60min":
+                whiteTime = 1800;
+                blackTime = 1800;
+                break;
+            default:
+                whiteTime = 0;
+                blackTime = 0;
+                break;
+        }
+    }
+
+    private void startTimer() {
+        // Ustawiamy tekst początkowy przed startem animacji
+        timer.setText("Czas: " + formatTime(whiteTime) + " | " + formatTime(blackTime));
+
+        gameTimer = new Timeline(
+            new KeyFrame(Duration.seconds(1), e -> {
+                if (whiteTurn) {
+                    whiteTime--;
+                    if (whiteTime <= 0) {
+                        wygasłCzasGracza("Białe");
+                    }
+                } else {
+                    blackTime--;
+                    if (blackTime <= 0) {
+                        wygasłCzasGracza("Czarne");
+                    }
+                }
+
+                timer.setText("Czas: " + formatTime(whiteTime) + " | " + formatTime(blackTime));
+            })
+        );
+        gameTimer.setCycleCount(Timeline.INDEFINITE);
+        gameTimer.play();
+    }
+
+    private void wygasłCzasGracza(String ktoPrzegral) {
+        stopTimer();
+        clearMoves();
+        String zwycięzca = ktoPrzegral.equals("Białe") ? "CZARNE" : "BIAŁE";
+        SceneManager.setStatus("KONIEC GRY! Koniec czasu dla: " + ktoPrzegral + ". Wygrywa: " + zwycięzca);
+        
     }
 }

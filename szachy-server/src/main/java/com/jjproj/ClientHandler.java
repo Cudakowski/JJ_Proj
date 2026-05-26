@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.Socket;
 
 import com.jjproj.DatabaseIntegration.UsersTable;
-import com.jjproj.Logic.Color;
 import com.jjproj.Logic.GameSession;
 
 public class ClientHandler implements Runnable {
@@ -16,6 +15,8 @@ public class ClientHandler implements Runnable {
     private boolean isWaitingForPlayer = false;
     private String waitingForPlayerName = null;
     private GameSession currentSession = null;
+    private String selectedInviteTime = "Bez ograniczen";
+    private String selectedInviteColor = "Bialy";
 
     public ClientHandler(Socket socket) {
         try {
@@ -190,23 +191,45 @@ public class ClientHandler implements Runnable {
                 
             this.isInGame = true;
             inviterClient.isInGame = true;
-
             inviterClient.isWaitingForPlayer = false;
             this.waitingForPlayerName = null;
+
+
+
+            ClientHandler bialyGracz;
+            ClientHandler czarnyGracz;
+
+            String ostatecznyKolor = inviterClient.selectedInviteColor;
             
-            GameSession session = new GameSession(inviterClient, this);
+            if (ostatecznyKolor.equalsIgnoreCase("Losowo")) {
+                ostatecznyKolor = (Math.random() < 0.5) ? "Bialy" : "Czarny";
+            } 
+            
+            if (ostatecznyKolor.equalsIgnoreCase("Czarny")) {
+                bialyGracz = this;          
+                czarnyGracz = inviterClient; 
+            } else {
+                bialyGracz = inviterClient; 
+                czarnyGracz = this;         
+            }
+            
+            
+            
+            
+            GameSession session = new GameSession(bialyGracz, czarnyGracz, inviterClient.selectedInviteTime);
             
             this.currentSession = session;
             inviterClient.currentSession = session;
             
-            inviterClient.sendMessage("GAME_START|Bialy|" + this.playerLogin);
-            this.sendMessage("GAME_START|Czarny|" + inviterName);
             
-            System.out.println("Rozpoczęto partię: " + inviterName + " (B) vs " + this.playerLogin + " (C)");
-
             session.startGame();
             
         }
+    }
+
+    @Override
+    public String toString() {
+        return playerLogin;
     }
 
     private void commandCancelInvite(String[] data) {
@@ -271,6 +294,8 @@ public class ClientHandler implements Runnable {
 
             this.isWaitingForPlayer = true;
             this.waitingForPlayerName = invitedUser;
+            this.selectedInviteColor = color;
+            this.selectedInviteTime = time;
 
             invitedClient.sendMessage("INVITE_RECEIVED|" + this.playerLogin + "|" + color + "|" + time);
         

@@ -274,11 +274,12 @@ public class NetworkManager {
                 if (data.length >= 3) {
                     String mojKolor = data[1];
                     String przeciwnik = data[2];
+                    String czasGry = data[3];
                     
                     System.out.println("Start gry. Gram jako " + mojKolor + " przeciwko: " + przeciwnik);
 
                     
-                    SceneManager.switchToGame();
+                    SceneManager.switchToGame(mojKolor,przeciwnik,czasGry);
                     if (mojKolor.equals("Czarny")) {
                         SceneManager.setStatus("Oczekiwanie na ruch przeciwnika...");
                 }
