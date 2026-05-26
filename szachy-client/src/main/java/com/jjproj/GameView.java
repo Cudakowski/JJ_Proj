@@ -142,7 +142,9 @@ public class GameView {
     bottomLetters.setPadding(new Insets(5, 0, 0, 0));
     topLetters.setPadding(new Insets(0, 0, 5, 0));
 
-    char[] files = {'A','B','C','D','E','F','G','H'};
+    char[] files = mojKolor.equals("Czarny") 
+            ? new char[]{'H','G','F','E','D','C','B','A'} 
+            : new char[]{'A','B','C','D','E','F','G','H'};
 
     for (char f : files) {
         Label l1 = new Label(String.valueOf(f));
@@ -173,7 +175,11 @@ public class GameView {
     leftNumbers.setSpacing(0);
     rightNumbers.setSpacing(0);
 
-    for (int i = 8; i >= 1; i--) {
+    int[] ranks = mojKolor.equals("Czarny") 
+            ? new int[]{1, 2, 3, 4, 5, 6, 7, 8} 
+            : new int[]{8, 7, 6, 5, 4, 3, 2, 1};
+
+    for (int i : ranks) {
         Label l1 = new Label(String.valueOf(i));
         Label l2 = new Label(String.valueOf(i));
 
@@ -272,10 +278,10 @@ public class GameView {
 
      // SCENE
 
-        Scene scene = new Scene(root, 1200, 1200);
+        Scene scene = new Scene(root, 1200, 1000);
 
         stage.setMinWidth(1200);
-        stage.setMinHeight(1200);
+        stage.setMinHeight(1000);
 
 
         // Stylizowanie elementow
