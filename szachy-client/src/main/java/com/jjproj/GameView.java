@@ -90,7 +90,7 @@ public class GameView {
         statusGry = new Label("Tura: Białe");
         
         // Naglowek czas rozgrywki graczy
-        timer = new Label("Czas: 00:00, 00:00");
+        timer = new Label("BIAŁY 00:00  |  00:00 CZARNY");
 
 
                 
@@ -424,6 +424,8 @@ public class GameView {
                     pieces[r][c] = piece;
                     pieces[oldRow][oldCol] = "";
                     refreshBoard();
+
+                    changeTurn();
                     
                     new Thread(() -> {
                         NetworkManager.sendCommand("MOVE|" + fromSquare + "|" + toSquare);
@@ -476,7 +478,7 @@ public class GameView {
                     piece.setOnMouseClicked(e -> {
                         selectedRow = r; //TODO: zrobić, aby się propki pokazały kiedy gracz podniesie pionka bez zaznaczania(teraz bez zaznaczania się nie pokazują)
                         selectedCol = c; //TODO: zrobić aby można było się ruszyć pionkiem w pole z kropką klikając na te pole (nie koniecznie drag&drop'em)
-                        showPossibleMoves(r, c);
+                        showPossibleMoves(r, c);// TODO: podświetlanie ostatniego ruchu
                     });
 
                     // start przeciagania
@@ -646,6 +648,7 @@ public class GameView {
         pieces[newRow][newCol] = lastBeatenPiece;
         
         refreshBoard();
+        changeTurn();
     }
 
     private int convertFileToCol(char file) {
@@ -734,34 +737,43 @@ public class GameView {
 
     private void startTimer() {
         // Ustawiamy tekst początkowy przed startem animacji
-        timer.setText("Czas: " + formatTime(whiteTime) + " | " + formatTime(blackTime));
+        timer.setText("BIAŁY " + formatTime(whiteTime) + "  |  " + formatTime(blackTime) + " CZARNY");
 
         gameTimer = new Timeline(
             new KeyFrame(Duration.seconds(1), e -> {
                 if (whiteTurn) {
                     whiteTime--;
-                    if (whiteTime <= 0) {
-                        wygasłCzasGracza("Białe");
-                    }
+                    // if (whiteTime <= 0) {
+                    //     playerExpired("Białe");
+                    // }
                 } else {
                     blackTime--;
-                    if (blackTime <= 0) {
-                        wygasłCzasGracza("Czarne");
-                    }
+                    // if (blackTime <= 0) {
+                    //     playerExpired("Czarne");
+                    // }
                 }
 
-                timer.setText("Czas: " + formatTime(whiteTime) + " | " + formatTime(blackTime));
+                timer.setText("BIAŁY " + formatTime(whiteTime) + "  |  " + formatTime(blackTime) + " CZARNY");
             })
         );
         gameTimer.setCycleCount(Timeline.INDEFINITE);
         gameTimer.play();
     }
 
-    private void wygasłCzasGracza(String ktoPrzegral) {
-        stopTimer();
-        clearMoves();
-        String zwycięzca = ktoPrzegral.equals("Białe") ? "CZARNE" : "BIAŁE";
-        SceneManager.setStatus("KONIEC GRY! Koniec czasu dla: " + ktoPrzegral + ". Wygrywa: " + zwycięzca);
+    // private void playerExpired(String ktoPrzegral) {
+    //     stopTimer();
+    //     clearMoves();
+    //     String zwyciezca = ktoPrzegral.equals("Białe") ? "CZARNE" : "BIAŁE";
+    //     SceneManager.setStatus("KONIEC GRY! Koniec czasu dla: " + ktoPrzegral + ". Wygrywa: " + zwyciezca);
         
+    // }
+
+    public void syncTimeWithServer(int serverWhiteTime, int serverBlackTime) {
+        this.whiteTime = serverWhiteTime;
+        this.blackTime = serverBlackTime;
+        
+        if (timer != null) {
+            timer.setText("Czas: " + formatTime(whiteTime) + " | " + formatTime(blackTime));
+        }
     }
 }

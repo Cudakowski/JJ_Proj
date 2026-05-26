@@ -128,6 +128,9 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    public GameSession getCurrentSession() { return currentSession; }
+    public void setInGame(boolean val) { this.isInGame = val; }
+
     private void commandMove(String[] data){
         if (currentSession != null && data.length >= 3) {
             String zPola = data[1];

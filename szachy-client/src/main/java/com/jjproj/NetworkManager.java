@@ -336,6 +336,14 @@ public class NetworkManager {
                     SceneManager.addMoveToHistory(data[1]);
                 }
                 break;
+            
+            case "TIME_UPDATE":
+                if (data.length >= 3) {
+                    int wTime = Integer.parseInt(data[1]);
+                    int bTime = Integer.parseInt(data[2]);
+                    SceneManager.syncTime(wTime, bTime);
+                }
+                break;
                 
             default:
                 System.out.println("Nieznana komenda z serwera: " + command);
