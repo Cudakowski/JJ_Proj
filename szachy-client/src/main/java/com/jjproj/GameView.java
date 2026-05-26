@@ -773,7 +773,7 @@ public class GameView {
         this.blackTime = serverBlackTime;
         
         if (timer != null) {
-            timer.setText("Czas: " + formatTime(whiteTime) + " | " + formatTime(blackTime));
+            timer.setText("BIAŁY " + formatTime(whiteTime) + "  |  " + formatTime(blackTime) + " CZARNY");
         }
     }
 }
