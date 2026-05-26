@@ -2,8 +2,8 @@ package com.jjproj;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -19,6 +19,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -93,16 +94,14 @@ public class GameView {
 
 
                 
-        // Przycisk do zmiany tury gry
-        Button changeTurnButton = new Button("Zmien ture");
+
 
         // Przycisk do zmiany tury gry
         save = new Button("Zapisz");
 
 
 
-        // Klikajac zmienia sie tura 
-        changeTurnButton.setOnAction(e -> changeTurn());
+
 
         if (wybranyCzas.equals("Bez ograniczen")) {
             timer.setVisible(false);       // Ukrywamy licznik
@@ -113,7 +112,7 @@ public class GameView {
         }
         
         // Ustawiam te wszystkie elementy Kolo siebie
-        HBox topBar = new HBox(20, statusGry, timer, changeTurnButton, save);
+        HBox topBar = new HBox(20, statusGry, timer, save);
         
         // Dodaje miedzy nimi odstep 10 px
         topBar.setPadding(new Insets(10));
@@ -128,16 +127,87 @@ public class GameView {
      // CENTER (plansza)
 
         // Tworzenie planszy - osobna funkcja (nizej implementacja)
-        GridPane board = createBoard();
+    GridPane board = createBoard();
 
-        // Robie taki wrapper zeby tam umiescic nasza plansze
-        StackPane centerWrapper = new StackPane(board);
+    // ====== OZNACZENIA SZACHOWNICY ======
 
-        // Dodaje odstep 20 px
-        centerWrapper.setPadding(new Insets(20));
+    HBox topLetters = new HBox();
+    HBox bottomLetters = new HBox();
 
-        // Dodaje wrapper z plansza do roota!
-        root.setCenter(centerWrapper);
+    topLetters.setAlignment(Pos.CENTER);
+    bottomLetters.setAlignment(Pos.CENTER);
+
+    topLetters.setSpacing(0);
+    bottomLetters.setSpacing(0);
+    bottomLetters.setPadding(new Insets(5, 0, 0, 0));
+    topLetters.setPadding(new Insets(0, 0, 5, 0));
+
+    char[] files = {'A','B','C','D','E','F','G','H'};
+
+    for (char f : files) {
+        Label l1 = new Label(String.valueOf(f));
+        Label l2 = new Label(String.valueOf(f));
+
+        l1.getStyleClass().add("coord-label");
+        l2.getStyleClass().add("coord-label");
+
+        topLetters.getChildren().add(l1);
+        bottomLetters.getChildren().add(l2);
+
+        l1.setMinWidth(80);
+        l1.setPrefWidth(80);
+        l1.setAlignment(Pos.CENTER);
+
+        l2.setMinWidth(80);
+        l2.setPrefWidth(80);
+        l2.setAlignment(Pos.CENTER);
+    }
+
+    // liczby po bokach (8–1)
+    VBox leftNumbers = new VBox();
+    VBox rightNumbers = new VBox();
+
+    leftNumbers.setAlignment(Pos.CENTER);
+    rightNumbers.setAlignment(Pos.CENTER);
+
+    leftNumbers.setSpacing(0);
+    rightNumbers.setSpacing(0);
+
+    for (int i = 8; i >= 1; i--) {
+        Label l1 = new Label(String.valueOf(i));
+        Label l2 = new Label(String.valueOf(i));
+
+        l1.getStyleClass().add("coord-label");
+        l2.getStyleClass().add("coord-label");
+
+        leftNumbers.getChildren().add(l1);
+        rightNumbers.getChildren().add(l2);
+
+        l1.setMinHeight(80);
+        l1.setPrefHeight(80);
+        l1.setAlignment(Pos.CENTER);
+
+        l2.setMinHeight(80);
+        l2.setPrefHeight(80);
+        l2.setAlignment(Pos.CENTER);
+    }
+
+    // ====== UKŁAD ======
+
+    BorderPane boardWithCoords = new BorderPane();
+    boardWithCoords.setCenter(board);
+    boardWithCoords.setTop(topLetters);
+    boardWithCoords.setBottom(bottomLetters);
+    boardWithCoords.setLeft(leftNumbers);
+    boardWithCoords.setRight(rightNumbers);
+
+    StackPane centerWrapper = new StackPane(boardWithCoords);
+    centerWrapper.setPadding(new Insets(10));
+    centerWrapper.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+
+
+
+    root.setCenter(centerWrapper);
 
 
      // RIGHT (historia ruchów)
@@ -167,7 +237,7 @@ public class GameView {
         rightPanel.setPadding(new Insets(10));
 
         // Ustawiam szerokosc tej historii ruchow
-        rightPanel.setPrefWidth(200);
+        rightPanel.setPrefWidth(350);
 
 
         
@@ -202,7 +272,10 @@ public class GameView {
 
      // SCENE
 
-        Scene scene = new Scene(root, 900, 800);
+        Scene scene = new Scene(root, 1200, 1200);
+
+        stage.setMinWidth(1200);
+        stage.setMinHeight(1200);
 
 
         // Stylizowanie elementow
@@ -211,7 +284,7 @@ public class GameView {
         statusGry.getStyleClass().add("statusGry-label");
         timer.getStyleClass().add("timer-label");
         save.getStyleClass().add("btn-main");
-        changeTurnButton.getStyleClass().add("btn-main");
+
         topBar.getStyleClass().add("panel-dark");
         historyTitle.getStyleClass().add("side-title");
         rightPanel.getStyleClass().add("panel-dark");
@@ -232,13 +305,8 @@ public class GameView {
         save.setMinWidth(150);
         save.setPrefWidth(150);
 
-        changeTurnButton.setMinWidth(150);
-        changeTurnButton.setPrefWidth(150);
 
-        // Minimalna wielkość okna
 
-        stage.setMinWidth(900);
-        stage.setMinHeight(800);
 
         if (!wybranyCzas.equals("Bez ograniczen")) {
             startTimer(); // Odpalamy zegar tylko, gdy gra jest na czas
@@ -264,7 +332,9 @@ public class GameView {
             for (int col = 0; col < 8; col++) {
 
                 StackPane square = new StackPane();
+                square.setMinSize(80, 80);
                 square.setPrefSize(80, 80);
+                square.setMaxSize(80, 80);
 
                 if ((row + col) % 2 == 0)
                     square.getStyleClass().add("square-light");

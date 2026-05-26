@@ -17,6 +17,8 @@ public class NetworkManager {
     private static ScheduledExecutorService clock;
     private static long sendTime = 0;
     private static AtomicBoolean isLoggingOrLogged = new AtomicBoolean(false);
+    private static final String hostIP4="192.168.245.52";
+    private static final int hostPort=5000;
 
     public static boolean connect(String host, int port) {
         try {
@@ -46,7 +48,7 @@ public class NetworkManager {
 
         Thread bridgeThread = new Thread(() -> {
         
-            boolean isConnected = NetworkManager.connect("localhost", 5000);
+            boolean isConnected = NetworkManager.connect(hostIP4, hostPort);
             
             
             if (isConnected) {
@@ -73,7 +75,7 @@ public class NetworkManager {
         }
 
         Thread bridgeThread = new Thread(() -> {
-            boolean isConnected = NetworkManager.connect("localhost", 5000);
+            boolean isConnected = NetworkManager.connect(hostIP4, hostPort);
             
             
             if (isConnected) {
