@@ -7,6 +7,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javafx.application.Platform;
+
 
 public class NetworkManager {
     
@@ -29,7 +31,41 @@ public class NetworkManager {
         }
     }
 
-    public static void login(String wpisanyLogin,String wpisaneHaslo) {
+    public static void onRegister(String wpisanyLogin, String wpisaneHaslo, String wpisanePonownieHaslo) {
+
+        if(!isLoggingOrLogged.compareAndSet(false,true)){
+            System.out.println("Blokada podwojnej rejestracji");
+            return;
+        }
+
+        if (!wpisaneHaslo.equals(wpisanePonownieHaslo)) {
+            SceneManager.setStatus("Hasła nie są zgodne");
+            isLoggingOrLogged.set(false);
+            return;
+        }// TODO: wymagania haseł czyli min 3 znaki, cyfra, znak specjalny itd.
+
+        Thread bridgeThread = new Thread(() -> {
+        
+            boolean isConnected = NetworkManager.connect("localhost", 5000);
+            
+            
+            if (isConnected) {
+                NetworkManager.sendCommand("REGISTER|" + wpisanyLogin + "|" + wpisaneHaslo);
+                SceneManager.setStatus("Weryfikacja danych");
+                
+            } else {
+                SceneManager.setStatus("Brak połączenia z serwerem");
+                isLoggingOrLogged.set(false);
+
+            }
+            
+        });
+        
+        bridgeThread.setDaemon(true);
+        bridgeThread.start();
+    }
+
+    public static void onLogin(String wpisanyLogin,String wpisaneHaslo) {
 
         if(!isLoggingOrLogged.compareAndSet(false,true)){
             System.out.println("Blokada podwojnego logowania");
@@ -116,12 +152,16 @@ public class NetworkManager {
     private static void processMessage(String message) {
         String[] data = message.split("\\|");
         String command = data[0];
+        String cause="?";
 
         switch (command) {
+
+            // ping pong
             case "PONG":
                 System.out.println("ping: " + calculateLag(/*data*/) + "ms");
                 break;
-                
+            
+            // logowanie
             case "LOGIN_SUCCESS":
                 System.out.println("Zalogowano");
                 startPinging();
@@ -131,7 +171,7 @@ public class NetworkManager {
                 break;
 
             case "LOGIN_FAILED":
-                String cause = data.length > 1 ? data[1] : "Nieznany blad";
+                cause = data.length > 1 ? data[1] : "Nieznany blad";
                 
                 System.out.println("Odmowa dostepu: " + cause);
                 
@@ -139,13 +179,159 @@ public class NetworkManager {
                 
                 disconnect(); 
                 break;
+
+            case "REGISTER_SUCCESS":
+                System.out.println("Zarejestrowano");
+                startPinging();
+                isLoggingOrLogged.set(true);
+                SceneManager.switchToMenu();
+                break;
+
+            case "REGISTER_FAILED":
+                cause = data.length > 1 ? data[1] : "Nieznany blad";
                 
-            case "BOARD_UPDATE":
-                // String nowyFEN = dane[1];
-                // TODO: 
-                // Platform.runLater(() -> {
+                System.out.println("Odmowa rejestracji: " + cause);
+                
+                SceneManager.setStatus("Blad rejestracji: " + cause );
+                
+                disconnect(); 
+                break;
+
+            // zapraszanie
+            case "USER_LIST":
+                //System.out.println("Pobrano liste uzytkownikow");
+                SceneManager.setStatus("Pobrano liste uzytkownikow");
+                if (data.length > 1) {
+                    String[] availablePlayers = data[1].split(",");
                     
-                // });
+                    SceneManager.updatePlayersList(availablePlayers);
+                    SceneManager.setStatus("Lista zaktualizowana.");
+                } else {
+                    SceneManager.clearPlayersList();
+                    SceneManager.setStatus("Brak innych graczy online.");
+                }
+                break;
+
+
+            case "INVITE_RECEIVED":
+                if (data.length >= 4) {
+                    String sender = data[1];
+                    String color = data[2];
+                    String time = data[3];
+                    
+                    String informacjaDlaOdbiorcy = "";
+                    if (color.equals("Bialy")) {
+                        informacjaDlaOdbiorcy = "Twój kolor: Czarny";
+                    } else if (color.equals("Czarny")) {
+                        informacjaDlaOdbiorcy = "Twój kolor: Biały";
+                    } else {
+                        informacjaDlaOdbiorcy = "Kolor: Losowo";
+                    }
+                    
+                    String tresc = sender + " zaprasza do gry! (" + time + "; " + informacjaDlaOdbiorcy + ")";
+                    
+                    SceneManager.receiveInvitation(sender, tresc);
+                }
+                break;
+
+            case "INVITE_ERROR":
+                if (data.length > 1) {
+                    SceneManager.setStatus(data[1]);
+                    SceneManager.addWaitingStatus("Error: " +data[1]);
+                }
+                break;
+
+            case "INVITE_REJECTED":
+                if (data.length > 1) {
+                    String rejecter = data[1];
+                    SceneManager.addWaitingStatus("Gracz " + rejecter + " odrzucił zaproszenie.");
+                }
+                break;
+
+            case "INVITE_CANCELLED":
+                if (data.length > 1) {
+                    String canceller = data[1];
+                    
+                    Platform.runLater(() -> {
+                        NotificationsView.markAsCancelled(canceller);
+                    });
+                    
+                    //SceneManager.setStatus("Zaproszenie od " + canceller + " wygasło.");
+                }
+                break;
+
+            case "INVITE_EXPIRED":
+                if (data.length > 1) {
+                    cause = data[1];
+                    
+                    SceneManager.addWaitingStatus(cause);
+                    SceneManager.addWaitingStatus("Zaproszenie wygasło. Możesz anulować.");
+                    
+                }
+                break;
+
+            case "GAME_START":
+                if (data.length >= 3) {
+                    String mojKolor = data[1];
+                    String przeciwnik = data[2];
+                    
+                    System.out.println("Start gry. Gram jako " + mojKolor + " przeciwko: " + przeciwnik);
+
+                    
+                    SceneManager.switchToGame();
+                    if (mojKolor.equals("Czarny")) {
+                        SceneManager.setStatus("Oczekiwanie na ruch przeciwnika...");
+                }
+                }
+                break;
+            
+            // w grze
+            case "BOARD_UPDATE":
+                if (data.length > 1) {
+                    String fen = data[1];
+                    SceneManager.updateBoard(fen);
+                }
+                break;
+
+            case "LEGAL_MOVES":
+                if (data.length > 1) {
+                    SceneManager.setLegalMoves(data[1]);
+                    SceneManager.setStatus("Twoja tura");
+                }
+                break;
+                
+            case "OPPONENT_MOVED":
+                if (data.length >= 3) {
+                    SceneManager.applyOpponentMove(data[1], data[2]);
+                }
+                break;
+                
+            case "MOVE_ERROR":
+                if (data.length >= 4) {
+                    // Cofamy własny zły ruch
+                    SceneManager.revertMyMove(data[2], data[3]);
+                    SceneManager.setStatus("Nielegalny ruch: " + data[1]);
+                }
+                break;
+                
+            case "MOVE_ACCEPTED":
+                // Potwierdzenie odebrania ruchu
+                SceneManager.setStatus("Oczekiwanie na ruch przeciwnika...");
+                break;
+
+            case "GAME_OVER":
+                if (data.length >= 3) {
+                    String winner = data[1];
+                    cause = data[2];
+                    
+                    SceneManager.handleGameOver(winner, cause);
+                }
+                break;
+
+            case "NEW_MOVE":
+                if (data.length > 1) {
+                    SceneManager.addMoveToHistory(data[1]);
+                }
                 break;
                 
             default:

@@ -45,7 +45,10 @@ public class WaitingForPlayerView {
         cancelBtn.getStyleClass().add("btn-main");
 
         cancelBtn.setOnAction(e -> {
-            // Tutaj logika wysyłająca do serwera info o anulowaniu
+            new Thread(() -> {
+                NetworkManager.sendCommand("CANCEL_INVITE|" + opponentName);
+            }).start();
+            
             PreGameView preGame = new PreGameView();
             stage.setScene(preGame.createScene(stage));
         });
@@ -61,7 +64,7 @@ public class WaitingForPlayerView {
 
 
         SceneManager.registerStatusLabel(status);
-
+        SceneManager.registerWaitingView(this);
         return scene;
     }
 
@@ -69,10 +72,5 @@ public class WaitingForPlayerView {
     public void addStatus(String message) {
         statusLog.getItems().add(message);
         statusLog.scrollTo(statusLog.getItems().size() - 1); // Zeby przewijac na dol
-    }
-
-    private void goToGame(Stage stage) {
-        GameView game = new GameView();
-        stage.setScene(game.createScene(stage));
     }
 }

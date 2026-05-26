@@ -31,5 +31,9 @@ public class Knight extends Piece {
 
         ));
     }
+    @Override
+    protected boolean canJumpOverPieces() {
+        return true;
+    }
 
 }

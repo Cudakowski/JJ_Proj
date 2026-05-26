@@ -50,7 +50,7 @@ public class LoginView {
 
         // Klikniecie z logowania - jak narazie do menu - dodac bazy danych
         loginButton.setOnAction(e -> {
-            NetworkManager.login(usernameField.getText(), passwordField.getText());
+            NetworkManager.onLogin(usernameField.getText(), passwordField.getText());
             // MenuView menuView = new MenuView();
             // stage.setScene(menuView.createScene(stage));
         });
