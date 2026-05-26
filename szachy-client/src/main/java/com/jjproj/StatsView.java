@@ -22,8 +22,10 @@ public class StatsView {
         // --- TOP ---
         Label title = new Label("STATYSTYKI");
         title.getStyleClass().add("main-title-small");
+
         HBox topBox = new HBox(title);
         topBox.setAlignment(Pos.CENTER);
+
         root.setTop(topBox);
 
         // --- CENTER ---
@@ -33,12 +35,12 @@ public class StatsView {
         // LEWA STRONA
         VBox leftColumn = new VBox(10);
         HBox.setHgrow(leftColumn, Priority.ALWAYS);
+
         Label leftLabel = new Label("Historia Twoich Gier");
         leftLabel.getStyleClass().add("section-label");
 
         ListView<String> gamesListView = new ListView<>();
-        gamesListView.getStyleClass().add("list-view-custom"); 
-        
+        gamesListView.getStyleClass().add("list-view-custom");
 
         gamesListView.getItems().addAll(
             "Gra #152 - Wygrana (vs Gracz123)",
@@ -51,22 +53,20 @@ public class StatsView {
             "Gra #148 - Wygrana (vs Anna99)",
             "Gra #148 - Wygrana (vs Anna99)",
             "Gra #148 - Wygrana (vs Anna99)"
-
-
         );
-        
+
         VBox.setVgrow(gamesListView, Priority.ALWAYS);
         leftColumn.getChildren().addAll(leftLabel, gamesListView);
 
         // PRAWA STRONA
         VBox rightColumn = new VBox(10);
         rightColumn.setPrefWidth(320);
+
         Label rightLabel = new Label("Szczegółowe statystyki");
         rightLabel.getStyleClass().add("section-label");
 
         ListView<VBox> globalStatsList = new ListView<>();
         globalStatsList.getStyleClass().add("list-view-stats");
-
 
         globalStatsList.getItems().addAll(
             createStatTile("Suma rozegranych gier", "154,200"),
@@ -80,40 +80,68 @@ public class StatsView {
         rightColumn.getChildren().addAll(rightLabel, globalStatsList);
 
         mainContent.getChildren().addAll(leftColumn, rightColumn);
+
         root.setCenter(mainContent);
 
-        // --- BOTTOM ---
+        // =========================
+        // BOTTOM
+        // =========================
+
         Button back = new Button("WSTECZ");
         back.getStyleClass().add("btn-main");
         back.setPrefWidth(150);
+
         back.setOnAction(e -> {
             MenuView menu = new MenuView();
             stage.setScene(menu.createScene(stage));
         });
 
-        HBox bottomBox = new HBox(back);
-        bottomBox.setAlignment(Pos.BOTTOM_RIGHT);
-        root.setBottom(bottomBox);
+        // STATUS LABEL TAKI JAK W GAMEVIEW
+        Label status = new Label("Status");
+        status.getStyleClass().add("error-label");
+        status.setMaxWidth(Double.MAX_VALUE);
+        status.setAlignment(Pos.CENTER);
+
+        HBox backBox = new HBox(back);
+        backBox.setAlignment(Pos.CENTER);
+
+        VBox bottomContainer = new VBox(10, backBox, status);
+        bottomContainer.setAlignment(Pos.CENTER);
+        bottomContainer.setPadding(new Insets(10));
+
+
+        root.setBottom(bottomContainer);
 
         Scene scene = new Scene(root, 950, 650);
-        scene.getStylesheets().add(getClass().getResource("/View.css").toExternalForm());
-        
+
+        scene.getStylesheets().add(
+            getClass().getResource("/View.css").toExternalForm()
+        );
+
+        // REJESTRACJA STATUSU
+        SceneManager.registerStatusLabel(status);
+
         return scene;
     }
 
     // Metoda dla prawych kafelków
     private VBox createStatTile(String title, String value) {
+
         VBox tile = new VBox(5);
+
         tile.setAlignment(Pos.CENTER);
         tile.setPadding(new Insets(15));
+
         tile.getStyleClass().add("stat-item-box");
 
         Label t = new Label(title);
         t.setStyle("-fx-text-fill: #d9c7a3; -fx-font-size: 13px;");
+
         Label v = new Label(value);
         v.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;");
-        
+
         tile.getChildren().addAll(t, v);
+
         return tile;
     }
 }

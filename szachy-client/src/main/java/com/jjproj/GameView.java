@@ -112,7 +112,7 @@ public class GameView {
         }
         
         // Ustawiam te wszystkie elementy Kolo siebie
-        HBox topBar = new HBox(20, statusGry, timer, save);
+        HBox topBar = new HBox(20, timer, save);
         
         // Dodaje miedzy nimi odstep 10 px
         topBar.setPadding(new Insets(10));
@@ -305,8 +305,8 @@ public class GameView {
         statusGry.setMinWidth(150);
         statusGry.setPrefWidth(150);
 
-        timer.setMinWidth(180);
-        timer.setPrefWidth(180);
+        timer.setMinWidth(400);
+        timer.setPrefWidth(400);
 
         save.setMinWidth(150);
         save.setPrefWidth(150);
