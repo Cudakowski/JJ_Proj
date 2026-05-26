@@ -28,6 +28,18 @@ public class GameStateChecker {
                 Piece piece = board.getPiece(coordinates);
 
                 if(piece !=null && piece.color == opponentColor){
+                    if (piece instanceof King) {
+                        int fileDiff = Math.abs(coordinates.file.ordinal() - kingCoordinates.file.ordinal());
+                        int rankDiff = Math.abs(coordinates.rank - kingCoordinates.rank);
+                        
+                        if (fileDiff <= 1 && rankDiff <= 1) {
+                            return true; 
+                        }
+                        continue;
+                    }
+
+
+
                     Set<Coordinates> moves = piece.getAvailableMoveSquares(board);
 
                     if(moves.contains(kingCoordinates)){

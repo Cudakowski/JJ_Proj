@@ -17,7 +17,7 @@ public class GameSession {
     private final ClientHandler blackPlayer;
 
     private int halfMoveClock = 0;// liczba półruchów bez bicia
-    private int fullMoveNumber = 1;//numer pełnego ruchu
+    private int fullMoveNumber = 0;//numer pełnego ruchu
 
     //dla roszady
     private boolean whiteKingsideCastle  = true;// biała krótka (K)
@@ -43,6 +43,9 @@ public class GameSession {
         
         whitePlayer.sendMessage("BOARD_UPDATE|" + startingFEN);
         blackPlayer.sendMessage("BOARD_UPDATE|" + startingFEN);
+
+        String legalMoves = getAllLegalMovesFor(); 
+        whitePlayer.sendMessage("LEGAL_MOVES|" + legalMoves);
     }
 
   
@@ -79,7 +82,7 @@ public class GameSession {
         );
         board.movePiece(rookFrom, rookTo);
     }
-    private Color getColorByLogin(String login) {
+    public Color getColorByLogin(String login) {
         if(whitePlayer.getPlayerLogin().equals(login)){
             return Color.WHITE;
         }
@@ -97,8 +100,30 @@ public class GameSession {
         blackPlayer.sendMessage(msg);
     }
 
-    public void gameOver(){
-        whitePlayer.
+    public String getAllLegalMovesFor(){
+        StringBuilder moves = new StringBuilder();
+
+        for( int rank =1; rank <=8; rank++){
+            for( File file: File.values()){
+                Coordinates fromCoords = new Coordinates(file, rank);
+                Piece piece = board.getPiece(fromCoords);
+                if(piece != null && piece.color==currentTurn){
+                    moves.append(fromCoords);
+                    moves.append(",");
+
+                    Set<Coordinates> legalMoves = GameStateChecker.getLegalMoves(piece, fromCoords, board);
+                    for (Coordinates coordinates : legalMoves) {
+                        moves.append(coordinates);
+                        moves.append(",");
+                    }
+
+                    moves.append(";");// "A1,A3,A5,;B2,C3,D2,;"
+                }
+            }
+        }
+
+
+        return moves.toString();
     }
 
 
@@ -266,10 +291,21 @@ public class GameSession {
             halfMoveClock = 0;
         } else {
              halfMoveClock++;
-        }                                   
+        }
+
         if(currentTurn == Color.BLACK){
             fullMoveNumber++;
         }
+        
+        String moveNotation;
+        if (currentTurn == Color.WHITE) {
+            moveNotation = fullMoveNumber + " ⚪ " + from.toLowerCase() + "-" + to.toLowerCase();
+        } else {
+            moveNotation = fullMoveNumber + " ⚫ " + from.toLowerCase() + "-" + to.toLowerCase();
+        }
+        
+        
+        
 
         //zmienić kolejkę
         Color opponent = (currentTurn == Color.WHITE) ? Color.BLACK : Color.WHITE;
@@ -286,10 +322,10 @@ public class GameSession {
             return "GAME_OVER|Remis|Pat";
         }
         if(GameStateChecker.isKingInCheck(opponent, board)) {
-            return "MOVE_OK|CHECK|" + fen;
+            return "MOVE_OK|CHECK|" + fen+ "|" + moveNotation;
         }
 
-        return "MOVE_OK|" + fen;
+        return "MOVE_OK|" + fen+ "|" + moveNotation;
     }
 
     public boolean isGameOver(){ 
@@ -306,6 +342,13 @@ public class GameSession {
     // }
     public String getInitialFEN() { 
         return boardToFEN(); 
+    }
+
+    public ClientHandler getOpponent(ClientHandler curr){
+        if (whitePlayer == curr){
+            return blackPlayer;
+        }
+        return whitePlayer;
     }
 
 }

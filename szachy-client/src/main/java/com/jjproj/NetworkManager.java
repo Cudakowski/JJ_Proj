@@ -276,8 +276,12 @@ public class NetworkManager {
                     String przeciwnik = data[2];
                     
                     System.out.println("Start gry. Gram jako " + mojKolor + " przeciwko: " + przeciwnik);
+
                     
                     SceneManager.switchToGame();
+                    if (mojKolor.equals("Czarny")) {
+                        SceneManager.setStatus("Oczekiwanie na ruch przeciwnika...");
+                }
                 }
                 break;
             
@@ -286,6 +290,47 @@ public class NetworkManager {
                 if (data.length > 1) {
                     String fen = data[1];
                     SceneManager.updateBoard(fen);
+                }
+                break;
+
+            case "LEGAL_MOVES":
+                if (data.length > 1) {
+                    SceneManager.setLegalMoves(data[1]);
+                    SceneManager.setStatus("Twoja tura");
+                }
+                break;
+                
+            case "OPPONENT_MOVED":
+                if (data.length >= 3) {
+                    SceneManager.applyOpponentMove(data[1], data[2]);
+                }
+                break;
+                
+            case "MOVE_ERROR":
+                if (data.length >= 4) {
+                    // Cofamy własny zły ruch
+                    SceneManager.revertMyMove(data[2], data[3]);
+                    SceneManager.setStatus("Nielegalny ruch: " + data[1]);
+                }
+                break;
+                
+            case "MOVE_ACCEPTED":
+                // Potwierdzenie odebrania ruchu
+                SceneManager.setStatus("Oczekiwanie na ruch przeciwnika...");
+                break;
+
+            case "GAME_OVER":
+                if (data.length >= 3) {
+                    String winner = data[1];
+                    cause = data[2];
+                    
+                    SceneManager.handleGameOver(winner, cause);
+                }
+                break;
+
+            case "NEW_MOVE":
+                if (data.length > 1) {
+                    SceneManager.addMoveToHistory(data[1]);
                 }
                 break;
                 

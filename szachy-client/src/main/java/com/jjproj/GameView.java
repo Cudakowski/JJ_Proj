@@ -1,5 +1,10 @@
 package com.jjproj;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
@@ -41,12 +46,23 @@ public class GameView {
     //     {"♖","♘","♗","♕","♔","♗","♘","♖"}
     // };
 
-    String[][] pieces = new String[8][8];
+    private String lastBeatenPiece ="";
 
+    String[][] pieces = new String[8][8];
+    private Map<String, List<String>> legalMovesMap = new HashMap<>();
+    private ListView<String> moveHistory;
 
     // Do klikania na figure zeby widziec gdzie moozna ja poruszyc
     private int selectedRow = -1;
     private int selectedCol = -1;
+
+    public GameView() {
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                pieces[row][col] = "";
+            }
+        }
+    }
 
     public Scene createScene(Stage stage) {
 
@@ -110,16 +126,16 @@ public class GameView {
      // RIGHT (historia ruchów)
 
         // Tutaj robie historie ruchow
-        ListView<String> moveHistory = new ListView<>();
+        moveHistory = new ListView<>();
 
         // Dodaje elementy - poki co pogladowo
-        moveHistory.getItems().addAll(
-                "1. e4",
-                "1... e5",
-                "2. Nf3",
-                "2... Nc6",
-                "Dodac tu ruchy"
-        );
+        // moveHistory.getItems().addAll(
+        //         "1. e4",
+        //         "1... e5",
+        //         "2. Nf3",
+        //         "2... Nc6",
+        //         "Dodac tu ruchy"
+        // );
 
         // Etykieta ze to jest historia ruchow
         Label historyTitle = new Label("Historia ruchów");
@@ -277,21 +293,45 @@ public class GameView {
                     }
 
                     // 2. pole zajęte ----------(to do zmiany przy zbijaniu)
-                    if (!pieces[r][c].equals("")) {
-                    e.setDropCompleted(false);
-                    e.consume();
-                    return;
+                    // if (!pieces[r][c].equals("")) {
+                    // e.setDropCompleted(false);
+                    // e.consume();
+                    // return;
+                    // }
+
+                    String fromSquare = "" + convertColToFile(oldCol) + convertRowToRank(oldRow);
+                    String toSquare = "" + convertColToFile(c) + convertRowToRank(r);
+                    
+                    if (!legalMovesMap.containsKey(fromSquare) || !legalMovesMap.get(fromSquare).contains(toSquare)) {
+                        e.setDropCompleted(false);
+                        e.consume();
+                        return;
                     }
 
-                    // przesuniacie figuty
-                    String piece = pieces[oldRow][oldCol];
+                    legalMovesMap.clear();
 
-                    // nowe pole dodaje figure a stare zostanie piste
+                    lastBeatenPiece = pieces[r][c];
+
+                    // // przesuniacie figuty
+                    // String piece = pieces[oldRow][oldCol];
+
+                    // // nowe pole dodaje figure a stare zostanie piste
+                    // pieces[r][c] = piece;
+                    // pieces[oldRow][oldCol] = "";
+
+                    // // funkcja odswiezania planszy
+                    // refreshBoard();
+
+                    
+                    
+                    String piece = pieces[oldRow][oldCol];
                     pieces[r][c] = piece;
                     pieces[oldRow][oldCol] = "";
-
-                    // funkcja odswiezania planszy
                     refreshBoard();
+                    
+                    new Thread(() -> {
+                        NetworkManager.sendCommand("MOVE|" + fromSquare + "|" + toSquare);
+                    }).start();
 
                     success = true;
                 }
@@ -414,24 +454,19 @@ public class GameView {
     private void showPossibleMoves(int row, int col) {
         clearHighlights();
 
-
-        int[][] moves = {
-            {row+1, col},
-            {row-1, col},
-            {row, col+1},
-            {row, col-1}
-        };
-
-        for (int[] move : moves) {
-            int r = move[0];
-            int c = move[1];
-
-            if (r >= 0 && r < 8 && c >= 0 && c < 8 && pieces[r][c].equals("")) {
+        String clickedSquare = "" + convertColToFile(col) + convertRowToRank(row);
+        
+        if (legalMovesMap.containsKey(clickedSquare)) {
+            
+            List<String> allowedDestinations = legalMovesMap.get(clickedSquare);
+            
+            for (String dest : allowedDestinations) {
+                int r = convertRankToRow(dest.charAt(1));
+                int c = convertFileToCol(dest.charAt(0));
+                
                 StackPane square = squares[r][c];
-
                 Label dot = new Label("●");
                 dot.getStyleClass().add("move-dot");
-
                 square.getChildren().add(dot);
             }
         }
@@ -477,5 +512,93 @@ public class GameView {
             case 'P': return "♙"; // biały pionek
             default: return "";
         }
+    }
+
+    // Wywoływane u Czarnego, gdy Biały zrobił poprawny ruch
+    public void applyLocalMove(String from, String to) {
+        int oldRow = convertRankToRow(from.charAt(1));
+        int oldCol = convertFileToCol(from.charAt(0));
+        
+        int newRow = convertRankToRow(to.charAt(1));
+        int newCol = convertFileToCol(to.charAt(0));
+        
+        // Przesuwamy figurę w tablicy
+        pieces[newRow][newCol] = pieces[oldRow][oldCol];
+        pieces[oldRow][oldCol] = "";
+        
+        // Odświeżamy GUI
+        refreshBoard();
+        changeTurn();
+    }
+    
+    public void revertLocalMove(String from, String to) {
+        int oldRow = convertRankToRow(from.charAt(1));
+        int oldCol = convertFileToCol(from.charAt(0));
+        
+        int newRow = convertRankToRow(to.charAt(1));
+        int newCol = convertFileToCol(to.charAt(0));
+        
+        pieces[oldRow][oldCol] = pieces[newRow][newCol];
+        pieces[newRow][newCol] = lastBeatenPiece;
+        
+        refreshBoard();
+    }
+
+    private int convertFileToCol(char file) {
+        return Character.toUpperCase(file) - 'A';
+    }
+
+    private int convertRankToRow(char rank) {
+        return '8' - rank; 
+    }
+    
+    private char convertColToFile(int col) {
+        return (char) ('A' + col);
+    }
+    
+    private char convertRowToRank(int row) {
+        return (char) ('8' - row);
+    }
+
+    public void updateLegalMoves(String dataString) {
+        legalMovesMap.clear();
+        
+        if (dataString == null || dataString.trim().isEmpty()) return;
+
+        String[] pieceMoves = dataString.split(";");
+        
+        for (String movesGroup : pieceMoves) {
+            if (movesGroup.trim().isEmpty()) continue;
+            
+            String[] coords = movesGroup.split(",");
+            if (coords.length > 1) {
+                String from = coords[0];
+                List<String> toList = new ArrayList<>();
+                
+                for (int i = 1; i < coords.length; i++) {
+                    toList.add(coords[i]);
+                }
+                
+                legalMovesMap.put(from, toList);
+            }
+        }
+    }
+
+    // Zatrzymuje czas po macie/remisie
+    public void stopTimer() {
+        if (gameTimer != null) {
+            gameTimer.stop();
+        }
+    }
+
+    // Blokuje możliwość ruszania figur
+    public void clearMoves() {
+        legalMovesMap.clear();
+        clearHighlights();
+    }
+
+    public void addMoveToHistory(String moveNotation) {
+        moveHistory.getItems().add(moveNotation);
+        moveHistory.scrollTo(moveHistory.getItems().size() - 1); //przewijanie na sam dół
     }
 }

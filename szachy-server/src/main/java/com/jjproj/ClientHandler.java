@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 import com.jjproj.DatabaseIntegration.UsersTable;
+import com.jjproj.Logic.Color;
 import com.jjproj.Logic.GameSession;
 
 public class ClientHandler implements Runnable {
@@ -132,26 +133,35 @@ public class ClientHandler implements Runnable {
             String naPole = data[2];
             
             String wynikRuchu = currentSession.applyMove(zPola, naPole, this.playerLogin);
-            
             String[] wynikData = wynikRuchu.split("\\|");
             
             if (wynikData[0].equals("ERROR")) {
-                this.sendMessage("MOVE_ERROR|" + wynikData[1]);
-            } 
-            else if (wynikData[0].equals("MOVE_OK")) {
-                String nowyFen = wynikData[wynikData.length - 1]; 
+                this.sendMessage("MOVE_ERROR|" + wynikData[1] + "|" + zPola + "|" + naPole);
                 
-                currentSession.broadcast("BOARD_UPDATE|" + nowyFen);
-                
-                if (wynikData.length > 2 && wynikData[1].equals("CHECK")) {
-                    currentSession.broadcast("GAME_STATUS|SZACH!");
+                ClientHandler przeciwnik = currentSession.getOpponent(this);
+                przeciwnik.sendMessage("GAME_STATUS|Przeciwnik wykonał nielegalny ruch.");
+            } else if (wynikData[0].equals("GAME_OVER")) {
+                ClientHandler przeciwnik = currentSession.getOpponent(this);
+                if (przeciwnik != null) {
+                    przeciwnik.sendMessage("OPPONENT_MOVED|" + zPola + "|" + naPole);
+                    przeciwnik.isInGame = false;
                 }
-            }
-            else if (wynikData[0].equals("GAME_OVER")) {
-                currentSession.broadcast("GAME_OVER|" + wynikData[1] + "|" + wynikData[2]);
                 
                 this.isInGame = false;
-                // Tutaj warto byłoby też wywołać koniec u przeciwnika
+                
+                currentSession.broadcast("GAME_OVER|" + wynikData[1] + "|" + wynikData[2]);
+            }
+            else if (wynikData[0].equals("MOVE_OK")) {
+                String moveNotation = wynikData[wynikData.length - 1];
+                currentSession.broadcast("NEW_MOVE|" + moveNotation);
+
+                ClientHandler przeciwnik = currentSession.getOpponent(this);
+                przeciwnik.sendMessage("OPPONENT_MOVED|" + zPola + "|" + naPole);
+                
+                String legalMovesDlaPrzeciwnika = currentSession.getAllLegalMovesFor();
+                przeciwnik.sendMessage("LEGAL_MOVES|" + legalMovesDlaPrzeciwnika);
+                
+                this.sendMessage("MOVE_ACCEPTED");
             }
         }
     }

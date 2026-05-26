@@ -139,7 +139,8 @@ public class SceneManager {
             setBadgeVisibility(false);
         }
     }
-
+    
+    // GameView commands
     public static void registerGameView(GameView gameView) {
         activeGameView = gameView;
     }
@@ -148,6 +149,49 @@ public class SceneManager {
         Platform.runLater(() -> {
             if (activeGameView != null) {
                 activeGameView.updateBoardFromFEN(fen);
+            }
+        });
+    }
+
+    public static void setLegalMoves(String moveData) {
+        Platform.runLater(() -> {
+            if (activeGameView != null) {
+                activeGameView.updateLegalMoves(moveData);
+            }
+        });
+    }
+
+    public static void applyOpponentMove(String from, String to) {
+        Platform.runLater(() -> {
+            if (activeGameView != null) {
+                activeGameView.applyLocalMove(from, to);
+            }
+        });
+    }
+
+    public static void revertMyMove(String from, String to) {
+        Platform.runLater(() -> {
+            if (activeGameView != null) {
+                activeGameView.revertLocalMove(from, to);
+            }
+        });
+    }
+
+    public static void handleGameOver(String winner, String cause) {
+        Platform.runLater(() -> {
+            setStatus("KONIEC GRY! " + cause + ". Wygrywa: " + winner);
+            
+            if (activeGameView != null) {
+                activeGameView.stopTimer();
+                activeGameView.clearMoves();
+            }
+        });
+    }
+
+    public static void addMoveToHistory(String moveNotation) {
+        Platform.runLater(() -> {
+            if (activeGameView != null) {
+                activeGameView.addMoveToHistory(moveNotation);
             }
         });
     }
