@@ -291,3 +291,43 @@
 .separator {
     -fx-background-color: #444;
 }
+
+/* =========================
+   SCROLLBAR 
+   ========================= */
+
+.scroll-bar:vertical,
+.scroll-bar:horizontal {
+    -fx-background-color: #151515;
+}
+
+.scroll-bar .track {
+    -fx-background-color: #1f1f1f;
+    -fx-background-radius: 8;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #6b5a42;
+    -fx-background-radius: 8;
+    -fx-opacity: 0.9;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #8a7454;
+    -fx-opacity: 1;
+}
+
+.scroll-bar .thumb:pressed {
+    -fx-background-color: #a08660;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: #1f1f1f;
+    -fx-padding: 2;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: #6b5a42;
+}
