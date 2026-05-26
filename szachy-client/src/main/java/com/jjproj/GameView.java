@@ -474,8 +474,8 @@ public class GameView {
                     final int c = col;
 
                     piece.setOnMouseClicked(e -> {
-                        selectedRow = r;
-                        selectedCol = c;
+                        selectedRow = r; //TODO: zrobić, aby się propki pokazały kiedy gracz podniesie pionka bez zaznaczania(teraz bez zaznaczania się nie pokazują)
+                        selectedCol = c; //TODO: zrobić aby można było się ruszyć pionkiem w pole z kropką klikając na te pole (nie koniecznie drag&drop'em)
                         showPossibleMoves(r, c);
                     });
 

@@ -3,8 +3,6 @@ package com.jjproj.Logic.piece;
 import com.jjproj.Logic.Color;
 import com.jjproj.Logic.Coordinates;
 import com.jjproj.Logic.Board;
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 

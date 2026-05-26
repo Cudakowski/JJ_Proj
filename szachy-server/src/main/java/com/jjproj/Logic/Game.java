@@ -4,9 +4,6 @@ import com.jjproj.Logic.piece.*;
 
 import java.util.Scanner;
 import java.util.Set;
-import com.jjproj.Logic.Coordinates;
-import com.jjproj.Logic.Board;
-import com.jjproj.Logic.GameStateChecker;
 
 
 public class Game {
@@ -15,7 +12,7 @@ public class Game {
     //private BoardConsoleRenderer render = new BoardConsoleRenderer();
     private final BoardConsoleRenderer renderer = new BoardConsoleRenderer();
     private final Scanner scanner = new Scanner(System.in); 
-    private InputCoordinates inputCoordinates = new InputCoordinates();
+    //private InputCoordinates inputCoordinates = new InputCoordinates();
   
 
     public Game(Board board){
