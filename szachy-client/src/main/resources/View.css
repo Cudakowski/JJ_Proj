@@ -244,3 +244,9 @@
     -fx-font-weight: bold;
     -fx-padding: 5 0 0 5;
 }
+
+.coord-label {
+    -fx-text-fill: #d9c7a3;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}

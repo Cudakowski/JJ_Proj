@@ -6,6 +6,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -19,7 +21,17 @@ public class MenuView {
         // Powiadomienia
         
 
-        Button notifications = new Button("🔔");
+        Image bellImage = new Image(
+        getClass().getResourceAsStream("/bell.png")
+    );
+
+        ImageView bellIcon = new ImageView(bellImage);
+
+        bellIcon.setFitWidth(20);
+        bellIcon.setFitHeight(20);
+
+        Button notifications = new Button();
+        notifications.setGraphic(bellIcon);
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
