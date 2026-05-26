@@ -8,106 +8,112 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
 
 public class StatsView {
 
     public Scene createScene(Stage stage) {
-
-        // Ustawiam roota - bedzie borderpane zeby moc dawac po bokach rozne info, jeszce do konca nie mam pelnego pomyslu jak to bedzie ale cos sie wymysli
         BorderPane root = new BorderPane();
-
         root.setPadding(new Insets(20));
+        root.getStyleClass().add("root-dark");
 
-        Label status = new Label("Status");
-        status.getStyleClass().add("error-label");
-        status.setMaxWidth(Double.MAX_VALUE);
-        status.setAlignment(Pos.CENTER);
-
-    // TOP
-
-        Region spacer = new Region();
-        VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);       
-    
-        
-        // Tytul okienka - statystyki!
-        Label title = new Label("Statystyki");
-
-
+        // --- TOP ---
+        Label title = new Label("STATYSTYKI");
+        title.getStyleClass().add("main-title-small");
         HBox topBox = new HBox(title);
-
         topBox.setAlignment(Pos.CENTER);
-
-        topBox.setPadding(new Insets(10));
-        
-        // Dodaje na gore naszego roota ten tytul
         root.setTop(topBox);
 
-    // CENTER
+        // --- CENTER ---
+        HBox mainContent = new HBox(20);
+        mainContent.setPadding(new Insets(20, 0, 20, 0));
 
-        // Tworze liste naszych gier
-        ListView<String> gamesList = new ListView<>();
+        // LEWA STRONA
+        VBox leftColumn = new VBox(10);
+        HBox.setHgrow(leftColumn, Priority.ALWAYS);
+        Label leftLabel = new Label("Historia Twoich Gier");
+        leftLabel.getStyleClass().add("section-label");
 
-        // Dodawanie gier do listy, na razie bez funkcjonalnosci, tak poglądowo
-        gamesList.getItems().addAll(
-                "Gra 1 - wygrana",
-                "Gra 2 - przerwana",
-                "Gra 3 - przegrana",
-                "Dokonczyc"
+        ListView<String> gamesListView = new ListView<>();
+        gamesListView.getStyleClass().add("list-view-custom"); 
+        
+
+        gamesListView.getItems().addAll(
+            "Gra #152 - Wygrana (vs Gracz123)",
+            "Gra #151 - Przegrana (vs MistrzSzachowy)",
+            "Gra #150 - Wygrana (vs Janusz_IT)",
+            "Gra #149 - Remis (vs Bot_Easy)",
+            "Gra #148 - Wygrana (vs Anna99)",
+            "Gra #148 - Wygrana (vs Anna99)",
+            "Gra #148 - Wygrana (vs Anna99)",
+            "Gra #148 - Wygrana (vs Anna99)",
+            "Gra #148 - Wygrana (vs Anna99)",
+            "Gra #148 - Wygrana (vs Anna99)"
+
+
+        );
+        
+        VBox.setVgrow(gamesListView, Priority.ALWAYS);
+        leftColumn.getChildren().addAll(leftLabel, gamesListView);
+
+        // PRAWA STRONA
+        VBox rightColumn = new VBox(10);
+        rightColumn.setPrefWidth(320);
+        Label rightLabel = new Label("Szczegółowe statystyki");
+        rightLabel.getStyleClass().add("section-label");
+
+        ListView<VBox> globalStatsList = new ListView<>();
+        globalStatsList.getStyleClass().add("list-view-stats");
+
+
+        globalStatsList.getItems().addAll(
+            createStatTile("Suma rozegranych gier", "154,200"),
+            createStatTile("Zbite pionki (Białe)", "942,105"),
+            createStatTile("Zbite pionki (Czarne)", "931,002"),
+            createStatTile("Najpopularniejszy ruch", "e2 -> e4"),
+            createStatTile("Średni czas gry", "12m 45s")
         );
 
+        VBox.setVgrow(globalStatsList, Priority.ALWAYS);
+        rightColumn.getChildren().addAll(rightLabel, globalStatsList);
 
-        // dodaje na srodek listę gier
-        root.setCenter(gamesList);
+        mainContent.getChildren().addAll(leftColumn, rightColumn);
+        root.setCenter(mainContent);
 
-    // BOTTOM
-
-        // Przycisk wyjscia do menu
-        Button back = new Button("Powrót do menu");
-        
-        // Jak klikniemy przenosi nas do menu
+        // --- BOTTOM ---
+        Button back = new Button("WSTECZ");
+        back.getStyleClass().add("btn-main");
+        back.setPrefWidth(150);
         back.setOnAction(e -> {
             MenuView menu = new MenuView();
             stage.setScene(menu.createScene(stage));
         });
 
+        HBox bottomBox = new HBox(back);
+        bottomBox.setAlignment(Pos.BOTTOM_RIGHT);
+        root.setBottom(bottomBox);
 
-
-        // Przycisk powrotu do menu daje na sam dół (tworze HBox i do niego dala, - moze tam kilka opcji by jeszcze dodac)
-
-        VBox bottom = new VBox(back, spacer, status);
-        bottom.setAlignment(Pos.CENTER);
-        root.setBottom(bottom);
-
-    // SCENE
-
-        // Tworze nowa scene i dodaje nasz root - borderpane do niej
-        Scene scene = new Scene(root, 600, 600);
-
-        // Ustawiam scene
-        stage.setScene(scene);
-
-        // Stylizowanie elementów
-        
-        root.getStyleClass().add("root-dark");
-        title.getStyleClass().add("status-label");
-        gamesList.getStyleClass().add("list-view");
-        back.getStyleClass().add("btn-main");
-        scene.getStylesheets().add(
-                getClass().getResource("/View.css").toExternalForm()
-        );
-
-        // Minnimalny rozmiar okna
-
-        stage.setMinWidth(400);
-        stage.setMinHeight(500);
-
-        SceneManager.registerStatusLabel(status);
+        Scene scene = new Scene(root, 950, 650);
+        scene.getStylesheets().add(getClass().getResource("/View.css").toExternalForm());
         
         return scene;
     }
-}
 
+    // Metoda dla prawych kafelków
+    private VBox createStatTile(String title, String value) {
+        VBox tile = new VBox(5);
+        tile.setAlignment(Pos.CENTER);
+        tile.setPadding(new Insets(15));
+        tile.getStyleClass().add("stat-item-box");
+
+        Label t = new Label(title);
+        t.setStyle("-fx-text-fill: #d9c7a3; -fx-font-size: 13px;");
+        Label v = new Label(value);
+        v.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;");
+        
+        tile.getChildren().addAll(t, v);
+        return tile;
+    }
+}

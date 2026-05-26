@@ -17,6 +17,8 @@ public class NetworkManager {
     private static ScheduledExecutorService clock;
     private static long sendTime = 0;
     private static AtomicBoolean isLoggingOrLogged = new AtomicBoolean(false);
+    private static final String hostIP4="192.168.245.52";
+    private static final int hostPort=5000;
 
     public static boolean connect(String host, int port) {
         try {
@@ -46,7 +48,7 @@ public class NetworkManager {
 
         Thread bridgeThread = new Thread(() -> {
         
-            boolean isConnected = NetworkManager.connect("localhost", 5000);
+            boolean isConnected = NetworkManager.connect(hostIP4, hostPort);
             
             
             if (isConnected) {
@@ -73,7 +75,7 @@ public class NetworkManager {
         }
 
         Thread bridgeThread = new Thread(() -> {
-            boolean isConnected = NetworkManager.connect("localhost", 5000);
+            boolean isConnected = NetworkManager.connect(hostIP4, hostPort);
             
             
             if (isConnected) {
@@ -274,11 +276,12 @@ public class NetworkManager {
                 if (data.length >= 3) {
                     String mojKolor = data[1];
                     String przeciwnik = data[2];
+                    String czasGry = data[3];
                     
                     System.out.println("Start gry. Gram jako " + mojKolor + " przeciwko: " + przeciwnik);
 
                     
-                    SceneManager.switchToGame();
+                    SceneManager.switchToGame(mojKolor,przeciwnik,czasGry);
                     if (mojKolor.equals("Czarny")) {
                         SceneManager.setStatus("Oczekiwanie na ruch przeciwnika...");
                 }

@@ -249,4 +249,45 @@
     -fx-text-fill: #d9c7a3;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
+    -fx-min-width: 80px;
+    -fx-alignment: center;
+}
+
+/* Styl dla kolumny statystyk po prawej */
+.stats-panel {
+    -fx-background-color: #2b2b2b;
+    -fx-background-radius: 15;
+    -fx-border-color: #444;
+    -fx-border-radius: 15;
+    -fx-text-fill: white;
+}
+
+.main-title-small {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: beige;
+    -fx-padding: 5;
+}
+
+/* Dostosowanie listy, by nie była zbyt toporna */
+.list-view-custom {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 5;
+}
+
+.list-view-custom .list-cell {
+    -fx-background-color: #333;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-margin: 5;
+    -fx-padding: 15;
+}
+
+.list-view-custom .list-cell:hover {
+    -fx-background-color: #444;
+}
+
+.separator {
+    -fx-background-color: #444;
 }
