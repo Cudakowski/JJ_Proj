@@ -195,4 +195,12 @@ public class SceneManager {
             }
         });
     }
+
+    public static void syncTime(int whiteSec, int blackSec) {
+        Platform.runLater(() -> {
+            if (activeGameView != null) {
+                activeGameView.syncTimeWithServer(whiteSec, blackSec);
+            }
+        });
+    }
 }

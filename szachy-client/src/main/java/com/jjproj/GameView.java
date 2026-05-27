@@ -90,7 +90,7 @@ public class GameView {
         statusGry = new Label("Tura: Białe");
         
         // Naglowek czas rozgrywki graczy
-        timer = new Label("Czas: 00:00, 00:00");
+        timer = new Label("BIAŁY 00:00  |  00:00 CZARNY");
 
 
                 
@@ -142,7 +142,9 @@ public class GameView {
     bottomLetters.setPadding(new Insets(5, 0, 0, 0));
     topLetters.setPadding(new Insets(0, 0, 5, 0));
 
-    char[] files = {'A','B','C','D','E','F','G','H'};
+    char[] files = mojKolor.equals("Czarny") 
+            ? new char[]{'H','G','F','E','D','C','B','A'} 
+            : new char[]{'A','B','C','D','E','F','G','H'};
 
     for (char f : files) {
         Label l1 = new Label(String.valueOf(f));
@@ -173,7 +175,11 @@ public class GameView {
     leftNumbers.setSpacing(0);
     rightNumbers.setSpacing(0);
 
-    for (int i = 8; i >= 1; i--) {
+    int[] ranks = mojKolor.equals("Czarny") 
+            ? new int[]{1, 2, 3, 4, 5, 6, 7, 8} 
+            : new int[]{8, 7, 6, 5, 4, 3, 2, 1};
+
+    for (int i : ranks) {
         Label l1 = new Label(String.valueOf(i));
         Label l2 = new Label(String.valueOf(i));
 
@@ -272,10 +278,10 @@ public class GameView {
 
      // SCENE
 
-        Scene scene = new Scene(root, 1200, 1200);
+        Scene scene = new Scene(root, 1200, 1000);
 
         stage.setMinWidth(1200);
-        stage.setMinHeight(1200);
+        stage.setMinHeight(1000);
 
 
         // Stylizowanie elementow
@@ -434,6 +440,9 @@ public class GameView {
                             showPossibleMoves(r, c);
                         }
                         e.consume();
+                        selectedRow = r; //TODO: zrobić, aby się propki pokazały kiedy gracz podniesie pionka bez zaznaczania(teraz bez zaznaczania się nie pokazują)
+                        selectedCol = c; //TODO: zrobić aby można było się ruszyć pionkiem w pole z kropką klikając na te pole (nie koniecznie drag&drop'em)
+                        showPossibleMoves(r, c);// TODO: podświetlanie ostatniego ruchu
                     });
 
                     // start przeciagania
@@ -620,6 +629,7 @@ public class GameView {
         pieces[newRow][newCol] = lastBeatenPiece;
         
         refreshBoard();
+        changeTurn();
     }
 
     private int convertFileToCol(char file) {
@@ -708,35 +718,44 @@ public class GameView {
 
     private void startTimer() {
         // Ustawiamy tekst początkowy przed startem animacji
-        timer.setText("Czas: " + formatTime(whiteTime) + " | " + formatTime(blackTime));
+        timer.setText("BIAŁY " + formatTime(whiteTime) + "  |  " + formatTime(blackTime) + " CZARNY");
 
         gameTimer = new Timeline(
             new KeyFrame(Duration.seconds(1), e -> {
                 if (whiteTurn) {
                     whiteTime--;
-                    if (whiteTime <= 0) {
-                        wygasłCzasGracza("Białe");
-                    }
+                    // if (whiteTime <= 0) {
+                    //     playerExpired("Białe");
+                    // }
                 } else {
                     blackTime--;
-                    if (blackTime <= 0) {
-                        wygasłCzasGracza("Czarne");
-                    }
+                    // if (blackTime <= 0) {
+                    //     playerExpired("Czarne");
+                    // }
                 }
 
-                timer.setText("Czas: " + formatTime(whiteTime) + " | " + formatTime(blackTime));
+                timer.setText("BIAŁY " + formatTime(whiteTime) + "  |  " + formatTime(blackTime) + " CZARNY");
             })
         );
         gameTimer.setCycleCount(Timeline.INDEFINITE);
         gameTimer.play();
     }
 
-    private void wygasłCzasGracza(String ktoPrzegral) {
-        stopTimer();
-        clearMoves();
-        String zwycięzca = ktoPrzegral.equals("Białe") ? "CZARNE" : "BIAŁE";
-        SceneManager.setStatus("KONIEC GRY! Koniec czasu dla: " + ktoPrzegral + ". Wygrywa: " + zwycięzca);
+    // private void playerExpired(String ktoPrzegral) {
+    //     stopTimer();
+    //     clearMoves();
+    //     String zwyciezca = ktoPrzegral.equals("Białe") ? "CZARNE" : "BIAŁE";
+    //     SceneManager.setStatus("KONIEC GRY! Koniec czasu dla: " + ktoPrzegral + ". Wygrywa: " + zwyciezca);
         
+    // }
+
+    public void syncTimeWithServer(int serverWhiteTime, int serverBlackTime) {
+        this.whiteTime = serverWhiteTime;
+        this.blackTime = serverBlackTime;
+        
+        if (timer != null) {
+            timer.setText("BIAŁY " + formatTime(whiteTime) + "  |  " + formatTime(blackTime) + " CZARNY");
+        }
     }
 
     private void clearSelectionStyle() {

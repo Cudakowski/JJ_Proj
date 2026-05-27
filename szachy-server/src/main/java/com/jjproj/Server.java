@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.jjproj.Logic.GameSession;
 import com.mysql.cj.jdbc.AbandonedConnectionCleanupThread;
 
 public class Server {
@@ -62,6 +63,8 @@ public class Server {
             try {
                 long currentTIme = System.currentTimeMillis();
 
+                java.util.Set<GameSession> sprawdzoneGry = new java.util.HashSet<>();
+
                 // PING
                 for (ClientHandler client : onlineUsers.values()) {
                     
@@ -70,9 +73,15 @@ public class Server {
                     if (timeSinceLastSignal > 10000) {
                         client.pingAbsenceDisconnection();
                     }
+
+                    GameSession session = client.getCurrentSession();
+                    if (session != null && !session.isGameOver() && !sprawdzoneGry.contains(session)) {
+                        session.checkTime();
+                        sprawdzoneGry.add(session);
+                    }
                 }
 
-                // TODO: Czy komuś skończył się czas w partii (wysłanie GAME_OVER)
+                
                 
             } catch (Exception e) {
                 System.err.println("Błąd w wątku zegarowym: " + e.getMessage());

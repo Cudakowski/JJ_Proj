@@ -1,9 +1,6 @@
 package com.jjproj.Logic;
 
 import com.jjproj.Logic.piece.*;
-import com.jjproj.Logic.InputCoordinates;
-import com.jjproj.Logic.Coordinates;
-import com.jjproj.Logic.Board;
 import java.util.Set;
 
 import java.util.HashSet;

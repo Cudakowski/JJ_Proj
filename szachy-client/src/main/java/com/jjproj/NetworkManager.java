@@ -17,7 +17,7 @@ public class NetworkManager {
     private static ScheduledExecutorService clock;
     private static long sendTime = 0;
     private static AtomicBoolean isLoggingOrLogged = new AtomicBoolean(false);
-    private static final String hostIP4="192.168.245.52";
+    private static final String hostIP4="localhost";
     private static final int hostPort=5000;
 
     public static boolean connect(String host, int port) {
@@ -334,6 +334,14 @@ public class NetworkManager {
             case "NEW_MOVE":
                 if (data.length > 1) {
                     SceneManager.addMoveToHistory(data[1]);
+                }
+                break;
+            
+            case "TIME_UPDATE":
+                if (data.length >= 3) {
+                    int wTime = Integer.parseInt(data[1]);
+                    int bTime = Integer.parseInt(data[2]);
+                    SceneManager.syncTime(wTime, bTime);
                 }
                 break;
                 

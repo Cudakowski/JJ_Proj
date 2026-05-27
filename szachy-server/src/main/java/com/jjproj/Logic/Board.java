@@ -1,6 +1,5 @@
 package com.jjproj.Logic;
 
-import java.util.Collections;
 import java.util.HashMap;
 
 import com.jjproj.Logic.piece.Bishop;

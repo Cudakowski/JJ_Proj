@@ -1,7 +1,6 @@
 package com.jjproj.Logic;
 import java.util.Scanner;
 
-import com.jjproj.Logic.piece.CoordinatesShift;
 import com.jjproj.Logic.piece.Piece;
 import java.util.Set;
 

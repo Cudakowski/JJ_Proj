@@ -11,6 +11,11 @@ public class GameSession {
     private boolean gameOver;
     private final String gameTime;
 
+    private int whiteTimeLeft;
+    private int blackTimeLeft;
+    private long lastTimeCheck;
+    private boolean isTimeLimited;
+
     private final ClientHandler whitePlayer;
     private final ClientHandler blackPlayer;
 
@@ -32,6 +37,15 @@ public class GameSession {
         this.currentTurn = Color.WHITE;
         this.gameOver = false;
         this.gameTime=gameTime;
+
+        switch (gameTime) {
+            case "10min": whiteTimeLeft = 300; blackTimeLeft = 300; isTimeLimited = true; break;
+            case "20min": whiteTimeLeft = 600; blackTimeLeft = 600; isTimeLimited = true; break;
+            case "40min": whiteTimeLeft = 1200; blackTimeLeft = 1200; isTimeLimited = true; break;
+            case "60min": whiteTimeLeft = 1800; blackTimeLeft = 1800; isTimeLimited = true; break;
+            default: isTimeLimited = false; break; // Bez ograniczen
+        }
+        this.lastTimeCheck = System.currentTimeMillis();
         
         this.whitePlayer = whitePlayer;
         this.blackPlayer = blackPlayer;
@@ -251,6 +265,9 @@ public class GameSession {
             return "ERROR|ILLEGAL_MOVE";
         }
 
+        checkTime();
+        if(gameOver) return "ERROR|TIMEOUT";
+
         boolean isCapture = !board.isSquareEmpty(toCoords);
 
         // en passant sprawdzamy do rucha
@@ -310,12 +327,10 @@ public class GameSession {
             fullMoveNumber++;
         }
         
-        
-        
-
-        //zmienić kolejkę
+        //zmienić kolejke
         Color opponent = (currentTurn == Color.WHITE) ? Color.BLACK : Color.WHITE;
         currentTurn = opponent;
+        this.lastTimeCheck = System.currentTimeMillis();
 
          //sprawdzanie stanu gry
         String fen = boardToFEN();
@@ -340,6 +355,8 @@ public class GameSession {
     public Color getCurrentTurn() { 
         return currentTurn; 
     }
+
+    
     // public String getWhitePlayer(){ 
     //     return whitePlayer; 
     // }
@@ -355,6 +372,40 @@ public class GameSession {
             return blackPlayer;
         }
         return whitePlayer;
+    }
+
+    public void checkTime() {
+        if (gameOver || !isTimeLimited) return;
+
+        long now = System.currentTimeMillis();
+        int passedSeconds = (int) ((now - lastTimeCheck) / 1000);
+
+        if (passedSeconds >= 1) {
+            if (currentTurn == Color.WHITE) {
+                whiteTimeLeft -= passedSeconds;
+            } else {
+                blackTimeLeft -= passedSeconds;
+            }
+            
+            lastTimeCheck = now;
+
+            if (whiteTimeLeft <= 0) {
+                gameOver = true;
+                broadcast("GAME_OVER|Czarny|Koniec czasu");
+                endGameSession();
+            } else if (blackTimeLeft <= 0) {
+                gameOver = true;
+                broadcast("GAME_OVER|Bialy|Koniec czasu");
+                endGameSession();
+            } else {
+                broadcast("TIME_UPDATE|" + whiteTimeLeft + "|" + blackTimeLeft);
+            }
+        }
+    }
+    
+    private void endGameSession() {
+        whitePlayer.setInGame(false);
+        blackPlayer.setInGame(false);
     }
 
 }
