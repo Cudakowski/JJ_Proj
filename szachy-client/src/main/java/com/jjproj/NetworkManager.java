@@ -222,12 +222,16 @@ public class NetworkManager {
                     String time = data[3];
                     
                     String informacjaDlaOdbiorcy = "";
-                    if (color.equals("Bialy")) {
-                        informacjaDlaOdbiorcy = "Twój kolor: Czarny";
-                    } else if (color.equals("Czarny")) {
-                        informacjaDlaOdbiorcy = "Twój kolor: Biały";
-                    } else {
-                        informacjaDlaOdbiorcy = "Kolor: Losowo";
+                    switch (color) {
+                        case "Bialy":
+                            informacjaDlaOdbiorcy = "Twój kolor: Czarny";
+                            break;
+                        case "Czarny":
+                            informacjaDlaOdbiorcy = "Twój kolor: Biały";
+                            break;
+                        default:
+                            informacjaDlaOdbiorcy = "Kolor: Losowo";
+                            break;
                     }
                     
                     String tresc = sender + " zaprasza do gry! (" + time + "; " + informacjaDlaOdbiorcy + ")";

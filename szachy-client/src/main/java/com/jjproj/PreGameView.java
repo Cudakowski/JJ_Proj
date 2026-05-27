@@ -1,10 +1,9 @@
 package com.jjproj;
 
-
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -18,211 +17,151 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-/**
- * Layout JavaFX (bez FXML) zgodny z mockupem:
- * - lewa: lista gier
- * - prawa: nowa gra
- * - dół: wstecz
- *
- * Zakłada użycie Twojego CSS (styleClass)
- */
 public class PreGameView {
 
-public Scene createScene(Stage stage) {
+    private final ToggleGroup colorGroup = new ToggleGroup();
+    private final ToggleGroup timeGroup = new ToggleGroup();
+    private Label statusLabel;
 
+    public Scene createScene(Stage stage) {
         BorderPane root = new BorderPane();
         root.getStyleClass().add("border-pane");
 
-        // top
-        Label title = new Label("Przed rozpoczęciem gry...");
+        // --- Struktura główna ---
+        root.setTop(createHeader());
+        root.setCenter(createMainContent(stage));
+        root.setBottom(createFooter(stage));
 
-        Label status = new Label("Status");
-        status.getStyleClass().add("error-label");
-        status.setMaxWidth(Double.MAX_VALUE);
-        status.setAlignment(Pos.CENTER);
+        // --- Konfiguracja Sceny ---
+        Scene scene = new Scene(root, 1150, 900);
+        scene.getStylesheets().add(getClass().getResource("/View.css").toExternalForm());
+        
+        return scene;
+    }
 
+    private HBox createHeader() {
+        Label title = new Label("Konfiguracja Rozgrywki");
+        title.getStyleClass().add("subtitle");
+        title.setMaxWidth(Double.MAX_VALUE);
+        title.setAlignment(Pos.CENTER);
 
         HBox topBar = new HBox(title);
-        topBar.setPadding(new Insets(20, 20, 10, 20));
-        
-        root.setTop(topBar);
+        topBar.setPadding(new Insets(30, 20, 10, 20));
+        HBox.setHgrow(title, Priority.ALWAYS);
+        return topBar;
+    }
 
-        // left
-        Label leftTitle = new Label("Lista rozpoczętych gier");
+    private HBox createMainContent(Stage stage) {
+        HBox container = new HBox(40, createSavedGamesPanel(stage), createNewGamePanel(stage));
+        container.setPadding(new Insets(20, 60, 20, 60));
+        container.setAlignment(Pos.CENTER);
+        return container;
+    }
 
+    private VBox createFooter(Stage stage) {
+        statusLabel = new Label("Oczekiwanie na wybór...");
+        statusLabel.getStyleClass().add("error-label");
+        statusLabel.setMaxWidth(Double.MAX_VALUE);
+        statusLabel.setAlignment(Pos.CENTER);
+        SceneManager.registerStatusLabel(statusLabel);
 
-        ListView<String> gamesList = new ListView<>();
+        Button backBtn = new Button("← Wstecz");
+        backBtn.getStyleClass().add("btn-main");
+        backBtn.setOnAction(e -> stage.setScene(new MenuView().createScene(stage)));
 
-        ObservableList<String> items = FXCollections.observableArrayList(
-                "Gra #1 - biały vs czarny",
-                "Gra #2 - czarny vs biały",
+        HBox navRow = new HBox(backBtn);
+        navRow.setPadding(new Insets(10, 60, 0, 60));
+        navRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox footer = new VBox(15, navRow, statusLabel);
+        footer.setPadding(new Insets(0, 0, 30, 0));
+        return footer;
+    }
+
+    private VBox createSavedGamesPanel(Stage stage) {
+        Label title = new Label("Kontynuuj zapisaną grę");
+        title.getStyleClass().add("side-title");
+
+        ListView<String> gamesList = new ListView<>(FXCollections.observableArrayList(
+                "Gra #1 - biały vs czarny", 
+                "Gra #2 - czarny vs biały", 
                 "Gra #3 - losowa"
-        );
+        ));
+        gamesList.getStyleClass().add("modern-list");
+        
+        // Rozciąganie listy na całą dostępną wysokość
+        VBox.setVgrow(gamesList, Priority.ALWAYS);
 
-        gamesList.setItems(items);
-
-        Button resumeBtn = new Button("Wznów grę i zaproś");
-
+        Button resumeBtn = new Button("Wznów zaznaczoną");
         resumeBtn.setMaxWidth(Double.MAX_VALUE);
+        resumeBtn.getStyleClass().add("btn-main");
+        resumeBtn.setOnAction(e -> stage.setScene(new OnlinePlayersView().createScene(stage, "", "")));
 
-        resumeBtn.setOnAction(e -> {
-            OnlinePlayersView onlinePlayersView = new OnlinePlayersView();
-            stage.setScene(onlinePlayersView.createScene(stage,"","")); //TODO                
-        });
-
-
-        VBox leftPanel = new VBox(15, leftTitle, gamesList, resumeBtn);
-        leftPanel.setPadding(new Insets(20));
-
-
-
-
-        // right
-        Label rightTitle = new Label("Nowa gra");
-
-
-        ToggleGroup colorGroup = new ToggleGroup();
-
-        RadioButton c1 = new RadioButton("BIAŁY (ty), CZARNY (oponent)");
-        c1.setToggleGroup(colorGroup);
-        c1.setUserData("Bialy");
-        c1.setSelected(true);
-
-        RadioButton c2 = new RadioButton("CZARNY (ty), BIAŁY (oponent)");
-        c2.setToggleGroup(colorGroup);
-        c2.setUserData("Czarny");
-
-        RadioButton c3 = new RadioButton("LOSOWO");
-        c3.setToggleGroup(colorGroup);
-        c3.setUserData("Losowo");
-
-        Label wybierzKolor = new Label("Wybierz kolor: ");
-
-        VBox colorBox = new VBox(10,
-               wybierzKolor, c1, c2, c3
-        );
-
-        ToggleGroup timeGroup = new ToggleGroup();
-
-        RadioButton t1 = new RadioButton("bez ograniczeń");
-        t1.setToggleGroup(timeGroup);
-        t1.setUserData("Bez ograniczen");
-        t1.setSelected(true);
-
-        RadioButton t2 = new RadioButton("10min (po 5min)");
-        t2.setToggleGroup(timeGroup);
-        t2.setUserData("10min");
-
-        RadioButton t3 = new RadioButton("20min (po 10min)");
-        t3.setToggleGroup(timeGroup);
-        t3.setUserData("20min");
-
-        RadioButton t4 = new RadioButton("40min (po 20min)");
-        t4.setToggleGroup(timeGroup);
-        t4.setUserData("40min");
-
-        RadioButton t5 = new RadioButton("60min (po 30min)");
-        t5.setToggleGroup(timeGroup);
-        t5.setUserData("60min");
-
-        Label czasGry  = new Label("Czas gry: ");
-        VBox timeBox = new VBox(10, czasGry, t1, t2, t3, t4, t5);
-
+        // Region wypychający przycisk na sam dół
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        Button nextBtn = new Button("Dalej");
+        return buildPanel(title, gamesList, spacer, resumeBtn);
+    }
+
+    private VBox createNewGamePanel(Stage stage) {
+        Label title = new Label("Parametry nowej gry");
+        title.getStyleClass().add("side-title");
+
+        VBox colorSection = createOptionGroup("Wybierz kolor:",
+                createRadio("BIAŁY (ty), CZARNY (oponent)", "Bialy", colorGroup, true),
+                createRadio("CZARNY (ty), BIAŁY (oponent)", "Czarny", colorGroup, false),
+                createRadio("LOSOWO", "Losowo", colorGroup, false));
+
+        VBox timeSection = createOptionGroup("Limit czasu:",
+                createRadio("bez ograniczeń", "Bez ograniczen", timeGroup, true),
+                createRadio("10min (po 5min)", "10min", timeGroup, false),
+                createRadio("20min (po 10min)", "20min", timeGroup, false),
+                createRadio("40min (po 20min)", "40min", timeGroup, false),
+                createRadio("60min (po 30min)", "60min", timeGroup, false));
+
+        Button nextBtn = new Button("Dalej do wyboru gracza");
         nextBtn.setMaxWidth(Double.MAX_VALUE);
-
-        nextBtn.setOnAction(e -> {
-            String gameColor = (String) colorGroup.getSelectedToggle().getUserData();
-            String gameTime = (String) timeGroup.getSelectedToggle().getUserData();
-
-            OnlinePlayersView onlinePlayersView = new OnlinePlayersView();
-            stage.setScene(onlinePlayersView.createScene(stage,gameColor,gameTime));                
-        });
-
-        VBox rightPanel = new VBox(20,
-                rightTitle,
-                colorBox,
-                timeBox,
-                spacer,
-                nextBtn
-        );
-        rightPanel.setPadding(new Insets(20));
-
-
-        // srodek
-        HBox center = new HBox(30, leftPanel, rightPanel);
-        center.setPadding(new Insets(20));
-
-        root.setCenter(center);
-
-        center.setAlignment(javafx.geometry.Pos.CENTER);
-
-        // dol
-        Button backBtn = new Button("Wstecz");
-        backBtn.setOnAction(e -> {
-        MenuView menuView = new MenuView();
-        stage.setScene(menuView.createScene(stage));
-        });
-
-
-
-        HBox backBtnContainer = new HBox(backBtn);
-        backBtnContainer.setAlignment(Pos.CENTER_LEFT);
-
-
-        VBox bottomContainer = new VBox(10, backBtnContainer, status);
-        bottomContainer.setPadding(new Insets(10, 20, 20, 20));
-        bottomContainer.setAlignment(Pos.CENTER); 
-
-        root.setBottom(bottomContainer);
-
-
-        // Stylizowanie
-        root.getStyleClass().add("root-dark");
-        title.getStyleClass().add("subtitle");
-        topBar.getStyleClass().add("top-bar");
-        leftTitle.getStyleClass().add("side-title");
-        gamesList.getStyleClass().add("list-view");
-        leftPanel.getStyleClass().add("panel-dark");
-        resumeBtn.getStyleClass().add("btn-main");
-        leftTitle.getStyleClass().add("side-title");
-        resumeBtn.getStyleClass().add("btn-main");
-        rightTitle.getStyleClass().add("side-title");
         nextBtn.getStyleClass().add("btn-main");
-        rightPanel.getStyleClass().add("panel-dark");
-        backBtn.getStyleClass().add("btn-main");
-        wybierzKolor.getStyleClass().add("status-label");
-        czasGry.getStyleClass().add("status-label");
+        nextBtn.setOnAction(e -> {
+            String color = (String) colorGroup.getSelectedToggle().getUserData();
+            String time = (String) timeGroup.getSelectedToggle().getUserData();
+            stage.setScene(new OnlinePlayersView().createScene(stage, color, time));
+        });
 
+        // Region wypychający przycisk "Dalej" na sam dół, aby panele były równe
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        gamesList.setPrefHeight(500);
-        leftPanel.setPrefWidth(400);
-        rightPanel.setPrefWidth(500);
+        return buildPanel(title, colorSection, timeSection, spacer, nextBtn);
+    }
 
-        HBox.setHgrow(title, Priority.ALWAYS);
-        title.setMaxWidth(Double.MAX_VALUE);
-        title.setAlignment(javafx.geometry.Pos.CENTER);
-        title.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+    // --- Helpery (Clean Code) ---
 
+    private VBox buildPanel(Node... children) {
+        VBox panel = new VBox(20, children);
+        panel.setPadding(new Insets(25));
+        panel.getStyleClass().add("modern-panel");
         
-        rightPanel.setAlignment(javafx.geometry.Pos.TOP_CENTER);
-        colorBox.setAlignment(javafx.geometry.Pos.CENTER);
-        timeBox.setAlignment(javafx.geometry.Pos.CENTER);
+        // Zapewnienie rozciągania panelu w poziomie i pionie
+        HBox.setHgrow(panel, Priority.ALWAYS);
+        VBox.setVgrow(panel, Priority.ALWAYS);
+        
+        return panel;
+    }
 
-        rightTitle.setMaxWidth(Double.MAX_VALUE);
-        rightTitle.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+    private VBox createOptionGroup(String labelText, RadioButton... radios) {
+        VBox group = new VBox(10, new Label(labelText));
+        group.getChildren().addAll(radios);
+        group.getStyleClass().add("modern-option-group");
+        return group;
+    }
 
-
-        Scene scene = new Scene(root, 1100, 700);
-        scene.getStylesheets().add(
-                getClass().getResource("/View.css").toExternalForm()
-        );
-
-        SceneManager.registerStatusLabel(status);
-
-        return scene;
+    private RadioButton createRadio(String text, String data, ToggleGroup group, boolean selected) {
+        RadioButton rb = new RadioButton(text);
+        rb.setUserData(data);
+        rb.setToggleGroup(group);
+        rb.setSelected(selected);
+        return rb;
     }
 }

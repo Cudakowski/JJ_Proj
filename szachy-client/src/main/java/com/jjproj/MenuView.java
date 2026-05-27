@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -17,44 +18,11 @@ import javafx.stage.Stage;
 public class MenuView {
 
     public Scene createScene(Stage stage) {
-
-        // Powiadomienia
-        
-
-        Image bellImage = new Image(
-        getClass().getResourceAsStream("/bell.png")
-    );
-
-        ImageView bellIcon = new ImageView(bellImage);
-
-        bellIcon.setFitWidth(20);
-        bellIcon.setFitHeight(20);
-
-        Button notifications = new Button();
-        notifications.setGraphic(bellIcon);
-
-        Region spacer = new Region();
-        VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
-
-
-        notifications.setOnAction(e -> {
-            SceneManager.setBadgeVisibility(false);
-
-            NotificationsView notificationsView = new NotificationsView();
-            stage.setScene(notificationsView.createScene(stage));
-        });
-
-        Label status = new Label("Status");
-        status.getStyleClass().add("error-label");
-        status.setMaxWidth(Double.MAX_VALUE);
-        status.setAlignment(Pos.CENTER);
-        
-
+        // --- Powiadomienia (Top Bar) ---
+        Button notificationsBtn = createNotificationButton();
         Label badge = new Label();
         
-        //badge.setVisible(true); // jako test widoczne
-
-        StackPane notificationWrapper = new StackPane(notifications, badge);
+        StackPane notificationWrapper = new StackPane(notificationsBtn, badge);
         StackPane.setAlignment(badge, Pos.BOTTOM_LEFT);
         notificationWrapper.setPadding(new Insets(5));
 
@@ -62,79 +30,53 @@ public class MenuView {
         topBar.setAlignment(Pos.TOP_RIGHT);
         topBar.setPadding(new Insets(10));
 
-
-
-
+        // --- Elementy Menu ---
         Label title = new Label("SZACHY");
+        Label status = new Label("Status");
 
+        Button newGameBtn = new Button("Graj");
+        Button statsBtn = new Button("Statystyki");
+        Button logOutBtn = new Button("Wyloguj");
+        Button exitBtn = new Button("Wyjście");
 
-        //przyciski
-
-        Button newGame = new Button("Graj");
-        Button stats = new Button("Statystyki"); // TODO: pobierz statystyki
-        Button logOut = new Button("Wyloguj"); 
-        Button exit = new Button("Wyjście");
-
-        newGame.setOnAction(e -> {
-            PreGameView gameView = new PreGameView();
-            stage.setScene(gameView.createScene(stage));
+        // --- Logika Przycisków ---
+        notificationsBtn.setOnAction(e -> {
+            SceneManager.setBadgeVisibility(false);
+            NotificationsView notificationsView = new NotificationsView();
+            stage.setScene(notificationsView.createScene(stage));
         });
 
-        stats.setOnAction(e -> {
+        newGameBtn.setOnAction(e -> {
+            PreGameView preGame = new PreGameView();
+            stage.setScene(preGame.createScene(stage));
+        });
+
+        statsBtn.setOnAction(e -> {
             StatsView statsView = new StatsView();
             stage.setScene(statsView.createScene(stage));
         });
 
-        logOut.setOnAction(e -> {
-            SceneManager.setStatus("Wylogowywanie");
-            Thread logOuThread = new Thread(()->{
-                NetworkManager.disconnect();
-                Platform.runLater(() -> {
-                    LoginView loginView = new LoginView();
-                    stage.setScene(loginView.createScene(stage));
-                });
-            });
+        logOutBtn.setOnAction(e -> handleLogout(stage));
 
-            logOuThread.setDaemon(true);
-            logOuThread.start();
-        });
+        exitBtn.setOnAction(e -> stage.close());
 
-        exit.setOnAction(e -> stage.close());
+        // --- Układ (Layout) ---
+        Region spacerMiddle = new Region();
+        VBox.setVgrow(spacerMiddle, Priority.ALWAYS);
 
-        VBox menu = new VBox(20, title, newGame, stats, logOut, exit, spacer,status);
-        menu.setAlignment(Pos.CENTER);
-
-
-
-        // spacery
+        VBox menuBox = new VBox(20, title, newGameBtn, statsBtn, logOutBtn, exitBtn, spacerMiddle, status);
+        menuBox.setAlignment(Pos.CENTER);
 
         Region spacerTop = new Region();
-        VBox.setVgrow(spacerTop, javafx.scene.layout.Priority.ALWAYS);
-
         Region spacerBottom = new Region();
-        VBox.setVgrow(spacerBottom, javafx.scene.layout.Priority.ALWAYS);
+        VBox.setVgrow(spacerTop, Priority.ALWAYS);
+        VBox.setVgrow(spacerBottom, Priority.ALWAYS);
 
-        VBox root = new VBox();
-        root.getChildren().addAll(topBar, spacerTop, menu, spacerBottom);
+        VBox root = new VBox(topBar, spacerTop, menuBox, spacerBottom);
 
+        // --- Scena i Konfiguracja ---
         Scene scene = new Scene(root, 600, 600);
-
-
-
-
-
-        title.getStyleClass().add("main-title");
-        newGame.getStyleClass().add("btn-main");
-        stats.getStyleClass().add("btn-main");
-        logOut.getStyleClass().add("btn-main");
-        exit.getStyleClass().add("btn-main");
-        notifications.getStyleClass().add("btn-notification");
-        badge.getStyleClass().add("notification-badge");
-        root.getStyleClass().add("root-gradient");
-
-        scene.getStylesheets().add(
-            getClass().getResource("/View.css").toExternalForm()
-        );
+        applyStyles(scene, root, title, newGameBtn, statsBtn, logOutBtn, exitBtn, notificationsBtn, badge, status);
 
         stage.setMinWidth(400);
         stage.setMinHeight(500);
@@ -143,5 +85,50 @@ public class MenuView {
         SceneManager.registerNotificationBadge(badge);
 
         return scene;
+    }
+
+    private Button createNotificationButton() {
+        Image bellImage = new Image(getClass().getResourceAsStream("/bell.png"));
+        ImageView bellIcon = new ImageView(bellImage);
+        bellIcon.setFitWidth(20);
+        bellIcon.setFitHeight(20);
+
+        Button btn = new Button();
+        btn.setGraphic(bellIcon);
+        return btn;
+    }
+
+    private void handleLogout(Stage stage) {
+        SceneManager.setStatus("Wylogowywanie");
+        Thread logoutThread = new Thread(() -> {
+            NetworkManager.disconnect();
+            Platform.runLater(() -> {
+                LoginView loginView = new LoginView();
+                stage.setScene(loginView.createScene(stage));
+            });
+        });
+        logoutThread.setDaemon(true);
+        logoutThread.start();
+    }
+
+    private void applyStyles(Scene scene, VBox root, Label title, Button newGame, Button stats, 
+                             Button logOut, Button exit, Button notify, Label badge, Label status) {
+        
+        root.getStyleClass().add("root-gradient");
+        title.getStyleClass().add("main-title");
+        
+        newGame.getStyleClass().add("btn-main");
+        stats.getStyleClass().add("btn-main");
+        logOut.getStyleClass().add("btn-main");
+        exit.getStyleClass().add("btn-main");
+        
+        notify.getStyleClass().add("btn-notification");
+        badge.getStyleClass().add("notification-badge");
+        
+        status.getStyleClass().add("error-label");
+        status.setMaxWidth(Double.MAX_VALUE);
+        status.setAlignment(Pos.CENTER);
+
+        scene.getStylesheets().add(getClass().getResource("/View.css").toExternalForm());
     }
 }
