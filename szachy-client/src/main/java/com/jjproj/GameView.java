@@ -35,6 +35,11 @@ public class GameView {
     private Label statusGry;
     private StackPane[][] squares = new StackPane[8][8];
 
+    private String lastMovedPiece = "";
+    private String lastBeatenPiece = "";
+    private int lastBeatenRow = -1;
+    private int lastBeatenCol = -1;
+
     private String mojKolor = "Bialy";
     private String wybranyCzas = "Bez ograniczen";
     private Button save; 
@@ -51,15 +56,14 @@ public class GameView {
     //     {"♖","♘","♗","♕","♔","♗","♘","♖"}
     // };
 
-    private String lastBeatenPiece ="";
 
     String[][] pieces = new String[8][8];
     private Map<String, List<String>> legalMovesMap = new HashMap<>();
     private ListView<String> moveHistory;
 
-    // Do klikania na figure zeby widziec gdzie moozna ja poruszyc
-    private int selectedRow = -1;
-    private int selectedCol = -1;
+    // // Do klikania na figure zeby widziec gdzie moozna ja poruszyc
+    // private int selectedRow = -1;
+    // private int selectedCol = -1;
 
     public GameView() {
         for (int row = 0; row < 8; row++) {
@@ -99,7 +103,11 @@ public class GameView {
         // Przycisk do zmiany tury gry
         save = new Button("Zapisz");
 
-
+        save.setOnAction(e -> {
+            new Thread(() -> {
+                NetworkManager.sendCommand("PAUSE_REQUEST");
+            }).start();
+        });
 
 
 
@@ -258,6 +266,10 @@ public class GameView {
 
         // Jak sie klinknie to wraca do menu :D
         back.setOnAction(e -> {
+            new Thread(() -> {
+                NetworkManager.sendCommand("LEAVE_GAME");
+            }).start();
+
             MenuView menu = new MenuView();
             stage.setScene(menu.createScene(stage));
         });
@@ -406,25 +418,42 @@ public class GameView {
 
                     legalMovesMap.clear();
 
+                    lastMovedPiece = pieces[oldRow][oldCol];
                     lastBeatenPiece = pieces[r][c];
+                    lastBeatenRow = r;
+                    lastBeatenCol = c;
 
-                    // // przesuniacie figuty
-                    // String piece = pieces[oldRow][oldCol];
-
-                    // // nowe pole dodaje figure a stare zostanie piste
-                    // pieces[r][c] = piece;
-                    // pieces[oldRow][oldCol] = "";
-
-                    // // funkcja odswiezania planszy
-                    // refreshBoard();
-
-                    
-                    
                     String piece = pieces[oldRow][oldCol];
+                    boolean isPawn = piece.equals("♙") || piece.equals("♟");
+                    boolean isKing = piece.equals("♔") || piece.equals("♚");
+
+                    // EN PASSANT
+                    if (isPawn && oldCol != c && pieces[r][c].equals("")) {
+                        lastBeatenPiece = pieces[oldRow][c]; 
+                        lastBeatenRow = oldRow;
+                        lastBeatenCol = c;
+                        pieces[oldRow][c] = "";              
+                    }
+
+                    // ROSZADA
+                    if (isKing && Math.abs(c - oldCol) == 2) {
+                        if (c > oldCol) { 
+                            pieces[r][c - 1] = pieces[r][7]; 
+                            pieces[r][7] = "";
+                        } else { 
+                            pieces[r][c + 1] = pieces[r][0]; 
+                            pieces[r][0] = "";
+                        }
+                    }
+
+                    // PROMOCJA w biedronce
+                    if (isPawn && (r == 0 || r == 7)) {
+                        piece = piece.equals("♙") ? "♕" : "♛";
+                    }
+
                     pieces[r][c] = piece;
                     pieces[oldRow][oldCol] = "";
                     refreshBoard();
-
                     changeTurn();
                     
                     new Thread(() -> {
@@ -476,8 +505,8 @@ public class GameView {
                     final int c = col;
 
                     piece.setOnMouseClicked(e -> {
-                        selectedRow = r; //TODO: zrobić, aby się propki pokazały kiedy gracz podniesie pionka bez zaznaczania(teraz bez zaznaczania się nie pokazują)
-                        selectedCol = c; //TODO: zrobić aby można było się ruszyć pionkiem w pole z kropką klikając na te pole (nie koniecznie drag&drop'em)
+                        //selectedRow = r; //TODO: zrobić, aby się propki pokazały kiedy gracz podniesie pionka bez zaznaczania(teraz bez zaznaczania się nie pokazują)
+                        //selectedCol = c; //TODO: zrobić aby można było się ruszyć pionkiem w pole z kropką klikając na te pole (nie koniecznie drag&drop'em)
                         showPossibleMoves(r, c);// TODO: podświetlanie ostatniego ruchu
                     });
 
@@ -579,7 +608,24 @@ public class GameView {
     }
     
     public void updateBoardFromFEN(String fen) {
-        String boardPart = fen.split(" ")[0]; 
+        String[] fenParts = fen.split(" ");
+        String boardPart = fenParts[0];
+
+        if (fenParts.length > 1) {
+            this.whiteTurn = fenParts[1].equals("w");
+            if (statusGry != null) {
+                statusGry.setText(this.whiteTurn ? "Tura: białe" : "Tura: czarne");
+            }
+            
+            boolean isMyTurn = (this.whiteTurn && this.mojKolor.equals("Bialy")) || 
+                               (!this.whiteTurn && this.mojKolor.equals("Czarny"));
+                               
+            if (isMyTurn) {
+                SceneManager.setStatus("Twoja tura");
+            } else {
+                SceneManager.setStatus("Oczekiwanie na ruch przeciwnika...");
+            }
+        }
         
         String[] ranks = boardPart.split("/"); 
 
@@ -620,19 +666,42 @@ public class GameView {
         }
     }
 
-    // Wywoływane u Czarnego, gdy Biały zrobił poprawny ruch
+    // pokazanie ruchu przeciwnika
     public void applyLocalMove(String from, String to) {
         int oldRow = convertRankToRow(from.charAt(1));
         int oldCol = convertFileToCol(from.charAt(0));
         
         int newRow = convertRankToRow(to.charAt(1));
         int newCol = convertFileToCol(to.charAt(0));
+
+        String piece = pieces[oldRow][oldCol];
+        boolean isPawn = piece.equals("♙") || piece.equals("♟");
+        boolean isKing = piece.equals("♔") || piece.equals("♚");
+
+        // en passant
+        if (isPawn && oldCol != newCol && pieces[newRow][newCol].equals("")) {
+            pieces[oldRow][newCol] = "";
+        }
+
+        // roszada
+        if (isKing && Math.abs(newCol - oldCol) == 2) {
+            if (newCol > oldCol) { // Krótka
+                pieces[newRow][newCol - 1] = pieces[newRow][7];
+                pieces[newRow][7] = "";
+            } else { // Długa
+                pieces[newRow][newCol + 1] = pieces[newRow][0];
+                pieces[newRow][0] = "";
+            }
+        }
+
+        // promocja w biedronce
+        if (isPawn && (newRow == 0 || newRow == 7)) {
+            piece = piece.equals("♙") ? "♕" : "♛";
+        }
         
-        // Przesuwamy figurę w tablicy
         pieces[newRow][newCol] = pieces[oldRow][oldCol];
         pieces[oldRow][oldCol] = "";
         
-        // Odświeżamy GUI
         refreshBoard();
         changeTurn();
     }
@@ -644,8 +713,26 @@ public class GameView {
         int newRow = convertRankToRow(to.charAt(1));
         int newCol = convertFileToCol(to.charAt(0));
         
-        pieces[oldRow][oldCol] = pieces[newRow][newCol];
-        pieces[newRow][newCol] = lastBeatenPiece;
+        pieces[newRow][newCol] = ""; 
+        
+        pieces[oldRow][oldCol] = lastMovedPiece;
+
+        // 3. Odtwarzamy zbitą figurę DOKŁADNIE tam, gdzie stała (niweluje problem z En Passant!)
+        if (!lastBeatenPiece.equals("") && lastBeatenRow != -1 && lastBeatenCol != -1) {
+            pieces[lastBeatenRow][lastBeatenCol] = lastBeatenPiece;
+        }
+
+        // 4. Cofanie wieży przy roszadzie (jedyne co musimy sprawdzić, to czy król skakał o 2 pola)
+        boolean isKing = lastMovedPiece.equals("♔") || lastMovedPiece.equals("♚");
+        if (isKing && Math.abs(newCol - oldCol) == 2) {
+            if (newCol > oldCol) {
+                pieces[newRow][7] = pieces[newRow][newCol - 1]; // Wieża wraca na prawe skrzydło
+                pieces[newRow][newCol - 1] = "";
+            } else {
+                pieces[newRow][0] = pieces[newRow][newCol + 1]; // Wieża wraca na lewe skrzydło
+                pieces[newRow][newCol + 1] = "";
+            }
+        }
         
         refreshBoard();
         changeTurn();

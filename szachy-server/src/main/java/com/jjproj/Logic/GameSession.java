@@ -3,6 +3,10 @@ package com.jjproj.Logic;
 import com.jjproj.Logic.piece.*;
 import java.util.Set;
 import com.jjproj.ClientHandler;
+import com.jjproj.DatabaseIntegration.GamesTable;
+import com.jjproj.DatabaseIntegration.MovesTable;
+import com.jjproj.DatabaseIntegration.PiecesTable;
+import com.jjproj.DatabaseIntegration.UsersTable;
 
 public class GameSession {
     
@@ -18,6 +22,10 @@ public class GameSession {
 
     private final ClientHandler whitePlayer;
     private final ClientHandler blackPlayer;
+
+    private Integer gameId;
+    private Integer whitePlayerDbId;
+    private Integer blackPlayerDbId;
 
     private int halfMoveClock = 0; // liczba półruchów bez bicia
     private int fullMoveNumber = 1; //numer pełnego ruchu
@@ -49,6 +57,58 @@ public class GameSession {
         
         this.whitePlayer = whitePlayer;
         this.blackPlayer = blackPlayer;
+
+        this.whitePlayerDbId = UsersTable.getUserId(whitePlayer.getPlayerLogin());
+        this.blackPlayerDbId = UsersTable.getUserId(blackPlayer.getPlayerLogin());
+    }
+
+    public GameSession(ClientHandler whitePlayer, ClientHandler blackPlayer, String fen, int gameIdFromDB) {
+        this.board = new Board();
+        this.gameTime = "Bez ograniczen"; // Wznawiane gry nie mają limitu czasowego
+        this.isTimeLimited = false;
+        this.gameOver = false;
+        
+        this.whitePlayer = whitePlayer;
+        this.blackPlayer = blackPlayer;
+        this.gameId = gameIdFromDB;
+        
+        this.whitePlayerDbId = UsersTable.getUserId(whitePlayer.getPlayerLogin());
+        this.blackPlayerDbId = UsersTable.getUserId(blackPlayer.getPlayerLogin());
+
+        String[] fenParts = fen.split(" ");
+        
+        this.board.setupFromFEN(fen);
+        
+        if (fenParts.length > 1) {
+            this.currentTurn = fenParts[1].equals("w") ? Color.WHITE : Color.BLACK;
+        } else {
+            this.currentTurn = Color.WHITE;
+        }
+        
+        if (fenParts.length > 2) {
+            String castling = fenParts[2];
+            this.whiteKingsideCastle = castling.contains("K");
+            this.whiteQueensideCastle = castling.contains("Q");
+            this.blackKingsideCastle = castling.contains("k");
+            this.blackQueensideCastle = castling.contains("q");
+            
+            if (!this.whiteKingsideCastle) board.revokeCastlingRight(Color.WHITE, true);
+            if (!this.whiteQueensideCastle) board.revokeCastlingRight(Color.WHITE, false);
+            if (!this.blackKingsideCastle) board.revokeCastlingRight(Color.BLACK, true);
+            if (!this.blackQueensideCastle) board.revokeCastlingRight(Color.BLACK, false);
+        }
+        
+        if (fenParts.length > 3 && !fenParts[3].equals("-")) {
+            this.enPassantTarget = CoordinatesParser.parse(fenParts[3].toUpperCase());
+            this.board.setEnPassantTarget(this.enPassantTarget);
+        }
+        
+        if (fenParts.length > 5) {
+            try {
+                this.halfMoveClock = Integer.parseInt(fenParts[4]);
+                this.fullMoveNumber = Integer.parseInt(fenParts[5]);
+            } catch (NumberFormatException ignored) {}
+        }
     }
 
     public void startGame() {
@@ -59,12 +119,23 @@ public class GameSession {
 
 
         String startingFEN = boardToFEN();
+
+        if (this.gameId == null && whitePlayerDbId != null && blackPlayerDbId != null) {
+            this.gameId = GamesTable.createNewGame(whitePlayerDbId, blackPlayerDbId, startingFEN);
+            System.out.println("Zarejestrowano nową grę w bazie danych. ID: " + this.gameId);
+        } else {
+            System.out.println("Wznowiono partię z bazy danych. ID: " + this.gameId);
+        }
         
         whitePlayer.sendMessage("BOARD_UPDATE|" + startingFEN);
         blackPlayer.sendMessage("BOARD_UPDATE|" + startingFEN);
 
         String legalMoves = getAllLegalMovesFor(); 
-        whitePlayer.sendMessage("LEGAL_MOVES|" + legalMoves);
+        if (this.currentTurn == Color.WHITE) {
+            whitePlayer.sendMessage("LEGAL_MOVES|" + legalMoves);
+        } else {
+            blackPlayer.sendMessage("LEGAL_MOVES|" + legalMoves);
+        }
     }
 
   
@@ -274,6 +345,13 @@ public class GameSession {
         int fileDiff = Math.abs(toCoords.file.ordinal() - fromCoords.file.ordinal());
         boolean isEnPassant = piece instanceof Pawn && fileDiff == 1 && board.isSquareEmpty(toCoords);
 
+        Piece capturedPiece = null;
+        if (isEnPassant) {
+            capturedPiece = board.getPiece(new Coordinates(toCoords.file, fromCoords.rank));
+        } else if (isCapture) {
+            capturedPiece = board.getPiece(toCoords);
+        }
+
         //robimy ruch
         board.movePiece(fromCoords, toCoords);
 
@@ -334,12 +412,33 @@ public class GameSession {
 
          //sprawdzanie stanu gry
         String fen = boardToFEN();
+
+        if (this.gameId != null) {
+            char movedSym = Character.toUpperCase(pieceToFEN(piece));
+            boolean movedIsBlack = (piece.color == Color.BLACK);
+            Integer movedPieceId = PiecesTable.getPieceId(movedSym, movedIsBlack);
+
+            Integer capturedPieceId = null;
+            if (capturedPiece != null) {
+                char capSym = Character.toUpperCase(pieceToFEN(capturedPiece));
+                boolean capIsBlack = (capturedPiece.color == Color.BLACK);
+                capturedPieceId = PiecesTable.getPieceId(capSym, capIsBlack);
+            }
+
+            if (movedPieceId != null) {
+                MovesTable.saveMove(this.gameId, from, to, movedPieceId, capturedPieceId);
+            }
+            GamesTable.updateGameFen(this.gameId, fen);
+        }
+
         if(GameStateChecker.isCheckMate(opponent, board)) {
             gameOver = true;
+            if (this.gameId != null) GamesTable.setGameOver(this.gameId, playerColor == Color.BLACK);
             return "GAME_OVER|" + colorToString(playerColor) + "|Szach-mat";
         }
         if(GameStateChecker.isCheckPate(opponent, board)) {
             gameOver = true;
+            if (this.gameId != null) GamesTable.setGameOver(this.gameId, null);
             return "GAME_OVER|Remis|Pat";
         }
         if(GameStateChecker.isKingInCheck(opponent, board)) {
@@ -391,10 +490,12 @@ public class GameSession {
 
             if (whiteTimeLeft <= 0) {
                 gameOver = true;
+                if (this.gameId != null) GamesTable.setGameOver(this.gameId, true);
                 broadcast("GAME_OVER|Czarny|Koniec czasu");
                 endGameSession();
             } else if (blackTimeLeft <= 0) {
                 gameOver = true;
+                if (this.gameId != null) GamesTable.setGameOver(this.gameId, false);
                 broadcast("GAME_OVER|Bialy|Koniec czasu");
                 endGameSession();
             } else {
@@ -403,9 +504,41 @@ public class GameSession {
         }
     }
     
-    private void endGameSession() {
-        whitePlayer.setInGame(false);
-        blackPlayer.setInGame(false);
+
+    public void endGameSession() {
+        this.gameOver = true;
+        if (whitePlayer != null) whitePlayer.clearSession();
+        if (blackPlayer != null) blackPlayer.clearSession();
+    }
+
+    public void playerDisconnected(ClientHandler disconnectedPlayer) {
+        if (gameOver) return; 
+
+        this.gameOver = true;
+        ClientHandler winner = getOpponent(disconnectedPlayer);
+        String winnerColor = (winner == whitePlayer) ? "Bialy" : "Czarny";
+
+        if (winner != null) {
+            if (this.gameId != null) {
+                Boolean isBlackWinner = (winner == blackPlayer);
+                GamesTable.setGameOver(this.gameId, isBlackWinner);
+            }
+            winner.sendMessage("GAME_OVER|" + winnerColor + "|Walkower - przeciwnik opuścił grę");
+        }
+        
+        endGameSession();
+    }
+
+    public void pauseGame(String requesterLogin) {
+        if (gameOver) return;
+
+        this.gameOver = true; 
+
+        broadcast("GAME_PAUSED|" + requesterLogin);
+        
+        endGameSession();
+        
+        //System.out.println("Gra została wstrzymana i zapisana przez: " + requesterLogin);
     }
 
 }

@@ -20,6 +20,7 @@ class Invitation {
     String text;
     boolean rejected = false;
     boolean cancelled = false;
+    boolean accepted = false;
 
     Invitation(String sender, String text) { 
         this.sender = sender;
@@ -71,7 +72,12 @@ public class NotificationsView {
                     HBox actions = new HBox(10);
                     actions.setAlignment(Pos.CENTER_RIGHT);
 
-                    if (item.rejected) {
+                    if (item.accepted) {
+                        Label acceptedLabel = new Label("zaakceptowane");
+                        acceptedLabel.setStyle("-fx-text-fill: #44ff44; -fx-font-style: italic;");
+                        actions.getChildren().add(acceptedLabel);
+
+                    } else if (item.rejected) {
                         //  odrzucone - tylko napis
                         Label rejectedLabel = new Label("odrzucono");
                         rejectedLabel.setStyle("-fx-text-fill: #ff4444; -fx-font-style: italic;");
@@ -100,7 +106,10 @@ public class NotificationsView {
                         });
 
                         joinBtn.setOnAction(e -> {
-                            SceneManager.setNotificationsViewActive(true);
+                            item.accepted = true;
+                            updateItem(item, false);
+
+                            SceneManager.setNotificationsViewActive(false);
                             SceneManager.setStatus("Łączenie z graczem...");
                             new Thread(() -> {
                                 NetworkManager.sendCommand("ACCEPT|" + item.sender);
@@ -120,7 +129,7 @@ public class NotificationsView {
         Button backBtn = new Button("Wstecz");
         backBtn.getStyleClass().add("btn-main");
         backBtn.setOnAction(e -> {
-            SceneManager.setNotificationsViewActive(true);
+            SceneManager.setNotificationsViewActive(false);
 
             MenuView menu = new MenuView();
             stage.setScene(menu.createScene(stage));

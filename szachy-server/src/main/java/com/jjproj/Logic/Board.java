@@ -169,5 +169,49 @@ public class Board {
         
         return newBoard;
     }
+
+    public void setupFromFEN(String fen) {
+        this.pieces.clear();
+        
+        String[] parts = fen.split(" ");
+        String boardPart = parts[0]; 
+        String[] ranks = boardPart.split("/");
+        
+        for (int row = 0; row < 8; row++) {
+            int rank = 8 - row;
+            String rankData = ranks[row];
+            int col = 0;
+            
+            for (char c : rankData.toCharArray()) {
+                if (Character.isDigit(c)) {
+                    col += Character.getNumericValue(c);
+                } else {
+                    File file = File.values()[col];
+                    Coordinates coords = new Coordinates(file, rank);
+                    Piece piece = createPieceFromFenChar(c, coords);
+                    
+                    if (piece != null) {
+                        setPiece(coords, piece);
+                    }
+                    col++;
+                }
+            }
+        }
+    }
+
+    private Piece createPieceFromFenChar(char c, Coordinates coords) {
+        Color color = Character.isUpperCase(c) ? Color.WHITE : Color.BLACK;
+        char lower = Character.toLowerCase(c);
+        
+        switch (lower) {
+            case 'p': return new Pawn(color, coords);
+            case 'r': return new Rook(color, coords);
+            case 'n': return new Knight(color, coords);
+            case 'b': return new Bishop(color, coords);
+            case 'q': return new Queen(color, coords);
+            case 'k': return new King(color, coords);
+            default: return null;
+        }
+    }
     
 }

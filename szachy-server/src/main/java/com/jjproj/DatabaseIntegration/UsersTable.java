@@ -45,4 +45,21 @@ public class UsersTable {
         }
         return false;
     }
+
+    public static Integer getUserId(String username) {
+        String sql = "SELECT user_id FROM users WHERE user_login = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt("user_id");
+            }
+        } catch (SQLException e) {
+            System.out.println("Błąd pobierania ID użytkownika: " + e.getMessage());
+        }
+        return null;
+    }
 }

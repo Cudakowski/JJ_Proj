@@ -67,6 +67,7 @@ public class SceneManager {
     public static void switchToMenu() {
         Platform.runLater(() -> {
             if (mainStage != null) {
+                setNotificationsViewActive(false);
                 MenuView view = new MenuView(); 
                 mainStage.setScene(view.createScene(mainStage));
             }
@@ -76,6 +77,7 @@ public class SceneManager {
     public static void switchToGame(String mojKolor, String przeciwnik, String czasGry) {
         Platform.runLater(() -> {
             if (mainStage != null) {
+                setNotificationsViewActive(false);
                 GameView view = new GameView(); 
                 mainStage.setScene(view.createScene(mainStage, mojKolor, przeciwnik, czasGry));
             }
@@ -200,6 +202,63 @@ public class SceneManager {
         Platform.runLater(() -> {
             if (activeGameView != null) {
                 activeGameView.syncTimeWithServer(whiteSec, blackSec);
+            }
+        });
+    }
+
+    public static void handleGamePaused(String requester) {
+        Platform.runLater(() -> {
+            setStatus("Gra wstrzymana i zapisana przez: " + requester);
+            
+            if (activeGameView != null) {
+                activeGameView.stopTimer();
+                activeGameView.clearMoves();
+            }
+            
+            // // Dajemy graczom 2 sekundy na przeczytanie komunikatu, po czym wracamy do menu
+            // new Thread(() -> {
+            //     try {
+            //         Thread.sleep(2000);
+            //     } catch (InterruptedException e) {}
+                
+            //     switchToMenu();
+            // }).start();
+        });
+    }
+
+    private static ObservableList<String> activePausedGamesList;
+
+    public static void registerPausedGamesList(ObservableList<String> list) {
+        activePausedGamesList = list;
+    }
+
+    public static void updatePausedGamesList(String data) {
+        Platform.runLater(() -> {
+            if (activePausedGamesList != null) {
+                activePausedGamesList.clear();
+                if (data == null || data.trim().isEmpty()) {
+                    activePausedGamesList.add("Brak przerwanych gier.");
+                    return;
+                }
+                
+                // data to np: "1:Romek:Bialy,5:Mietek:Czarny"
+                String[] games = data.split(",");
+                for (String g : games) {
+                    String[] parts = g.split(":");
+                    if (parts.length == 3) {
+                        activePausedGamesList.add("[" + parts[0] + "] Przeciwnik: " + parts[1] + " (Twój kolor: " + parts[2] + ")");
+                    }
+                }
+            }
+        });
+    }
+    
+    public static void switchToWaitingForResume(String opponentName) {
+        Platform.runLater(() -> {
+            if (mainStage != null) {
+                setNotificationsViewActive(false);
+                WaitingForPlayerView waitingView = new WaitingForPlayerView();
+                mainStage.setScene(waitingView.createScene(mainStage, opponentName));
             }
         });
     }

@@ -3,6 +3,7 @@ package com.jjproj;
 import java.io.IOException;
 import java.net.Socket;
 
+import com.jjproj.DatabaseIntegration.GamesTable;
 import com.jjproj.DatabaseIntegration.UsersTable;
 import com.jjproj.Logic.GameSession;
 
@@ -17,6 +18,7 @@ public class ClientHandler implements Runnable {
     private GameSession currentSession = null;
     private String selectedInviteTime = "Bez ograniczen";
     private String selectedInviteColor = "Bialy";
+    private Integer resumingGameId = null;
 
     public ClientHandler(Socket socket) {
         try {
@@ -122,6 +124,35 @@ public class ClientHandler implements Runnable {
                 commandMove(data);
                 break;
 
+            case "LEAVE_GAME":
+                System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
+                if (this.isInGame && this.currentSession != null) {
+                    this.currentSession.playerDisconnected(this);
+                }
+                break;
+
+            case "PAUSE_REQUEST":
+                System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
+                if (this.isInGame && this.currentSession != null) {
+                    this.currentSession.pauseGame(this.playerLogin);
+                }
+                break;
+
+            case "GET_PAUSED_GAMES":
+                System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
+                Integer myId = UsersTable.getUserId(this.playerLogin);
+                if (myId != null) {
+                    String pausedGames = GamesTable.getPausedGamesForUser(myId);
+                    sendMessage("PAUSED_GAMES_LIST|" + pausedGames);
+                }
+                break;
+
+            case "RESUME_GAME":
+                if (data.length > 2) {
+                    commandResumeGame(data[1], data[2]); // data[1] = gameId, data[2] = nazwa przeciwnika
+                }
+                break;
+
             default:
                 System.out.println("[Ostrzeżenie] Otrzymano nieznaną komendę: " + command);
                 break;
@@ -130,6 +161,28 @@ public class ClientHandler implements Runnable {
 
     public GameSession getCurrentSession() { return currentSession; }
     public void setInGame(boolean val) { this.isInGame = val; }
+
+    private void commandResumeGame(String gameIdStr, String opponentName) {
+        ClientHandler opponentClient = Server.onlineUsers.get(opponentName);
+        
+        if (opponentClient == null) {
+            this.sendMessage("RESUME_ERROR|Gracz " + opponentName + " jest offline.");
+            return;
+        }
+        if (opponentClient.isInGame) {
+            this.sendMessage("RESUME_ERROR|Gracz " + opponentName + " jest już w innej grze.");
+            return;
+        }
+
+        this.isWaitingForPlayer = true;
+        this.waitingForPlayerName = opponentName;
+        this.selectedInviteTime = "Bez ograniczen"; 
+        this.resumingGameId = Integer.parseInt(gameIdStr);
+        
+        this.sendMessage("RESUME_WAITING|" + opponentName);
+        
+        opponentClient.sendMessage("INVITE_RESUME|" + this.playerLogin + "|" + gameIdStr);
+    }
 
     private void commandMove(String[] data){
         if (currentSession != null && data.length >= 3) {
@@ -151,9 +204,9 @@ public class ClientHandler implements Runnable {
                     przeciwnik.isInGame = false;
                 }
                 
-                this.isInGame = false;
                 
                 currentSession.broadcast("GAME_OVER|" + wynikData[1] + "|" + wynikData[2]);
+                currentSession.endGameSession();
             }
             else if (wynikData[0].equals("MOVE_OK")) {
                 String moveNotation = wynikData[wynikData.length - 1];
@@ -201,25 +254,44 @@ public class ClientHandler implements Runnable {
 
             ClientHandler bialyGracz;
             ClientHandler czarnyGracz;
+            GameSession session;
 
-            String ostatecznyKolor = inviterClient.selectedInviteColor;
-            
-            if (ostatecznyKolor.equalsIgnoreCase("Losowo")) {
-                ostatecznyKolor = (Math.random() < 0.5) ? "Bialy" : "Czarny";
-            } 
-            
-            if (ostatecznyKolor.equalsIgnoreCase("Czarny")) {
-                bialyGracz = this;          
-                czarnyGracz = inviterClient; 
+            if (inviterClient.resumingGameId != null) {
+                // WZNOWIENIE GRY Z BAZY
+                int gameId = inviterClient.resumingGameId;
+                String fen = GamesTable.getGameFen(gameId); 
+                Integer myDbId = UsersTable.getUserId(this.playerLogin);
+                
+                boolean amIWhite = GamesTable.isUserWhiteInGame(gameId, myDbId); 
+                
+                if (amIWhite) {
+                    bialyGracz = this;
+                    czarnyGracz = inviterClient;
+                } else {
+                    bialyGracz = inviterClient;
+                    czarnyGracz = this;
+                }
+                
+                session = new GameSession(bialyGracz, czarnyGracz, fen, gameId);
+                inviterClient.resumingGameId = null;
+
             } else {
-                bialyGracz = inviterClient; 
-                czarnyGracz = this;         
+                // NOWA GRA
+                String ostatecznyKolor = inviterClient.selectedInviteColor;
+                if (ostatecznyKolor.equalsIgnoreCase("Losowo")) {
+                    ostatecznyKolor = (Math.random() < 0.5) ? "Bialy" : "Czarny";
+                }
+                
+                if (ostatecznyKolor.equalsIgnoreCase("Czarny")) {
+                    bialyGracz = this;          
+                    czarnyGracz = inviterClient; 
+                } else {
+                    bialyGracz = inviterClient; 
+                    czarnyGracz = this;         
+                }
+                
+                session = new GameSession(bialyGracz, czarnyGracz, inviterClient.selectedInviteTime);
             }
-            
-            
-            
-            
-            GameSession session = new GameSession(bialyGracz, czarnyGracz, inviterClient.selectedInviteTime);
             
             this.currentSession = session;
             inviterClient.currentSession = session;
@@ -299,6 +371,7 @@ public class ClientHandler implements Runnable {
             this.waitingForPlayerName = invitedUser;
             this.selectedInviteColor = color;
             this.selectedInviteTime = time;
+            this.resumingGameId = null;
 
             invitedClient.sendMessage("INVITE_RECEIVED|" + this.playerLogin + "|" + color + "|" + time);
         
@@ -375,6 +448,10 @@ public class ClientHandler implements Runnable {
                 }
             }
 
+            if (this.isInGame && this.currentSession != null) {
+                this.currentSession.playerDisconnected(this);
+            }
+
             Server.onlineUsers.remove(playerLogin);
             System.out.println("Usunieto " + playerLogin + " z listy online.");
         }
@@ -391,36 +468,12 @@ public class ClientHandler implements Runnable {
             connection.close(); 
         }
     }
+
+    public void clearSession() {
+        this.isInGame = false;
+        this.currentSession = null;
+    }
 }
-
-// Kto wysyła?,Komenda,Argumenty,Przykładowe użycie,Opis
-// Klient,LOGIN,Nick Hasło,`LOGIN,Tomek
-// Klient,REGISTER,Nick Hasło,`REGISTER,Adam
-// Klient,PING,(brak),PING,"System Heartbeat (bicia serca). Klient wysyła to co np. 3 sekundy, żeby pokazać, że żyje."
-// Serwer,PONG,(brak),PONG,Odpowiedź serwera na PING.
-// Serwer,LOGIN_SUCCESS,Nick,`LOGIN_SUCCESS,Tomek`
-// Serwer,LOGIN_FAILED,Powód,`LOGIN_FAILED,Złe hasło`
-// Serwer,REGISTER_SUCCESS,Nick,`REGISTER_SUCCESS,Tomek`
-// Serwer,REGISTER_FAILED,Powód,`REGISTER_FAILED,`
-
-// Kto wysyła?,Komenda,Argumenty,Przykładowe użycie,Opis
-// Klient,GET_USER_LIST,(brak),GET_USER_LIST,Klient prosi o listę zalogowanych graczy do wyświetlenia w Menu.
-// Serwer,USER_LIST,Lista nicków,`USER_LIST,"Adam,Kasia,Michal`"
-// Klient,INVITE,NickPrzeciwnika,`INVITE,Adam`
-// Serwer,INVITE_FROM,NickZapraszającego,`INVITE_FROM,Tomek`
-// Klient,ACCEPT,NickZapraszającego,`ACCEPT,Tomek`
-// Klient,DECLINE,NickZapraszającego,`DECLINE,Tomek`
-// Serwer,INVITE_REJECTED,Powód,`INVITE_REJECTED,Odrzucił`
-// Serwer,GAME_START,TwójKolor Przeciwnik BiałyCzas CzarnyCzas,`GAME_START,Bialy
-
-// Kto wysyła?,Komenda,Argumenty,Przykładowe użycie,Opis
-// Klient,MOVE,Skąd Dokąd,`MOVE,E2
-// Serwer,BOARD_UPDATE,NowyFEN,`BOARD_UPDATE,rnbqkbnr/pppp1ppp...`
-// Serwer,LEGAL_MOVES,ListaRuchów,`LEGAL_MOVES,"E2:E3,E4"
-// Serwer,TIME_UPDATE,BiałyCzasMs CzarnyCzasMs,`TIME_UPDATE,595000
-// Serwer,GAME_OVER,KtoWygrał Powód,`GAME_OVER,Bialy
-// Klient,PAUSE_REQUEST,(brak),PAUSE_REQUEST,Gracz chce wstrzymać grę (wyjść do menu). Serwer musi zapisać aktualny stan (FEN) do bazy.
-// Serwer,GAME_PAUSED,(brak),GAME_PAUSED,"Potwierdzenie z serwera, że można bezpiecznie opuścić ekran gry."
 
 
 /*
@@ -435,6 +488,54 @@ create table users (
     user_password VARCHAR(50)
 );
 
-select * from users;
+CREATE TABLE pieces (
+    piece_id INT PRIMARY KEY AUTO_INCREMENT,
+    piece_symbol CHAR(1),   -- np. 'P', 'R', 'N', 'B', 'Q', 'K'
+    is_white_black BOOLEAN -- 0(biały) lub 1(black)
+);
+
+
+
+CREATE TABLE games (
+    game_id INT PRIMARY KEY AUTO_INCREMENT,
+    game_fen VARCHAR(90) NOT NULL, 
+    is_over BOOLEAN DEFAULT FALSE,
+    white_player_id INT NOT NULL,
+    black_player_id INT NOT NULL,
+    winner_white_black BOOLEAN NULL,    -- NULL dopóki gra trwa lub jest remis, 0(biały wygrany) lub 1(black wygrany)
+    FOREIGN KEY(white_player_id) REFERENCES users(user_id),
+    FOREIGN KEY(black_player_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE moves (
+    move_id INT PRIMARY KEY AUTO_INCREMENT,
+    game_id INT NOT NULL,
+    --  numer ruchu nie potrzebny bo będzie określany za omocą id ruchu które i tak jest zgodne hronologicznie
+    move_from VARCHAR(2) NOT NULL,    -- np. 'E2'
+    move_to VARCHAR(2) NOT NULL,      -- np. 'E4'
+    -- nie wydaje mi się by zapamiętywanie notacji było potrzebne
+    moved_piece_id INT NOT NULL,
+    captured_piece_id INT NULL,       -- NULL, jeśli nikt nie zginął
+    FOREIGN KEY(game_id) REFERENCES games(game_id),
+    FOREIGN KEY(moved_piece_id) REFERENCES pieces(piece_id),
+    FOREIGN KEY(captured_piece_id) REFERENCES pieces(piece_id)
+);
+
+INSERT INTO pieces (piece_symbol, is_white_black) VALUES 
+-- FIGURY BIAŁE (0)
+('P', 0), -- Pionek (Pawn)
+('R', 0), -- Wieża (Rook)
+('N', 0), -- Skoczek (kNight)
+('B', 0), -- Goniec (Bishop)
+('Q', 0), -- Hetman (Queen)
+('K', 0), -- Król (King)
+
+-- FIGURY CZARNE (1)
+('p', 1), -- Pionek
+('r', 1), -- Wieża
+('n', 1), -- Skoczek
+('b', 1), -- Goniec
+('q', 1), -- Hetman
+('k', 1); -- Król
 
 */

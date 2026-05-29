@@ -282,9 +282,9 @@ public class NetworkManager {
 
                     
                     SceneManager.switchToGame(mojKolor,przeciwnik,czasGry);
-                    if (mojKolor.equals("Czarny")) {
-                        SceneManager.setStatus("Oczekiwanie na ruch przeciwnika...");
-                }
+                    //if (mojKolor.equals("Czarny")) {
+                    //    SceneManager.setStatus("Oczekiwanie na ruch przeciwnika...");
+                    //}
                 }
                 break;
             
@@ -342,6 +342,40 @@ public class NetworkManager {
                     int wTime = Integer.parseInt(data[1]);
                     int bTime = Integer.parseInt(data[2]);
                     SceneManager.syncTime(wTime, bTime);
+                }
+                break;
+            
+            case "GAME_PAUSED":
+                if (data.length > 1) {
+                    String requester = data[1];
+                    SceneManager.handleGamePaused(requester);
+                }
+                break;
+
+            case "PAUSED_GAMES_LIST":
+                String gamesData = data.length > 1 ? data[1] : "";
+                SceneManager.updatePausedGamesList(gamesData);
+                break;
+                
+            case "RESUME_ERROR":
+                if (data.length > 1) {
+                    SceneManager.setStatus(data[1]);
+                }
+                break;
+                
+            case "RESUME_WAITING":
+                if (data.length > 1) {
+                    String opponent = data[1];
+                    SceneManager.switchToWaitingForResume(opponent);
+                }
+                break;
+            case "INVITE_RESUME":
+                if (data.length >= 3) {
+                    String sender = data[1];
+                    String gameId = data[2];
+                    
+                    String tresc = sender + " proponuje wznowienie przerwanej partii (Gra #" + gameId + ")";
+                    SceneManager.receiveInvitation(sender, tresc);
                 }
                 break;
                 

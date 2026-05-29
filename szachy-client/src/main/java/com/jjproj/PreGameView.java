@@ -53,23 +53,42 @@ public Scene createScene(Stage stage) {
 
         ListView<String> gamesList = new ListView<>();
 
-        ObservableList<String> items = FXCollections.observableArrayList(
-                "Gra #1 - biały vs czarny",
-                "Gra #2 - czarny vs biały",
-                "Gra #3 - losowa"
-        );
-
+        // ObservableList<String> items = FXCollections.observableArrayList(
+        //         "Gra #1 - biały vs czarny",
+        //         "Gra #2 - czarny vs biały",
+        //         "Gra #3 - losowa"
+        // );
+        ObservableList<String> items = FXCollections.observableArrayList("Ładowanie gier...");
         gamesList.setItems(items);
+
+        SceneManager.registerPausedGamesList(items);
+        new Thread(() -> NetworkManager.sendCommand("GET_PAUSED_GAMES")).start();
 
         Button resumeBtn = new Button("Wznów grę i zaproś");
 
         resumeBtn.setMaxWidth(Double.MAX_VALUE);
 
+        // resumeBtn.setOnAction(e -> {
+        //     OnlinePlayersView onlinePlayersView = new OnlinePlayersView();
+        //     stage.setScene(onlinePlayersView.createScene(stage,"","")); //TODO                
+        // });
         resumeBtn.setOnAction(e -> {
-            OnlinePlayersView onlinePlayersView = new OnlinePlayersView();
-            stage.setScene(onlinePlayersView.createScene(stage,"","")); //TODO                
+            String selected = gamesList.getSelectionModel().getSelectedItem();
+            
+            if (selected != null && selected.startsWith("[")) {
+                try {
+                    String gameId = selected.substring(1, selected.indexOf("]"));
+                    String opponent = selected.substring(selected.indexOf("Przeciwnik: ") + 12, selected.indexOf(" ("));
+                    
+                    SceneManager.setStatus("Weryfikacja przeciwnika...");
+                    new Thread(() -> NetworkManager.sendCommand("RESUME_GAME|" + gameId + "|" + opponent)).start();
+                } catch (Exception ex) {
+                    SceneManager.setStatus("Błąd formatu zapisu gry.");
+                }
+            } else {
+                SceneManager.setStatus("Wybierz grę z listy!");
+            }
         });
-
 
         VBox leftPanel = new VBox(15, leftTitle, gamesList, resumeBtn);
         leftPanel.setPadding(new Insets(20));
