@@ -378,6 +378,15 @@ public class NetworkManager {
                     SceneManager.receiveInvitation(sender, tresc);
                 }
                 break;
+
+            case "STATS_DATA":
+                if (data.length >= 3) {
+                    SceneManager.updateStatsData(data[1], data[2]);
+                } else if (data.length == 2) {
+                    // Pusta historia, ale są statystyki zerowe
+                    SceneManager.updateStatsData("", data[1]);
+                }
+                break;
                 
             default:
                 System.out.println("Nieznana komenda z serwera: " + command);

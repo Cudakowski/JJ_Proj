@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 import com.jjproj.DatabaseIntegration.GamesTable;
+import com.jjproj.DatabaseIntegration.StatsRepository;
 import com.jjproj.DatabaseIntegration.UsersTable;
 import com.jjproj.Logic.GameSession;
 
@@ -150,6 +151,16 @@ public class ClientHandler implements Runnable {
             case "RESUME_GAME":
                 if (data.length > 2) {
                     commandResumeGame(data[1], data[2]); // data[1] = gameId, data[2] = nazwa przeciwnika
+                }
+                break;
+
+            case "GET_STATS":
+                System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": Prośba o statystyki");
+                Integer myStatsId = UsersTable.getUserId(this.playerLogin);
+                if (myStatsId != null) {
+                    String history = StatsRepository.getGameHistory(myStatsId);
+                    String details = StatsRepository.getUserStats(myStatsId);
+                    sendMessage("STATS_DATA|" + history + "|" + details);
                 }
                 break;
 

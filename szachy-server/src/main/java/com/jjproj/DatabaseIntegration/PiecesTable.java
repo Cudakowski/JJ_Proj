@@ -12,7 +12,7 @@ public class PiecesTable {
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setString(1, String.valueOf(symbol));
-            stmt.setBoolean(2, isBlack);
+            stmt.setInt(2, isBlack ? 1 : 0);
             
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {

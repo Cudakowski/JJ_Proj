@@ -125,6 +125,27 @@ public class GameSession {
             System.out.println("Zarejestrowano nową grę w bazie danych. ID: " + this.gameId);
         } else {
             System.out.println("Wznowiono partię z bazy danych. ID: " + this.gameId);
+
+            java.util.List<String[]> historicalMoves = MovesTable.getMovesForGame(this.gameId);
+            int loopFullMoveNum = 1;
+            boolean loopWhiteTurn = true;
+            
+            for (String[] m : historicalMoves) {
+                String from = m[0];
+                String to = m[1];
+                String notation;
+                
+                if (loopWhiteTurn) {
+                    notation = loopFullMoveNum + " ⚫ " + from.toLowerCase() + "-" + to.toLowerCase();
+                    loopWhiteTurn = false;
+                } else {
+                    notation = loopFullMoveNum + " ⚪ " + from.toLowerCase() + "-" + to.toLowerCase();
+                    loopWhiteTurn = true;
+                    loopFullMoveNum++;
+                }
+                
+                broadcast("NEW_MOVE|" + notation);
+            }
         }
         
         whitePlayer.sendMessage("BOARD_UPDATE|" + startingFEN);
@@ -414,7 +435,7 @@ public class GameSession {
         String fen = boardToFEN();
 
         if (this.gameId != null) {
-            char movedSym = Character.toUpperCase(pieceToFEN(piece));
+            char movedSym = pieceToFEN(piece);
             boolean movedIsBlack = (piece.color == Color.BLACK);
             Integer movedPieceId = PiecesTable.getPieceId(movedSym, movedIsBlack);
 
@@ -426,7 +447,12 @@ public class GameSession {
             }
 
             if (movedPieceId != null) {
-                MovesTable.saveMove(this.gameId, from, to, movedPieceId, capturedPieceId);
+                boolean isSaved = MovesTable.saveMove(this.gameId, from, to, movedPieceId, capturedPieceId);
+                if (!isSaved) {
+                    System.out.println("[BAZA DANYCH] Błąd SQL - nie udało się zapisać ruchu w tabeli moves!");
+                }
+            } else {
+                System.out.println("[BAZA DANYCH] UWAGA: Nie znaleziono ID dla figury '" + movedSym + "' (Czarna: " + movedIsBlack + ") w tabeli pieces!");
             }
             GamesTable.updateGameFen(this.gameId, fen);
         }

@@ -262,4 +262,18 @@ public class SceneManager {
             }
         });
     }
+
+    private static StatsView activeStatsView;
+
+    public static void registerStatsView(StatsView view) {
+        activeStatsView = view;
+    }
+
+    public static void updateStatsData(String history, String details) {
+        Platform.runLater(() -> {
+            if (activeStatsView != null) {
+                activeStatsView.populateData(history, details);
+            }
+        });
+    }
 }

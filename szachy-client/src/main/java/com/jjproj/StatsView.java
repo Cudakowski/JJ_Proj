@@ -13,6 +13,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class StatsView {
+    private ListView<String> gamesListView;
+    private ListView<VBox> globalStatsList;
 
     public Scene createScene(Stage stage) {
         BorderPane root = new BorderPane();
@@ -39,21 +41,22 @@ public class StatsView {
         Label leftLabel = new Label("Historia Twoich Gier");
         leftLabel.getStyleClass().add("section-label");
 
-        ListView<String> gamesListView = new ListView<>();
+        gamesListView = new ListView<>();
         gamesListView.getStyleClass().add("list-view-custom");
+        gamesListView.getItems().add("Ładowanie historii...");
 
-        gamesListView.getItems().addAll(
-            "Gra #152 - Wygrana (vs Gracz123)",
-            "Gra #151 - Przegrana (vs MistrzSzachowy)",
-            "Gra #150 - Wygrana (vs Janusz_IT)",
-            "Gra #149 - Remis (vs Bot_Easy)",
-            "Gra #148 - Wygrana (vs Anna99)",
-            "Gra #148 - Wygrana (vs Anna99)",
-            "Gra #148 - Wygrana (vs Anna99)",
-            "Gra #148 - Wygrana (vs Anna99)",
-            "Gra #148 - Wygrana (vs Anna99)",
-            "Gra #148 - Wygrana (vs Anna99)"
-        );
+        // gamesListView.getItems().addAll(
+        //     "Gra #152 - Wygrana (vs Gracz123)",
+        //     "Gra #151 - Przegrana (vs MistrzSzachowy)",
+        //     "Gra #150 - Wygrana (vs Janusz_IT)",
+        //     "Gra #149 - Remis (vs Bot_Easy)",
+        //     "Gra #148 - Wygrana (vs Anna99)",
+        //     "Gra #148 - Wygrana (vs Anna99)",
+        //     "Gra #148 - Wygrana (vs Anna99)",
+        //     "Gra #148 - Wygrana (vs Anna99)",
+        //     "Gra #148 - Wygrana (vs Anna99)",
+        //     "Gra #148 - Wygrana (vs Anna99)"
+        // );
 
         VBox.setVgrow(gamesListView, Priority.ALWAYS);
         leftColumn.getChildren().addAll(leftLabel, gamesListView);
@@ -65,16 +68,16 @@ public class StatsView {
         Label rightLabel = new Label("Szczegółowe statystyki");
         rightLabel.getStyleClass().add("section-label");
 
-        ListView<VBox> globalStatsList = new ListView<>();
+        globalStatsList = new ListView<>();
         globalStatsList.getStyleClass().add("list-view-stats");
 
-        globalStatsList.getItems().addAll(
-            createStatTile("Suma rozegranych gier", "154,200"),
-            createStatTile("Zbite pionki (Białe)", "942,105"),
-            createStatTile("Zbite pionki (Czarne)", "931,002"),
-            createStatTile("Najpopularniejszy ruch", "e2 -> e4"),
-            createStatTile("Średni czas gry", "12m 45s")
-        );
+        // globalStatsList.getItems().addAll(
+        //     createStatTile("Suma rozegranych gier", "154,200"),
+        //     createStatTile("Zbite pionki (Białe)", "942,105"),
+        //     createStatTile("Zbite pionki (Czarne)", "931,002"),
+        //     createStatTile("Najpopularniejszy ruch", "e2 -> e4"),
+        //     createStatTile("Średni czas gry", "12m 45s")
+        // );
 
         VBox.setVgrow(globalStatsList, Priority.ALWAYS);
         rightColumn.getChildren().addAll(rightLabel, globalStatsList);
@@ -120,8 +123,39 @@ public class StatsView {
 
         // REJESTRACJA STATUSU
         SceneManager.registerStatusLabel(status);
+        SceneManager.registerStatsView(this);
+        
+        new Thread(() -> {
+            NetworkManager.sendCommand("GET_STATS");
+        }).start();
 
         return scene;
+    }
+
+    public void populateData(String historyStr, String detailsStr) {
+        gamesListView.getItems().clear();
+        if (historyStr == null || historyStr.trim().isEmpty()) {
+            gamesListView.getItems().add("Brak zakończonych gier.");
+        } else {
+            String[] games = historyStr.split(",");
+            for (String g : games) {
+                String[] parts = g.split(":"); // format: gameId:opponent:outcome
+                if (parts.length == 3) {
+                    gamesListView.getItems().add("Gra #" + parts[0] + " - " + parts[2] + " (vs " + parts[1] + ")");
+                }
+            }
+        }
+
+        globalStatsList.getItems().clear();
+        String[] stats = detailsStr.split(","); // totalGames, winrate%, wins, draws, losses, capturedPieces
+        if (stats.length == 6) {
+            globalStatsList.getItems().addAll(
+                createStatTile("Rozegrane partie", stats[0]),
+                createStatTile("Winrate (Zwycięstwa)", stats[1]),
+                createStatTile("Zwycięstwa / Remisy / Porażki", stats[2] + " / " + stats[3] + " / " + stats[4]),
+                createStatTile("Zbite figury przeciwników", stats[5])
+            );
+        }
     }
 
     // Metoda dla prawych kafelków
