@@ -17,7 +17,7 @@ public class NetworkManager {
     private static ScheduledExecutorService clock;
     private static long sendTime = 0;
     private static AtomicBoolean isLoggingOrLogged = new AtomicBoolean(false);
-    private static final String hostIP4="localhost";
+    private static final String hostIP4="192.168.245.52";
     private static final int hostPort=5000;
     private static int messageCycle=0;
 

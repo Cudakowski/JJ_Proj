@@ -331,3 +331,8 @@
 .scroll-bar .decrement-arrow {
     -fx-background-color: #6b5a42;
 }
+
+
+.square-selected {
+    -fx-background-color: #4CAF50;
+}

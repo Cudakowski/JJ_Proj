@@ -81,11 +81,19 @@ public Scene createScene(Stage stage) {
             }
         });
 
-        VBox leftPanel = new VBox(15, leftTitle, gamesList, resumeBtn);
-        leftPanel.setPadding(new Insets(20));
+        Region leftSpacer = new Region();
+        VBox.setVgrow(leftSpacer, Priority.ALWAYS);
 
+        VBox leftPanel = new VBox(15,
+                leftTitle,
+                gamesList,
+                leftSpacer,
+                resumeBtn
+        );
 
-
+        leftPanel.setSpacing(15);
+        leftPanel.setPadding(new Insets(25));
+        leftPanel.setStyle("-fx-background-radius: 12;");
 
         // right
         Label rightTitle = new Label("Nowa gra");
@@ -159,7 +167,9 @@ public Scene createScene(Stage stage) {
                 spacer,
                 nextBtn
         );
-        rightPanel.setPadding(new Insets(20));
+        rightPanel.setSpacing(15);
+        rightPanel.setPadding(new Insets(25));
+        rightPanel.setStyle("-fx-background-radius: 12;");
 
 
         // srodek
@@ -168,7 +178,7 @@ public Scene createScene(Stage stage) {
 
         root.setCenter(center);
 
-        center.setAlignment(javafx.geometry.Pos.CENTER);
+        center.setAlignment(Pos.CENTER);
 
         // dol
         Button backBtn = new Button("Wstecz");
@@ -209,8 +219,17 @@ public Scene createScene(Stage stage) {
 
 
         gamesList.setPrefHeight(500);
-        leftPanel.setPrefWidth(400);
-        rightPanel.setPrefWidth(500);
+        gamesList.setMaxHeight(Double.MAX_VALUE);
+        VBox.setVgrow(gamesList, Priority.ALWAYS);
+        leftPanel.setPrefHeight(700);
+        rightPanel.setPrefHeight(700);
+        leftPanel.setMaxHeight(Double.MAX_VALUE);
+        rightPanel.setMaxHeight(Double.MAX_VALUE);
+
+        leftPanel.setMinWidth(400);
+        rightPanel.setMinWidth(500);
+
+
 
         HBox.setHgrow(title, Priority.ALWAYS);
         title.setMaxWidth(Double.MAX_VALUE);
@@ -218,11 +237,10 @@ public Scene createScene(Stage stage) {
         title.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
 
         
-        rightPanel.setAlignment(javafx.geometry.Pos.TOP_CENTER);
+
         colorBox.setAlignment(javafx.geometry.Pos.CENTER);
         timeBox.setAlignment(javafx.geometry.Pos.CENTER);
 
-        rightTitle.setMaxWidth(Double.MAX_VALUE);
         rightTitle.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
 
 

@@ -44,6 +44,9 @@ public class GameView {
     private String wybranyCzas = "Bez ograniczen";
     private Button save; 
 
+    private int selectedRow = -1;
+    private int selectedCol = -1;
+
     // Pionki są w tablicy, na razie po prostu symbole z unicode, potem zmienie na cos fajniejszego
     // String[][] pieces = {
     //     {"♜","♞","♝","♛","♚","♝","♞","♜"},
@@ -362,6 +365,30 @@ public class GameView {
                 final int r = row; // final zeby moglo byc w eventach
                 final int c = col;
 
+                square.setOnMouseClicked(e -> {
+
+                // nic nie zaznaczono
+                if (selectedRow == -1 || selectedCol == -1) {
+                    return;
+                }
+
+                String fromSquare =
+                        "" + convertColToFile(selectedCol)
+                        + convertRowToRank(selectedRow);
+
+                String toSquare =
+                        "" + convertColToFile(c)
+                        + convertRowToRank(r);
+
+                // kliknięto nielegalne pole
+                if (!legalMovesMap.containsKey(fromSquare)
+                        || !legalMovesMap.get(fromSquare).contains(toSquare)) {
+                    return;
+                }
+
+                makeMove(selectedRow, selectedCol, r, c);
+                });
+
                 // tutaj zapisuje pole zebym potem latwiej mogla sie odwolac od niefo
                 squares[row][col] = square;
 
@@ -418,47 +445,7 @@ public class GameView {
 
                     legalMovesMap.clear();
 
-                    lastMovedPiece = pieces[oldRow][oldCol];
-                    lastBeatenPiece = pieces[r][c];
-                    lastBeatenRow = r;
-                    lastBeatenCol = c;
-
-                    String piece = pieces[oldRow][oldCol];
-                    boolean isPawn = piece.equals("♙") || piece.equals("♟");
-                    boolean isKing = piece.equals("♔") || piece.equals("♚");
-
-                    // EN PASSANT
-                    if (isPawn && oldCol != c && pieces[r][c].equals("")) {
-                        lastBeatenPiece = pieces[oldRow][c]; 
-                        lastBeatenRow = oldRow;
-                        lastBeatenCol = c;
-                        pieces[oldRow][c] = "";              
-                    }
-
-                    // ROSZADA
-                    if (isKing && Math.abs(c - oldCol) == 2) {
-                        if (c > oldCol) { 
-                            pieces[r][c - 1] = pieces[r][7]; 
-                            pieces[r][7] = "";
-                        } else { 
-                            pieces[r][c + 1] = pieces[r][0]; 
-                            pieces[r][0] = "";
-                        }
-                    }
-
-                    // PROMOCJA w biedronce
-                    if (isPawn && (r == 0 || r == 7)) {
-                        piece = piece.equals("♙") ? "♕" : "♛";
-                    }
-
-                    pieces[r][c] = piece;
-                    pieces[oldRow][oldCol] = "";
-                    refreshBoard();
-                    changeTurn();
-                    
-                    new Thread(() -> {
-                        NetworkManager.sendCommand("MOVE|" + fromSquare + "|" + toSquare);
-                    }).start();
+                    makeMove(oldRow, oldCol, r, c);
 
                     success = true;
                 }
@@ -507,20 +494,45 @@ public class GameView {
                     piece.setOnMouseClicked(e -> {
                         //selectedRow = r; //TODO: zrobić, aby się propki pokazały kiedy gracz podniesie pionka bez zaznaczania(teraz bez zaznaczania się nie pokazują)
                         //selectedCol = c; //TODO: zrobić aby można było się ruszyć pionkiem w pole z kropką klikając na te pole (nie koniecznie drag&drop'em)
-                        showPossibleMoves(r, c);// TODO: podświetlanie ostatniego ruchu
-                    });
+                        //showPossibleMoves(r, c);// TODO: podświetlanie ostatniego ruchu
+                        
+                        if (selectedRow == r && selectedCol == c) {
+                            clearSelectedSquare();
+                            clearHighlights();
+                            return;
+                        }                        
+                        
+                        if (!isMyTurn()) {
+                                return;
+                            }
 
+                            if (!isMyPiece(pieces[r][c])) {
+                                return;
+                            }
+
+                            highlightSelectedSquare(r, c);
+                            showPossibleMoves(r, c);
+                        });
                     // start przeciagania
                     piece.setOnDragDetected(e -> {
 
-                        // dworze dragboard
+                        if (!isMyTurn()) {
+                            return;
+                        }
+
+                        if (!isMyPiece(pieces[r][c])) {
+                            return;
+                        }
+
+                        // usuń stare zaznaczenie i stare kropki
+                        highlightSelectedSquare(r, c);
+                        showPossibleMoves(r, c);
+
                         Dragboard db = piece.startDragAndDrop(TransferMode.MOVE);
 
-                        // zapisuje dane
                         ClipboardContent content = new ClipboardContent();
                         content.putString(r + "," + c);
 
-                        // podczas przeciagania dane leca dlaej z figurka
                         db.setContent(content);
 
                         e.consume();
@@ -702,6 +714,9 @@ public class GameView {
         pieces[newRow][newCol] = pieces[oldRow][oldCol];
         pieces[oldRow][oldCol] = "";
         
+        clearSelectedSquare();
+        clearHighlights();
+
         refreshBoard();
         changeTurn();
     }
@@ -862,5 +877,116 @@ public class GameView {
         if (timer != null) {
             timer.setText("BIAŁY " + formatTime(whiteTime) + "  |  " + formatTime(blackTime) + " CZARNY");
         }
+    }
+
+
+    private boolean isMyPiece(String piece) {
+        if (piece.equals("")) {
+            return false;
+        }
+
+        if (mojKolor.equals("Bialy")) {
+            return "♔♕♖♗♘♙".contains(piece);
+        } else {
+            return "♚♛♜♝♞♟".contains(piece);
+        }
+    }
+
+    private void highlightSelectedSquare(int row, int col) {
+
+    // usuń stare zaznaczenie
+    if (selectedRow != -1 && selectedCol != -1) {
+        squares[selectedRow][selectedCol]
+                .getStyleClass()
+                .remove("square-selected");
+    }
+
+    selectedRow = row;
+    selectedCol = col;
+
+    squares[row][col]
+            .getStyleClass()
+            .add("square-selected");
+    }
+
+    private boolean isMyTurn() {
+    return (whiteTurn && mojKolor.equals("Bialy")) ||
+           (!whiteTurn && mojKolor.equals("Czarny"));
+    }
+
+
+
+    private void clearSelectedSquare() {
+
+    if (selectedRow != -1 && selectedCol != -1) {
+        squares[selectedRow][selectedCol]
+                .getStyleClass()
+                .remove("square-selected");
+    }
+
+    selectedRow = -1;
+    selectedCol = -1;
+}
+
+
+    private void makeMove(int oldRow, int oldCol,
+                        int newRow, int newCol) {
+
+        String fromSquare =
+                "" + convertColToFile(oldCol)
+                + convertRowToRank(oldRow);
+
+        String toSquare =
+                "" + convertColToFile(newCol)
+                + convertRowToRank(newRow);
+
+        legalMovesMap.clear();
+
+        lastMovedPiece = pieces[oldRow][oldCol];
+        lastBeatenPiece = pieces[newRow][newCol];
+        lastBeatenRow = newRow;
+        lastBeatenCol = newCol;
+
+        String piece = pieces[oldRow][oldCol];
+        boolean isPawn = piece.equals("♙") || piece.equals("♟");
+        boolean isKing = piece.equals("♔") || piece.equals("♚");
+
+        // EN PASSANT
+        if (isPawn && oldCol != newCol && pieces[newRow][newCol].equals("")) {
+            lastBeatenPiece = pieces[oldRow][newCol];
+            lastBeatenRow = oldRow;
+            lastBeatenCol = newCol;
+            pieces[oldRow][newCol] = "";
+        }
+
+        // ROSZADA
+        if (isKing && Math.abs(newCol - oldCol) == 2) {
+            if (newCol > oldCol) {
+                pieces[newRow][newCol - 1] = pieces[newRow][7];
+                pieces[newRow][7] = "";
+            } else {
+                pieces[newRow][newCol + 1] = pieces[newRow][0];
+                pieces[newRow][0] = "";
+            }
+        }
+
+        // PROMOCJA
+        if (isPawn && (newRow == 0 || newRow == 7)) {
+            piece = piece.equals("♙") ? "♕" : "♛";
+        }
+
+        pieces[newRow][newCol] = piece;
+        pieces[oldRow][oldCol] = "";
+
+        clearSelectedSquare();
+        clearHighlights();
+
+        refreshBoard();
+        changeTurn();
+
+        new Thread(() -> {
+            NetworkManager.sendCommand(
+                    "MOVE|" + fromSquare + "|" + toSquare);
+        }).start();
     }
 }
