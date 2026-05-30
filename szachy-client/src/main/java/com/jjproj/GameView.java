@@ -292,8 +292,8 @@ public class GameView {
 
         Scene scene = new Scene(root, 1200, 1000);
 
-        stage.setMinWidth(1200);
-        stage.setMinHeight(1000);
+        // stage.setMinWidth(1200);
+        // stage.setMinHeight(1000);
 
 
         // Stylizowanie elementow

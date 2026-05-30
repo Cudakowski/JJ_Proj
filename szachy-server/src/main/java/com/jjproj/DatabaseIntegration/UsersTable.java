@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 public class UsersTable {
 
     public static boolean registerUser(String username, String password) {
@@ -14,7 +16,9 @@ public class UsersTable {
             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setString(1, username);
-            stmt.setString(2, password);
+
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());//hashowanie hasła
+            stmt.setString(2, hashedPassword);
 
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0; 
@@ -37,7 +41,7 @@ public class UsersTable {
             
             if (rs.next()) {
                 String dbPassword = rs.getString("user_password");
-                return dbPassword.equals(password);
+                return BCrypt.checkpw(password, dbPassword);
             }
 
         } catch (SQLException e) {

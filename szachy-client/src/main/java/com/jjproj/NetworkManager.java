@@ -19,6 +19,7 @@ public class NetworkManager {
     private static AtomicBoolean isLoggingOrLogged = new AtomicBoolean(false);
     private static final String hostIP4="localhost";
     private static final int hostPort=5000;
+    private static int messageCycle=0;
 
     public static boolean connect(String host, int port) {
         try {
@@ -145,10 +146,14 @@ public class NetworkManager {
     // TODO :
     // mozna by tu wprowadzić liczenie laga za pomocą różnicy w czasie między 
     // obecnym czasem a czasem przysłanym przez serwer w komendzie PING
-    private static long calculateLag(/*String[] data*/) {
+    private static long calculateLag(String[] data) {
         if (sendTime == 0) return 0; 
 
-        return System.currentTimeMillis() - sendTime;
+        if (data.length > 1) {
+            return System.currentTimeMillis() - Long.parseLong(data[1]);
+        } else {
+            return System.currentTimeMillis() - sendTime;
+        }
     }
 
     private static void processMessage(String message) {
@@ -160,7 +165,7 @@ public class NetworkManager {
 
             // ping pong
             case "PONG":
-                System.out.println("ping: " + calculateLag(/*data*/) + "ms");
+                System.out.println("ping: " + calculateLag(data) + "ms");
                 break;
             
             // logowanie
@@ -207,7 +212,28 @@ public class NetworkManager {
                     String[] availablePlayers = data[1].split(",");
                     
                     SceneManager.updatePlayersList(availablePlayers);
-                    SceneManager.setStatus("Lista zaktualizowana.");
+                    switch (messageCycle) {
+                        case 0:
+                            SceneManager.setStatus("Lista zaktualizowana");
+                            messageCycle=1;
+                            break;
+                        case 1:
+                            SceneManager.setStatus("Lista zaktualizowana.");
+                            messageCycle=2;
+                            break;
+                        case 2:
+                            SceneManager.setStatus("Lista zaktualizowana..");
+                            messageCycle=3;
+                            break;
+                        case 3:
+                            SceneManager.setStatus("Lista zaktualizowana...");
+                            messageCycle=0;
+                            break;
+                        default:
+                            messageCycle=0;
+                            break;
+                    }
+                    
                 } else {
                     SceneManager.clearPlayersList();
                     SceneManager.setStatus("Brak innych graczy online.");
@@ -404,7 +430,7 @@ public class NetworkManager {
         
         Runnable wyslijPing = () -> {
             sendTime = System.currentTimeMillis();
-            sendCommand("PING");
+            sendCommand("PING|" + sendTime);
         };
 
         clock.scheduleAtFixedRate(wyslijPing, 3, 3, TimeUnit.SECONDS);

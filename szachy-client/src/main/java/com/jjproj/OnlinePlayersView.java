@@ -22,21 +22,14 @@ public class OnlinePlayersView {
         Label title = new Label("LISTA GRACZY ONLINE");
 
         Region spacer = new Region();
-        VBox.setVgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+        VBox.setVgrow(spacer, Priority.ALWAYS);
 
         Label status = new Label("Status");
         status.getStyleClass().add("error-label");
         status.setMaxWidth(Double.MAX_VALUE);
         status.setAlignment(Pos.CENTER);
 
-
-
-
-        Button refreshBtn = new Button("Odśwież");
-
-
-
-        HBox header = new HBox(20, title, refreshBtn);
+        HBox header = new HBox(20, title);
         header.setAlignment(Pos.CENTER);
 
         // Lista graczy
@@ -71,6 +64,7 @@ public class OnlinePlayersView {
                         stage.setScene(waitingForPlayerView.createScene(stage, name));
 
                         new Thread(() -> {
+                            NetworkManager.sendCommand("STOP_GETTING_USER_LIST"); 
                             NetworkManager.sendCommand("INVITE|" + name + "|" + gameColor + "|" + gameTime);
                         }).start();
                     });
@@ -91,16 +85,19 @@ public class OnlinePlayersView {
 
         
 
-        refreshBtn.setOnAction(e -> {
-            SceneManager.setStatus("Pobieranie listy graczy...");
+        // refreshBtn.setOnAction(e -> {
+        //     SceneManager.setStatus("Pobieranie listy graczy...");
             
-            startGetUsersThread();
-        });
+        //     startGetUsersThread();
+        // });
 
 
         Button backBtn = new Button("Wstecz");
 
         backBtn.setOnAction(e -> {
+            new Thread(() -> {
+                NetworkManager.sendCommand("STOP_GETTING_USER_LIST"); 
+            }).start();
             PreGameView preGame = new PreGameView();
             stage.setScene(preGame.createScene(stage));
         });
@@ -113,7 +110,7 @@ public class OnlinePlayersView {
 
         // stylizowanie
         title.getStyleClass().add("subtitle");
-        refreshBtn.getStyleClass().add("btn-game"); 
+        //refreshBtn.getStyleClass().add("btn-game"); 
         backBtn.getStyleClass().add("btn-main");
         layout.getStyleClass().add("root-gradient");
 

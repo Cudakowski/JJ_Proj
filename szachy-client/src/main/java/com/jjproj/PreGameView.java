@@ -53,11 +53,6 @@ public Scene createScene(Stage stage) {
 
         ListView<String> gamesList = new ListView<>();
 
-        // ObservableList<String> items = FXCollections.observableArrayList(
-        //         "Gra #1 - biały vs czarny",
-        //         "Gra #2 - czarny vs biały",
-        //         "Gra #3 - losowa"
-        // );
         ObservableList<String> items = FXCollections.observableArrayList("Ładowanie gier...");
         gamesList.setItems(items);
 
@@ -68,10 +63,6 @@ public Scene createScene(Stage stage) {
 
         resumeBtn.setMaxWidth(Double.MAX_VALUE);
 
-        // resumeBtn.setOnAction(e -> {
-        //     OnlinePlayersView onlinePlayersView = new OnlinePlayersView();
-        //     stage.setScene(onlinePlayersView.createScene(stage,"","")); //TODO                
-        // });
         resumeBtn.setOnAction(e -> {
             String selected = gamesList.getSelectionModel().getSelectedItem();
             
@@ -235,7 +226,7 @@ public Scene createScene(Stage stage) {
         rightTitle.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
 
 
-        Scene scene = new Scene(root, 1100, 700);
+        Scene scene = new Scene(root, 1100, 800);
         scene.getStylesheets().add(
                 getClass().getResource("/View.css").toExternalForm()
         );

@@ -79,6 +79,8 @@ public class Server {
                         session.checkTime();
                         sprawdzoneGry.add(session);
                     }
+
+                    client.sendUpdatedUserList();
                 }
 
                 

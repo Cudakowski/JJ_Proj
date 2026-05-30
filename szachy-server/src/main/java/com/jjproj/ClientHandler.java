@@ -15,6 +15,7 @@ public class ClientHandler implements Runnable {
     private String playerLogin = null;
     private boolean isInGame=false;
     private boolean isWaitingForPlayer = false;
+    private boolean isViewingOnlinePlayers = false;
     private String waitingForPlayerName = null;
     private GameSession currentSession = null;
     private String selectedInviteTime = "Bez ograniczen";
@@ -90,6 +91,11 @@ public class ClientHandler implements Runnable {
                 System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
                 commandGetUserList(data);
                 break;
+
+            case "STOP_GETTING_USER_LIST":
+                System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
+                isViewingOnlinePlayers=false;
+                break;
                 
             case "INVITE":
                 System.out.println("[Odebrano] " + (playerLogin != null ? playerLogin : "Nieznajomy") + ": " + message);
@@ -115,7 +121,12 @@ public class ClientHandler implements Runnable {
             // ping
             case "PING":
                 lastPingTime = System.currentTimeMillis();
-                sendMessage("PONG");
+
+                if (data.length > 1) {
+                    sendMessage("PONG|" + data[1]); 
+                } else {
+                    sendMessage("PONG");
+                }
                 break;
             
             // game
@@ -260,6 +271,8 @@ public class ClientHandler implements Runnable {
             inviterClient.isInGame = true;
             inviterClient.isWaitingForPlayer = false;
             this.waitingForPlayerName = null;
+            this.isViewingOnlinePlayers = false;
+            inviterClient.isViewingOnlinePlayers = false;
 
 
 
@@ -346,17 +359,8 @@ public class ClientHandler implements Runnable {
     }
 
     private void commandGetUserList(String[] data) {
-        java.util.StringJoiner playerList = new java.util.StringJoiner(",");
-
-        for (String playerName : Server.onlineUsers.keySet()) {
-            
-            if (this.playerLogin != null && !playerName.equals(this.playerLogin)) {
-                playerList.add(playerName);
-            }
-        }
-
-
-        sendMessage("USER_LIST|" + playerList.toString());
+        isViewingOnlinePlayers=true;
+        sendUpdatedUserList();
     }
 
 
@@ -396,7 +400,17 @@ public class ClientHandler implements Runnable {
         if (data.length >= 3) {
             String enteredLogin = data[1];
             String enteredPassword = data[2];
-            
+
+            if (enteredLogin.length() < 3 || enteredLogin.length() > 50) {
+                sendMessage("REGISTER_FAILED|Login musi mieć od 3 do 50 znaków.");
+                return;
+            }
+
+            if (enteredPassword.length() < 3 || enteredPassword.length() > 50) {
+                sendMessage("REGISTER_FAILED|Hasło musi mieć od 3 do 50 znaków.");
+                return;
+            }
+
             boolean isCorrect = UsersTable.registerUser(enteredLogin, enteredPassword);
 
             if(isCorrect){
@@ -454,6 +468,7 @@ public class ClientHandler implements Runnable {
                     
                     client.isWaitingForPlayer = false;
                     client.waitingForPlayerName = null;
+                    isViewingOnlinePlayers=false;
                     
                     client.sendMessage("INVITE_EXPIRED|Gracz " + playerLogin + " offline");
                 }
@@ -483,6 +498,20 @@ public class ClientHandler implements Runnable {
     public void clearSession() {
         this.isInGame = false;
         this.currentSession = null;
+        this.isViewingOnlinePlayers = false;
+    }
+
+    public void sendUpdatedUserList() {
+        if (!isViewingOnlinePlayers) return;
+        
+        java.util.StringJoiner playerList = new java.util.StringJoiner(",");
+
+        for (String playerName : Server.onlineUsers.keySet()) {
+            if (this.playerLogin != null && !playerName.equals(this.playerLogin)) {
+                playerList.add(playerName);
+            }
+        }
+        sendMessage("USER_LIST|" + playerList.toString());
     }
 }
 
@@ -496,8 +525,10 @@ use szachy;
 create table users (
 	user_id INT PRIMARY KEY AUTO_INCREMENT,
     user_login VARCHAR(50),
-    user_password VARCHAR(50)
+    user_password VARCHAR(100)
 );
+
+-- ALTER TABLE users MODIFY user_password VARCHAR(100);
 
 CREATE TABLE pieces (
     piece_id INT PRIMARY KEY AUTO_INCREMENT,
