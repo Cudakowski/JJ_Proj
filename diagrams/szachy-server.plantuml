@@ -1,0 +1,243 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+class BackendMain {
+  + BackendMain(): 
+  + main(String[]): void
+}
+class Bishop {
+  + Bishop(Color, Coordinates): 
+   pieceMoves: Set<CoordinatesShift>
+}
+class Board {
+  + Board(): 
+  - enPassantTarget: Coordinates
+  + getPiece(Coordinates): Piece
+  + revokeCastlingRight(Color, boolean): void
+  + setupFromFEN(String): void
+  + isSquareEmpty(Coordinates): boolean
+  + hasCastlingRight(Color, boolean): boolean
+  + copy(): Board
+  - setupKnights(): void
+  + movePiece(Coordinates, Coordinates): void
+  + removePiece(Coordinates): void
+  + setupDefaultPiecesPositions(): void
+  - setupRooks(): void
+  - setupBishops(): void
+  - setupQueens(): void
+  + setPiece(Coordinates, Piece): void
+  - createPieceFromFenChar(char, Coordinates): Piece
+  - setupPawns(): void
+  - setupKings(): void
+   enPassantTarget: Coordinates
+}
+class BoardConsoleRenderer {
+  + BoardConsoleRenderer(): 
+  + render(Board): void
+  - getPieceSymbol(Piece): String
+}
+class BoardTest {
+  + BoardTest(): 
+  + setUp(): void
+  + testInitialBoardSetup(): void
+}
+class ClientHandler {
+  + ClientHandler(Socket): 
+  - currentSession: GameSession
+  - isInGame: boolean
+  - playerLogin: String
+  - commandCancelInvite(String[]): void
+  + clearSession(): void
+  - processMessage(String): void
+  - commandDecline(String[]): void
+  + sendUpdatedUserList(): void
+  - clearAfterDisconnect(): void
+  - commandAccept(String[]): void
+  - commandLogin(String[]): void
+  + sendMessage(String): void
+  + toString(): String
+  + pingAbsenceDisconnection(): void
+  - commandResumeGame(String, String): void
+  + run(): void
+  - commandRegister(String[]): void
+  + getlastPingTime(): long
+  - commandMove(String[]): void
+  - commandGetUserList(String[]): void
+  - commandInvite(String[]): void
+   playerLogin: String
+   currentSession: GameSession
+   isInGame: boolean
+}
+enum Color << enumeration >> {
+  - Color(): 
+  + valueOf(String): Color
+  + values(): Color[]
+}
+class Coordinates {
+  + Coordinates(File, int): 
+  + shift(CoordinatesShift): Coordinates
+  + equals(Object): boolean
+  + toString(): String
+  + hashCode(): int
+}
+class CoordinatesParser {
+  + CoordinatesParser(): 
+  + parse(String): Coordinates
+  + toString(Coordinates): String
+}
+class CoordinatesShift {
+  + CoordinatesShift(int, int): 
+}
+class DatabaseManager {
+  + DatabaseManager(): 
+  + closePool(): void
+   connection: Connection
+}
+enum File << enumeration >> {
+  - File(): 
+  + values(): File[]
+  + valueOf(String): File
+}
+class Game {
+  + Game(Board): 
+  - handleCastling(Coordinates, Coordinates): void
+  - handlePromotion(Coordinates, Color): void
+  + startGame(): void
+  - updateCastlingRights(Coordinates, Piece): void
+}
+class GameSession {
+  + GameSession(ClientHandler, ClientHandler, String): 
+  + GameSession(ClientHandler, ClientHandler, String, int): 
+  - currentTurn: Color
+  - gameOver: boolean
+  + pauseGame(String): void
+  + playerDisconnected(ClientHandler): void
+  + startGame(): void
+  - colorToString(Color): String
+  + boardToFEN(): String
+  + endGameSession(): void
+  - updateCastlingRights(Coordinates, Piece): void
+  + applyMove(String, String, String): String
+  + getColorByLogin(String): Color
+  + checkTime(): void
+  - handleCastling(Coordinates, Coordinates): void
+  + broadcast(String): void
+  - pieceToFEN(Piece): char
+  + getOpponent(ClientHandler): ClientHandler
+   initialFEN: String
+   currentTurn: Color
+   allLegalMovesFor: String
+   gameOver: boolean
+}
+class GameStateChecker {
+  + GameStateChecker(): 
+  + isKingInCheck(Color, Board): boolean
+  + hasLegalMoves(Color, Board): boolean
+  + isCheckPate(Color, Board): boolean
+  + shouldPromote(Piece, Coordinates): boolean
+  + getLegalMoves(Piece, Coordinates, Board): Set<Coordinates>
+  + promotePawn(Coordinates, Piece, Board): void
+  - findKing(Color, Board): Coordinates
+  + isCheckMate(Color, Board): boolean
+}
+class GamesTable {
+  + GamesTable(): 
+  + getGameFen(int): String
+  + isUserWhiteInGame(int, int): boolean
+  + updateGameFen(int, String): boolean
+  + setGameOver(int, Boolean): boolean
+  + createNewGame(int, int, String): Integer
+  + getPausedGamesForUser(int): String
+}
+class InputCoordinates {
+  + InputCoordinates(): 
+  + inputPieceCoordinatesForColor(Color, Board): Coordinates
+  + input(): Coordinates
+  + inputAvailableSquare(Set<Coordinates>): Coordinates
+}
+class King {
+  + King(Color, Coordinates): 
+  # isSquareAvailableForMove(Coordinates, Board): boolean
+   pieceMoves: Set<CoordinatesShift>
+}
+class Knight {
+  + Knight(Color, Coordinates): 
+  # canJumpOverPieces(): boolean
+   pieceMoves: Set<CoordinatesShift>
+}
+class MovesTable {
+  + MovesTable(): 
+  + saveMove(int, String, String, int, Integer): boolean
+  + getMovesForGame(int): List<String[]>
+}
+class Pawn {
+  + Pawn(Color, Coordinates): 
+  # isSquareAvailableForMove(Coordinates, Board): boolean
+   pieceMoves: Set<CoordinatesShift>
+}
+class Piece {
+  + Piece(Color, Coordinates): 
+  + getAvailableMoveSquares(Board): Set<Coordinates>
+  # canJumpOverPieces(): boolean
+  # isPathClear(Coordinates, Board): boolean
+  # isSquareAvailableForMove(Coordinates, Board): boolean
+   pieceMoves: Set<CoordinatesShift>
+}
+class PiecesTable {
+  + PiecesTable(): 
+  + getPieceId(char, boolean): Integer
+}
+class Queen {
+  + Queen(Color, Coordinates): 
+   pieceMoves: Set<CoordinatesShift>
+}
+class Rook {
+  + Rook(Color, Coordinates): 
+   pieceMoves: Set<CoordinatesShift>
+}
+class Server {
+  + Server(): 
+  + startServer(): void
+  - startClock(): void
+  - startConsole(): void
+}
+class StatsRepository {
+  + StatsRepository(): 
+  + getGameHistory(int): String
+  + getUserStats(int): String
+}
+class TestLogic {
+  + TestLogic(): 
+  + test(): void
+}
+class UsersTable {
+  + UsersTable(): 
+  + registerUser(String, String): boolean
+  + getUserId(String): Integer
+  + checkLogin(String, String): boolean
+}
+
+Bishop                -[#000082,plain]-^  Piece                
+Board                "1" *-[#595959,plain]-> "pieces\n*" Coordinates          
+Board                "1" *-[#595959,plain]-> "pieces\n*" Piece                
+BoardTest            "1" *-[#595959,plain]-> "board\n1" Board                
+ClientHandler        "1" *-[#595959,plain]-> "currentSession\n1" GameSession          
+Coordinates          "1" *-[#595959,plain]-> "file\n1" File                 
+Game                 "1" *-[#595959,plain]-> "board\n1" Board                
+Game                 "1" *-[#595959,plain]-> "renderer\n1" BoardConsoleRenderer 
+GameSession          "1" *-[#595959,plain]-> "board\n1" Board                
+GameSession          "1" *-[#595959,plain]-> "whitePlayer\n1" ClientHandler        
+GameSession          "1" *-[#595959,plain]-> "currentTurn\n1" Color                
+GameSession          "1" *-[#595959,plain]-> "enPassantTarget\n1" Coordinates          
+King                  -[#000082,plain]-^  Piece                
+Knight                -[#000082,plain]-^  Piece                
+Pawn                  -[#000082,plain]-^  Piece                
+Piece                "1" *-[#595959,plain]-> "color\n1" Color                
+Piece                "1" *-[#595959,plain]-> "coordinates\n1" Coordinates          
+Queen                 -[#000082,plain]-^  Piece                
+Rook                  -[#000082,plain]-^  Piece                
+Server               "1" *-[#595959,plain]-> "onlineUsers\n*" ClientHandler        
+@enduml

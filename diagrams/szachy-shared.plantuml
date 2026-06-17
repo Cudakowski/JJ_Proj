@@ -1,0 +1,15 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+class TCPConnection {
+  + TCPConnection(Socket): 
+  + TCPConnection(String, int): 
+  + sendString(String): void
+  + awaitString(): String
+  + close(): void
+}
+
+@enduml

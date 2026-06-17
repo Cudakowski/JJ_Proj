@@ -1,0 +1,158 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+class GameView {
+  + GameView(): 
+  + addMoveToHistory(String): void
+  + stopTimer(): void
+  + changeTurn(): void
+  - clearHighlights(): void
+  + applyLocalMove(String, String): void
+  - clearSelectedSquare(): void
+  + createScene(Stage, String, String, String): Scene
+  - refreshBoard(): void
+  - convertRankToRow(char): int
+  + updateLegalMoves(String): void
+  + syncTimeWithServer(int, int): void
+  - fenCharToUnicode(char): String
+  + clearMoves(): void
+  - convertRowToRank(int): char
+  - showPossibleMoves(int, int): void
+  + updateBoardFromFEN(String): void
+  - startTimer(): void
+  - makeMove(int, int, int, int): void
+  - isMyPiece(String): boolean
+  - convertFileToCol(char): int
+  - convertColToFile(int): char
+  - highlightSelectedSquare(int, int): void
+  - formatTime(int): String
+  - ustawPoczatkowyCzas(String): void
+  + revertLocalMove(String, String): void
+  - createBoard(): GridPane
+   myTurn: boolean
+}
+class GameViewTest {
+  + GameViewTest(): 
+  + testClickingPieceHighlightsSquareAndShowsMoves(FxRobot): void
+  + testGameUiElementsAreVisible(): void
+  + testUpdateBoardFromFENParsesCorrectly(FxRobot): void
+  + testSyncTimeWithServerUpdatesTimerLabel(FxRobot): void
+  + testLeaveGameButtonReturnsToMenu(FxRobot): void
+  + start(Stage): void
+}
+class Invitation {
+  ~ Invitation(String, String): 
+}
+class LoginView {
+  + LoginView(): 
+  + createScene(Stage): Scene
+}
+class LoginViewTest {
+  + LoginViewTest(): 
+  + testTypingInCredentialsFields(FxRobot): void
+  + testLoginElementsAreVisible(): void
+  + start(Stage): void
+  + testClickingRegisterButtonChangesScene(FxRobot): void
+}
+class MenuView {
+  + MenuView(): 
+  + createScene(Stage): Scene
+}
+class MenuViewTest {
+  + MenuViewTest(): 
+  + start(Stage): void
+  + testClickingStatsButtonChangesScene(FxRobot): void
+  + testTitleIsCorrect(): void
+  + testMenuButtonsAreVisible(): void
+}
+class NetworkManager {
+  + NetworkManager(): 
+  + disconnect(): void
+  + connect(String, int): boolean
+  - startListening(): void
+  - calculateLag(String[]): long
+  - processMessage(String): void
+  - startPinging(): void
+  + onLogin(String, String): void
+  + onRegister(String, String, String): void
+  + sendCommand(String): void
+}
+class NotificationsView {
+  + NotificationsView(): 
+  + createScene(Stage): Scene
+  + addNotification(String, String): void
+  + markAsCancelled(String): void
+}
+class OnlinePlayersView {
+  + OnlinePlayersView(): 
+  + createScene(Stage, String, String): Scene
+  - startGetUsersThread(): void
+}
+class PreGameView {
+  + PreGameView(): 
+  + createScene(Stage): Scene
+}
+class RegisterView {
+  + RegisterView(): 
+  + createScene(Stage): Scene
+}
+class SceneManager {
+  + SceneManager(): 
+  + status: Label
+  + registerStatusLabel(Label): void
+  + addMoveToHistory(String): void
+  + registerStatsView(StatsView): void
+  + switchToGame(String, String, String): void
+  + receiveInvitation(String, String): void
+  + updatePlayersList(String[]): void
+  + registerNotificationBadge(Label): void
+  + updateBoard(String): void
+  + updateStatsData(String, String): void
+  + registerPlayersList(ObservableList<String>): void
+  + syncTime(int, int): void
+  + revertMyMove(String, String): void
+  + addInviteNotification(String): void
+  + addWaitingStatus(String): void
+  + registerGameView(GameView): void
+  + registerPausedGamesList(ObservableList<String>): void
+  + updatePausedGamesList(String): void
+  + handleGameOver(String, String): void
+  + clearPlayersList(): void
+  + registerWaitingView(WaitingForPlayerView): void
+  + handleGamePaused(String): void
+  + switchToMenu(): void
+  + applyOpponentMove(String, String): void
+  + switchToWaitingForResume(String): void
+   notificationsViewActive: boolean
+   window: Stage
+   status: String
+   badgeVisibility: boolean
+   legalMoves: String
+}
+class StatsView {
+  + StatsView(): 
+  + createScene(Stage): Scene
+  + populateData(String, String): void
+  - createStatTile(String, String): VBox
+}
+class SzachyOnline {
+  + SzachyOnline(): 
+  + stop(): void
+  + main(String[]): void
+  + start(Stage): void
+}
+class WaitingForPlayerView {
+  + WaitingForPlayerView(): 
+  + createScene(Stage, String): Scene
+  + addStatus(String): void
+}
+
+GameViewTest         "1" *-[#595959,plain]-> "gameView\n1" GameView             
+NotificationsView    "1" *-[#595959,plain]-> "notificationsData\n*" Invitation           
+SceneManager         "1" *-[#595959,plain]-> "activeGameView\n1" GameView             
+SceneManager         "1" *-[#595959,plain]-> "activeStatsView\n1" StatsView            
+SceneManager         "1" *-[#595959,plain]-> "activeWaitingForPlayerView\n1" WaitingForPlayerView 
+@enduml
